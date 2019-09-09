@@ -17,7 +17,7 @@ async def on_message(message):
 
 @bot.command
 async def cool(ctx):
-    ctx.send("thx")
+    ctx.say("thx")
 
 
 client.run('NjE5ODk2OTcyMTUyOTMwMzA4.XXYVVA.4-SIlkPjobYpLOWkGxhE6XeDqyI')
