@@ -1,2 +1,1 @@
 worker: python korsensei.py
-web: python korsensei.py runserver 0.0.0.0:$PORT
