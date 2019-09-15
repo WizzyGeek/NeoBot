@@ -40,4 +40,4 @@ for filename in os.listdir('./cogs'):
     else:
         pass
 
-client.run('NjE5ODk2OTcyMTUyOTMwMzA4.XXdlXA.eDzLIWfhfgwArT93-JwCzbc0np0')
+client.run('token')
