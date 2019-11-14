@@ -37,7 +37,7 @@ class utility(commands.Cog):
             ]
         await ctx.send(f"Answer: {random.choice(ans)}")
      
-    @commands.command(name="graffiti" aliases=["art"]) 
+    @commands.command(name="graffiti", aliases=["art"]) 
     async def graffiti(self, ctx):
         ctx.send("""
 
