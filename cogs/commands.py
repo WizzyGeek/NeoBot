@@ -39,7 +39,7 @@ class utility(commands.Cog):
      
     @commands.command(name="graffiti", aliases=["art"]) 
     async def graffiti(self, ctx):
-        ctx.send("""
+        await ctx.send("""
 
         ──────────────────▒
         ─────────────────░█
