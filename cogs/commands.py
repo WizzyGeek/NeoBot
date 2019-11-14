@@ -9,7 +9,7 @@ class utility(commands.Cog):
 
     @commands.command(name="ping", aliases=["latency","lag"])
     async def ping(self, ctx):
-        await ctx.send('Pong! {0}'.format(round(client.latency, 1)))
+        await ctx.send('Pong! {0}'.format(client.latency))
 
     
     @commands.command(aliases = ['8ball','8b',"luckyball"])
