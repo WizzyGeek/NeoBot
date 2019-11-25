@@ -1,1 +1,1 @@
-worker: python korsensei.py 
+worker: python forbot.py 
