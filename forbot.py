@@ -1,16 +1,18 @@
 #imports
+import ast
+import asyncio
 import os
+import random
 import re
 import sqlite3
 from collections import Counter
-from string import punctuation
 from math import sqrt
+from string import punctuation
+
 import discord
 from discord.ext import commands
-import asyncio
-import random
 from utils.utility import ErrorHandler, rank_query
-import ast
+
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
 guild = discord.Guild
@@ -268,5 +270,5 @@ for filename in os.listdir('./cogs'):
     else:
         pass
 #----------------------------------------#
-client.run('NjE5ODk2OTcyMTUyOTMwMzA4.Xc0eRw.OBUWRWobEvWmERpgGckJf_M3OcI')
+client.run('NjQ3MDgxMjI2OTg4OTQ1NDIw.Xdv_Iw.-EluqU2IXzFoDCOo58DAGIajapw')
 #------------------------------------------------------------------------------------------------------------------------#
