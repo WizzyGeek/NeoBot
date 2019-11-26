@@ -1,4 +1,4 @@
-#imports
+#-----------standard-imports-----------#
 import ast
 import asyncio
 import os
@@ -6,17 +6,24 @@ import random
 import re
 import sqlite3
 from collections import Counter
-from math import sqrt
+from math import floor, sqrt
 from string import punctuation
 
+#-----------3rd-party-imports-----------#
 import discord
 from discord.ext import commands
+
+#-----------module-imports-----------#
 from utils.utility import ErrorHandler, rank_query
 
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
 guild = discord.Guild
 user = discord.Client()
+config = {
+    "welchannel": 583703372725747713,
+    "token": 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xdv_Iw.-EluqU2IXzFoDCOo58DAGIajapw'
+}
 #----------------------------------------#
 @client.event
 async def on_message(message):
@@ -36,8 +43,10 @@ async def update(message):
     cursor = connection.cursor()
 
     try:
-        cursor.execute("CREATE TABLE level(id INT NOT NULL UNIQUE, user TEXT UNIQUE, lvl INT NOT NULL, exp INT)")
-        cursor.execute("CREATE TABLE rank(user TEXT UNIQUE, rank INT NOT NULL)")
+        cursor.execute(
+            "CREATE TABLE level(id INT NOT NULL UNIQUE, user TEXT UNIQUE, lvl INT NOT NULL, exp INT)")
+        cursor.execute(
+            "CREATE TABLE rank(user TEXT UNIQUE, rank INT NOT NULL)")
     except sqlite3.OperationalError:
         #await ErrorHandler(err, connection)
         pass
@@ -48,7 +57,8 @@ async def update(message):
     cursor.execute(f"SELECT user FROM level WHERE user = '{message.author}'")
     res = cursor.fetchone()
     if res is not None:
-        cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author}'")
+        cursor.execute(
+            f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author}'")
         connection.commit()
         await lvlup(message)
         connection.close()
@@ -64,7 +74,8 @@ async def update(message):
                 new_id = 1
             else:
                 new_id = int(res[0]) + 1
-        cursor.execute(f"INSERT INTO level VALUES({new_id}, '{message.author}', 1, {weight})")
+        cursor.execute(
+            f"INSERT INTO level VALUES({new_id}, '{message.author}', 1, {weight})")
         connection.commit()
         connection.close()
         await lvlup(message)
@@ -74,18 +85,22 @@ async def lvlup(message):
     try:
         connection = sqlite3.connect("level.db")
         cursor = connection.cursor()
-        cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{message.author}'")
+        cursor.execute(
+            f"SELECT lvl, exp FROM level WHERE user = '{message.author}'")
         res = cursor.fetchone()
         if res == None:
             return None
         lvl = int(res[0])
         exp = int(res[1])
-        lvl_end = int(exp ** (1/4))
+        msg = floor(exp/8)
+        lvl_end = floor((msg ** 1/2)/5)
         if lvl < lvl_end:
             rank = await rank_query(message.author)
-            embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:you now have {exp}XP and your level is {lvl_end} !keep goin!!! you rank is {rank}", colour=discord.Color.dark_blue())
+            embed = discord.Embed(title=f"{message.author} just leveled up",
+                                  description=f":tada:you now have {exp}XP and your level is {lvl_end} !keep goin!!! you rank is {rank}", colour=discord.Color.dark_blue())
             await message.channel.send(content=None, embed=embed)
-            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author}'")
+            cursor.execute(
+                f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author}'")
             connection.commit()
             connection.close()
     except sqlite3.OperationalError as err:
@@ -98,13 +113,13 @@ async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 #----------------------------------------#
 @client.event
-async def on_member_join(member): 
+async def on_member_join(member):
     await member.create_dm()
     await member.dm_channel.send(f'Hi {member.name}, welcome to my Discord server!')
-    channel = client.get_channel(583703372725747713)
+    channel = client.get_channel(config["welchannel"])
     await channel.send(f"welcome to the gang {member.mention}")
 #----------------------------------------#
-@client.command(aliases=['c','ch'])
+@client.command(aliases=['c', 'ch'])
 async def chat(ctx):
     connection = sqlite3.connect('chatbot.sqlite')
     cursor = connection.cursor()
@@ -125,13 +140,13 @@ async def chat(ctx):
         tableName = entityName + 's'
         columnName = entityName
         cursor.execute('SELECT rowid FROM ' + tableName +
-                        ' WHERE ' + columnName + ' = ?', (text,))
+                       ' WHERE ' + columnName + ' = ?', (text,))
         row = cursor.fetchone()
         if row:
             return row[0]
         else:
             cursor.execute('INSERT INTO ' + tableName +
-                            ' (' + columnName + ') VALUES (?)', (text,))
+                           ' (' + columnName + ') VALUES (?)', (text,))
             return cursor.lastrowid
 
     def get_words(text):
@@ -149,7 +164,7 @@ async def chat(ctx):
     Bot = 'Hello!'
     while True:
         you = ctx.message.content.strip()
-        
+
         if you is None:
             print("ERROR: NO INPUT PROVIDED!")
 
@@ -170,11 +185,13 @@ async def chat(ctx):
         for word, n in words:
             word_id = get_id('word', word)
             weight = sqrt(n / float(words_length))
-            cursor.execute('INSERT INTO associations VALUES (?, ?, ?)', (word_id, sentence_id, weight))
+            cursor.execute('INSERT INTO associations VALUES (?, ?, ?)',
+                           (word_id, sentence_id, weight))
 
         connection.commit()
 
-        cursor.execute('CREATE TEMPORARY TABLE results(sentence_id INT, sentence TEXT, weight REAL)')
+        cursor.execute(
+            'CREATE TEMPORARY TABLE results(sentence_id INT, sentence TEXT, weight REAL)')
         words = get_words(you)
         words_length = sum([n * len(word) for word, n in words])
 
@@ -182,7 +199,8 @@ async def chat(ctx):
             weight = sqrt(n / float(words_length))
             cursor.execute('INSERT INTO results SELECT associations.sentence_id, sentences.sentence, ?*associations.weight/(4+sentences.used) FROM words INNER JOIN associations ON associations.word_id=words.rowid INNER JOIN sentences ON sentences.rowid=associations.sentence_id WHERE words.word=?', (weight, word,))
 
-        cursor.execute('SELECT sentence_id, sentence, SUM(weight) AS sum_weight FROM results GROUP BY sentence_id ORDER BY sum_weight DESC LIMIT 1')
+        cursor.execute(
+            'SELECT sentence_id, sentence, SUM(weight) AS sum_weight FROM results GROUP BY sentence_id ORDER BY sum_weight DESC LIMIT 1')
         row = cursor.fetchone()
         cursor.execute('DROP TABLE results')
 
@@ -192,9 +210,11 @@ async def chat(ctx):
             row = cursor.fetchone()
 
         Bot = row[1]
-        cursor.execute('UPDATE sentences SET used=used+1 WHERE rowid=?', (row[0],))
+        cursor.execute(
+            'UPDATE sentences SET used=used+1 WHERE rowid=?', (row[0],))
         print('Bot: ' + Bot)
 
+#----------------------------------------#
 @client.group()
 @commands.is_owner()
 async def sudo(ctx):
@@ -205,11 +225,11 @@ async def sudo(ctx):
         pass
     else:
         await ctx.send("you are not authorised")
-        return Exception("user is badd")
-
+        return Exception("user is bad")
+#----------------------------------------#
 @sudo.command(name="load")
 async def load(ctx, extension):
-    """loads a cog"""  
+    """loads a cog"""
     client.load_extension(f"cogs.{extension}")
     print("loaded " + extension)
     await ctx.send("loaded")
@@ -230,10 +250,10 @@ async def unload(ctx, extension):
     await ctx.send("unloaded!")
 #----------------------------------------#
 @sudo.command(name="evalm")
-async def evalpy(ctx, * ,expr):
-    """evaluates by parsing a pythonic expression"""  
+async def evalpy(ctx, *, expr):
+    """evaluates by parsing a pythonic expression"""
     str(expr)
-    expr.replace("```","")
+    expr.replace("```", "")
     try:
         await ctx.send(ast.literal_eval(expr))
     except discord.errors.HTTPException:
@@ -244,10 +264,8 @@ async def evalpy(ctx, * ,expr):
         await ctx.send("umm, what to process?")
     except ValueError:
         await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
-
-
-@client.command(name="eval")  
-@commands.is_owner()
+#----------------------------------------#
+@sudo.command(name="eval")
 async def evalus(ctx, *, expr):
     """evaluates a pythonic expression"""
     str(expr)
@@ -263,6 +281,14 @@ async def evalus(ctx, *, expr):
     except ValueError:
         await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
 
+@sudo.command(name="dbdump")
+async def dbdump(ctx):
+    db = discord.File('level.db')
+    try:
+        await ctx.send(file=db, content="here are the levels")
+        print("db transferred")
+    except:
+        print("Error:Db not transferred")
 #--------------------------------------------------------------------------------#
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
@@ -270,5 +296,5 @@ for filename in os.listdir('./cogs'):
     else:
         pass
 #----------------------------------------#
-client.run('NjQ3MDgxMjI2OTg4OTQ1NDIw.Xdv_Iw.-EluqU2IXzFoDCOo58DAGIajapw')
+client.run(config["token"])
 #------------------------------------------------------------------------------------------------------------------------#
