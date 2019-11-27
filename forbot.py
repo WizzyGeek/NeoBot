@@ -96,7 +96,7 @@ async def lvlup(message):
         lvl_end = floor((msg ** 1/2)/6)
         if lvl < lvl_end:
             rank = await rank_query(message.author)
-            embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:you now have {exp}XP and your level is {lvl_end} !keep goin!!! you rank is {rank}", colour=discord.Color.dark_blue())
+            embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
             await message.channel.send(content=None, embed=embed)
             cursor.execute(
                 f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author}'")
