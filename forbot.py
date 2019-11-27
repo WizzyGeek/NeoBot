@@ -51,9 +51,9 @@ async def update(message):
         #await ErrorHandler(err, connection)
         pass
 
-    weight = round(len(str(message))**1/2)
-    if weight > 30:
-        weight = 30
+    weight = (round(len(str(message))**1/2))/2
+    if weight > 15:
+        weight = 15
     cursor.execute(f"SELECT user FROM level WHERE user = '{message.author}'")
     res = cursor.fetchone()
     if res is not None:
@@ -92,12 +92,11 @@ async def lvlup(message):
             return None
         lvl = int(res[0])
         exp = int(res[1])
-        msg = floor(exp/8)
-        lvl_end = floor((msg ** 1/2)/5)
+        msg = floor(exp/15)
+        lvl_end = floor((msg ** 1/2)/6)
         if lvl < lvl_end:
             rank = await rank_query(message.author)
-            embed = discord.Embed(title=f"{message.author} just leveled up",
-                                  description=f":tada:you now have {exp}XP and your level is {lvl_end} !keep goin!!! you rank is {rank}", colour=discord.Color.dark_blue())
+            embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:you now have {exp}XP and your level is {lvl_end} !keep goin!!! you rank is {rank}", colour=discord.Color.dark_blue())
             await message.channel.send(content=None, embed=embed)
             cursor.execute(
                 f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author}'")
