@@ -22,7 +22,7 @@ guild = discord.Guild
 user = discord.Client()
 config = {
     "welchannel": 583703372725747713,
-    "token": 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xdv_Iw.-EluqU2IXzFoDCOo58DAGIajapw'
+    "token": 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
 }
 #----------------------------------------#
 @client.event
