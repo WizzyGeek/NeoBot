@@ -13,9 +13,12 @@ class level(commands.Cog):
         if user == None:
             user = ctx.author
         QueryResult = await LevelsQuery(user)
-        XP = QueryResult[0]
-        lvl = QueryResult[1]
-        rank = QueryResult[2]
+        try:
+            XP = QueryResult[0]
+            lvl = QueryResult[1]
+            rank = QueryResult[2]
+        except TypeError:
+            await ctx.send(f"{user} is unranked!")
         embed = discord.Embed(title=f"{str(user)}'s level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
         await ctx.send(embed=embed)
         return

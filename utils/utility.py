@@ -1,16 +1,16 @@
-import sqlite3
 import asyncio
-import tracemalloc
+import sqlite3
+import sys
 import traceback
+import tracemalloc
+
 tracemalloc.start()
 #1
 async def ErrorHandler(err, connection):
     """Handles all sql errors must. function is a coro.Needs an open connection."""
     connection.commit()
     connection.close()
-    with open("errors.log", "a") as logfile:
-        traceback.print_exc(file=logfile)
-    print("an Error was caught")
+    traceback.print_exc(file=sys.stdout)
     return None
 #----------------------------------------#
 async def rank_query(user):

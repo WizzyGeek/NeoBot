@@ -45,8 +45,6 @@ async def update(message):
     try:
         cursor.execute(
             "CREATE TABLE level(id INT NOT NULL UNIQUE, user TEXT UNIQUE, lvl INT NOT NULL, exp INT)")
-        cursor.execute(
-            "CREATE TABLE rank(user TEXT UNIQUE, rank INT NOT NULL)")
     except sqlite3.OperationalError:
         #await ErrorHandler(err, connection)
         pass
@@ -119,7 +117,7 @@ async def on_member_join(member):
     await channel.send(f"welcome to the gang {member.mention}")
 #----------------------------------------#
 @client.command(aliases=['c', 'ch'])
-async def chat(ctx):
+async def chat(ctx, *, you):
     connection = sqlite3.connect('chatbot.sqlite')
     cursor = connection.cursor()
 
@@ -154,64 +152,54 @@ async def chat(ctx):
         wordsList = wordsRegexp.findall(text.lower())
         return Counter(wordsList).items()
 
-    """ def nobotspeakshere(message):
-        if message.author.bot == False:
-            return False
-        elif message.author.bot == None:
-            return True
-    """
-    Bot = 'Hello!'
-    while True:
-        you = ctx.message.content.strip()
+    if you is None:
+        print("ERROR: NO INPUT PROVIDED!")
 
-        if you is None:
-            print("ERROR: NO INPUT PROVIDED!")
+    print(you)
 
-        print(you)
+    if you == '':
+        await ctx.send("what?")
+    elif you == 'bye':
+        await ctx.send("bye")
+        return
+    else:
+        pass
 
-        if you == '':
-            break
-        elif you == 'bye':
-            await ctx.send("Bot: bye")
-            break
-        else:
-            pass
+    cursor.execute(
+        'CREATE TEMPORARY TABLE results(sentence_id INT, sentence TEXT, weight REAL)')
+    words = get_words(you)
+    words_length = sum([n * len(word) for word, n in words])
 
-        words = get_words(Bot)
-        words_length = sum([n * len(word) for word, n in words])
-        sentence_id = get_id('sentence', you)
+    for word, n in words:
+        weight = sqrt(n / float(words_length))
+        cursor.execute('INSERT INTO results SELECT associations.sentence_id, sentences.sentence, ?*associations.weight/(4+sentences.used) FROM words INNER JOIN associations ON associations.word_id=words.rowid INNER JOIN sentences ON sentences.rowid=associations.sentence_id WHERE words.word=?', (weight, word,))
 
-        for word, n in words:
-            word_id = get_id('word', word)
-            weight = sqrt(n / float(words_length))
-            cursor.execute('INSERT INTO associations VALUES (?, ?, ?)',
-                           (word_id, sentence_id, weight))
+    cursor.execute(
+        'SELECT sentence_id, sentence, SUM(weight) AS sum_weight FROM results GROUP BY sentence_id ORDER BY sum_weight DESC LIMIT 1')
+    row = cursor.fetchone()
+    cursor.execute('DROP TABLE results')
 
-        connection.commit()
-
+    if row is None:
         cursor.execute(
-            'CREATE TEMPORARY TABLE results(sentence_id INT, sentence TEXT, weight REAL)')
-        words = get_words(you)
-        words_length = sum([n * len(word) for word, n in words])
-
-        for word, n in words:
-            weight = sqrt(n / float(words_length))
-            cursor.execute('INSERT INTO results SELECT associations.sentence_id, sentences.sentence, ?*associations.weight/(4+sentences.used) FROM words INNER JOIN associations ON associations.word_id=words.rowid INNER JOIN sentences ON sentences.rowid=associations.sentence_id WHERE words.word=?', (weight, word,))
-
-        cursor.execute(
-            'SELECT sentence_id, sentence, SUM(weight) AS sum_weight FROM results GROUP BY sentence_id ORDER BY sum_weight DESC LIMIT 1')
+            'SELECT rowid, sentence FROM sentences WHERE used = (SELECT MIN(used) FROM sentences) ORDER BY RANDOM() LIMIT 1')
         row = cursor.fetchone()
-        cursor.execute('DROP TABLE results')
 
-        if row is None:
-            cursor.execute(
-                'SELECT rowid, sentence FROM sentences WHERE used = (SELECT MIN(used) FROM sentences) ORDER BY RANDOM() LIMIT 1')
-            row = cursor.fetchone()
+    Bot = row[1]
+    cursor.execute(
+        'UPDATE sentences SET used=used+1 WHERE rowid=?', (row[0],))
 
-        Bot = row[1]
-        cursor.execute(
-            'UPDATE sentences SET used=used+1 WHERE rowid=?', (row[0],))
-        print('Bot: ' + Bot)
+    words = get_words(Bot)
+    words_length = sum([n * len(word) for word, n in words])
+    sentence_id = get_id('sentence', you)
+
+    for word, n in words:
+        word_id = get_id('word', word)
+        weight = sqrt(n / float(words_length))
+        cursor.execute('INSERT INTO associations VALUES (?, ?, ?)',
+                       (word_id, sentence_id, weight))
+
+    connection.commit()
+    await ctx.send(Bot)
 
 #----------------------------------------#
 @client.group()
@@ -279,7 +267,7 @@ async def evalus(ctx, *, expr):
         await ctx.send("umm, what to process?")
     except ValueError:
         await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
-
+#----------------------------------------#
 @sudo.command(name="dbdump")
 async def dbdump(ctx):
     db = discord.File('level.db')
