@@ -18,9 +18,10 @@ from utils.utility import ErrorHandler, rank_query
 client = commands.Bot(command_prefix="$")
 guild = discord.Guild
 user = discord.Client()
+#config for different servers can be put as a nested json objNect
 config = {
     "welchannel": 583703372725747713,
-    "token": 'NjE5ODk2OTcyMTUyOTMwMzA4.Xc0eRw.OBUWRWobEvWmERpgGckJf_M3OcI',
+    "token": 'NjE5ODk2OTcyMTUyOTMwMzA4.XfchIA.-1F8t7BEBaPGvXbKn5GS3SoCqpM',
     "embedcol": discord.Color.dark_blue()
 }
 #----------------------------------------#
@@ -91,11 +92,15 @@ async def lvlup(message):
             return None
         lvl = int(res[0])
         exp = int(res[1])
-        msg = floor(exp/8)
-        lvl_end = floor((msg ** 1/2)/5)
+        msg = floor(exp/15)
+        lvl_end = floor((msg ** 1/2)/6)
         if lvl < lvl_end:
             rank = await rank_query(message.author)
-            embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:you now have {exp}XP and your level is {lvl_end} !keep goin!!! you rank is {rank}", colour=config["embedcol"])
+            embed = discord.Embed(
+                title=f"{message.author} just leveled up",
+                description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**",
+                colour=discord.Color.dark_blue()
+                )
             await message.channel.send(content=None, embed=embed)
             cursor.execute(
                 f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author}'")
@@ -115,100 +120,7 @@ async def on_member_join(member):
     await member.create_dm()
     await member.dm_channel.send(f'Hi {member.name}, welcome to my Discord server!')
     channel = client.get_channel(config["welchannel"])
-    await channel.send(f"welcome to the gang {member.mention}")
-#----------------------------------------#
-""" @client.command(aliases=['c', 'ch'])
-async def chat(ctx):
-    connection = sqlite3.connect('chatbot.sqlite')
-    cursor = connection.cursor()
-
-    create_table_request_list = [
-        'CREATE TABLE words(word TEXT UNIQUE)',
-        'CREATE TABLE sentences(sentence TEXT UNIQUE, used INT NOT NULL DEFAULT 0)',
-        'CREATE TABLE associations (word_id INT NOT NULL, sentence_id INT NOT NULL, weight REAL NOT NULL)',
-    ]
-
-    for create_table_request in create_table_request_list:
-        try:
-            cursor.execute(create_table_request)
-        except:
-            pass
-
-    def get_id(entityName, text):
-        tableName = entityName + 's'
-        columnName = entityName
-        cursor.execute('SELECT rowid FROM ' + tableName +
-                       ' WHERE ' + columnName + ' = ?', (text,))
-        row = cursor.fetchone()
-        if row:
-            return row[0]
-        else:
-            cursor.execute('INSERT INTO ' + tableName +
-                           ' (' + columnName + ') VALUES (?)', (text,))
-            return cursor.lastrowid
-
-    def get_words(text):
-        wordsRegexpString = r'(?:\w+|[' + re.escape(punctuation) + ']+)'
-        wordsRegexp = re.compile(wordsRegexpString)
-        wordsList = wordsRegexp.findall(text.lower())
-        return Counter(wordsList).items()
-
-    """ def nobotspeakshere(message):
-        if message.author.bot == False:
-            return False
-        elif message.author.bot == None:
-            return True
-    """
-    Bot = 'Hello!'
-    while True:
-        you = ctx.message.content.strip()
-
-        if you is None:
-            await ctx.send("umm")
-
-        if you == '':
-            break
-        elif you == 'bye':
-            await ctx.send("Bot: bye")
-            break
-        else:
-            pass
-
-        words = get_words(Bot)
-        words_length = sum([n * len(word) for word, n in words])
-        sentence_id = get_id('sentence', you)
-
-        for word, n in words:
-            word_id = get_id('word', word)
-            weight = sqrt(n / float(words_length))
-            cursor.execute('INSERT INTO associations VALUES (?, ?, ?)',
-                           (word_id, sentence_id, weight))
-
-        connection.commit()
-
-        cursor.execute(
-            'CREATE TEMPORARY TABLE results(sentence_id INT, sentence TEXT, weight REAL)')
-        words = get_words(you)
-        words_length = sum([n * len(word) for word, n in words])
-
-        for word, n in words:
-            weight = sqrt(n / float(words_length))
-            cursor.execute('INSERT INTO results SELECT associations.sentence_id, sentences.sentence, ?*associations.weight/(4+sentences.used) FROM words INNER JOIN associations ON associations.word_id=words.rowid INNER JOIN sentences ON sentences.rowid=associations.sentence_id WHERE words.word=?', (weight, word,))
-
-        cursor.execute(
-            'SELECT sentence_id, sentence, SUM(weight) AS sum_weight FROM results GROUP BY sentence_id ORDER BY sum_weight DESC LIMIT 1')
-        row = cursor.fetchone()
-        cursor.execute('DROP TABLE results')
-
-        if row is None:
-            cursor.execute(
-                'SELECT rowid, sentence FROM sentences WHERE used = (SELECT MIN(used) FROM sentences) ORDER BY RANDOM() LIMIT 1')
-            row = cursor.fetchone()
-
-        Bot = row[1]
-        cursor.execute(
-            'UPDATE sentences SET used=used+1 WHERE rowid=?', (row[0],))
-        await ctx.send('Bot: ' + Bot) """
+    await channel.send(f"welcome to the gang {member.mention}")  
 #----------------------------------------#
 @client.group()
 @commands.is_owner()
@@ -266,7 +178,7 @@ async def evalus(ctx, *, expr):
     str(expr)
     expr.replace("```", "")
     try:
-        await ctx.send(eval(expr))SELECT
+        await ctx.send(eval(expr))
     except discord.errors.HTTPException:
         await ctx.send("executed but no string to send")
     except SyntaxError as err:
