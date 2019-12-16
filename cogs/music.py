@@ -356,7 +356,7 @@ class Music(commands.Cog):  # for new rewrite standard to load cogs
         try:
             # Remove our previous now_playing message.
             await player.np.delete()
-        except discord.HTTPException:
+        except:
             pass
 
         player.np = await ctx.send(f'**Now Playing:** `{vc.source.title}` '
