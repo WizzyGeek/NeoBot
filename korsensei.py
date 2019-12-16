@@ -5,7 +5,7 @@ import random
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
 guild = discord.Guild
-#----------------------------------------#
+#--------------------7--------------------#
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(name='my students', type=discord.ActivityType.watching, status=discord.Status.idle))
