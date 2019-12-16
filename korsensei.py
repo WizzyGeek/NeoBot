@@ -1,3 +1,7 @@
+#!/usr/bin/python3
+# -*-encoding: utf-8 -*-
+"""A in development Discord Bot
+it connsists of a leveling system, Music, Moderation and other commands"""
 #------------imports------------#
 import ast
 import asyncio
@@ -14,6 +18,15 @@ from discord.ext import commands
 #-----------module-imports-----------# 
 from utils.utility import ErrorHandler, rank_query
 
+__authour__ = "Ojass Bharati"
+__copyright__ = "Copyright 2019 Ojass Bharati"
+__credits__ = ["Ojass Bharati", "Anvit Dadape"]
+
+__version__ = "0.1.0"
+__email__ = "anvit.dd@gmail.com"
+__license__ = "MIT"
+__status__ = "Development"
+
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
 guild = discord.Guild
@@ -21,7 +34,7 @@ user = discord.Client()
 #config for different servers can be put as a nested json objNect
 config = {
     "welchannel": 583703372725747713,
-    "token": 'NjE5ODk2OTcyMTUyOTMwMzA4.XfchIA.-1F8t7BEBaPGvXbKn5GS3SoCqpM',
+    "token": <token>,
     "embedcol": discord.Color.dark_blue()
 }
 #----------------------------------------#
@@ -197,7 +210,7 @@ async def chat(ctx, *, you):
 #----------------------------------------#
 @client.event
 async def on_ready():
-    await client.change_presence(activity=discord.Activity(name='My Forests', type=discord.ActivityType.watching, status=discord.Status.idle))
+    await client.change_presence(activity=discord.Activity(name='My students', type=discord.ActivityType.watching, status=discord.Status.idle))
     print('We have logged in as {0.user}'.format(client))
 #----------------------------------------#
 @client.event
@@ -281,12 +294,19 @@ async def dbdump(ctx):
         print("db transferred")
     except:
         print("Error:Db not transferred")
+
+def cog_init():
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            client.load_extension(f'cogs.{filename[:-3]}')
+        else:
+            pass
+    return None
+
+def Runner():
+    cog_init()
+    client.run(config["token"])
 #--------------------------------------------------------------------------------#
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        client.load_extension(f'cogs.{filename[:-3]}')
-    else:
-        pass
-#----------------------------------------#
-client.run(config["token"])
+if __name__ == '__main__':
+    Runner()
 #------------------------------------------------------------------------------------------------------------------------#
