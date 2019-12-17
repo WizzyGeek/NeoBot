@@ -22,8 +22,8 @@ __authour__ = "Ojass Bharati"
 __copyright__ = "Copyright 2019 Ojass Bharati"
 __credits__ = ["Ojass Bharati", "Anvit Dadape"]
 
-__version__ = "0.1.0"
-__email__ = "anvit.dd@gmail.com"
+__version__ = "1.0.1"
+__email__ = "ojass.bharati@gmail.com"
 __license__ = "MIT"
 __status__ = "Development"
 
