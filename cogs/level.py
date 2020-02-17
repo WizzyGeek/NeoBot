@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+
 from utils.utility import LevelsQuery, ranking
 
 client = commands.Bot(command_prefix="$")
@@ -8,10 +9,10 @@ class level(commands.Cog):
     def __init__(self, client):
         self.client = client
     
-    @commands.command(name="level", aliases=["levelquery"], description="returns a users level or you own")
+    @commands.command(name="level", aliases=["levelquery"], description="returns your level")
     async def UserLevelQuery(self, ctx, user=None):
         if user == None:
-            user = ctx.author
+            user = ctx.author.id
         QueryResult = await LevelsQuery(user)
         try:
             XP = QueryResult[0]
@@ -31,6 +32,7 @@ class level(commands.Cog):
         #embed.add_field(name="rank", value=str("\n".join(series)), inline=True)
         embed.add_field(name="user", value=str("\n".join(users)), inline=True)
         await ctx.send(embed=embed, content=None)
- 
+
+
 def setup(client):
     client.add_cog(level(client))

@@ -5,6 +5,7 @@ import os
 import random
 import re
 import sqlite3
+import psycopg2
 from collections import Counter
 from math import floor, sqrt
 from string import punctuation
@@ -18,6 +19,7 @@ from utils.utility import ErrorHandler, rank_query
 
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
+DATABASE_URL = os.environ['DATABASE_URL']
 guild = discord.Guild
 user = discord.Client()
 config = {
@@ -39,24 +41,22 @@ async def on_message(message):
     return
 #----------------------------------------#
 async def update(message):
-    connection = sqlite3.connect("level.db")
+    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
 
     try:
-        cursor.execute(
-            "CREATE TABLE level(id INT NOT NULL UNIQUE, user TEXT UNIQUE, lvl INT NOT NULL, exp INT)")
-    except sqlite3.OperationalError:
+        cursor.execute("CREATE TABLE level(id INT NOT NULL UNIQUE, user UNIQUE, lvl INT NOT NULL, exp INT)")
+    except psycopg2.OperationalError:
         #await ErrorHandler(err, connection)
         pass
 
     weight = (round(len(str(message))**1/2))/2
     if weight > 15:
         weight = 15
-    cursor.execute(f"SELECT user FROM level WHERE user = '{message.author}'")
+    cursor.execute(f"SELECT user FROM level WHERE user = '{message.author.id}'")
     res = cursor.fetchone()
     if res is not None:
-        cursor.execute(
-            f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author}'")
+        cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author.id}'")
         connection.commit()
         await lvlup(message)
         connection.close()
@@ -73,7 +73,7 @@ async def update(message):
             else:
                 new_id = int(res[0]) + 1
         cursor.execute(
-            f"INSERT INTO level VALUES({new_id}, '{message.author}', 1, {weight})")
+            f"INSERT INTO level VALUES({new_id}, '{message.author.id}', 1, {weight})")
         connection.commit()
         connection.close()
         await lvlup(message)
@@ -81,10 +81,10 @@ async def update(message):
 #----------------------------------------#
 async def lvlup(message):
     try:
-        connection = sqlite3.connect("level.db")
+        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+
         cursor = connection.cursor()
-        cursor.execute(
-            f"SELECT lvl, exp FROM level WHERE user = '{message.author}'")
+        cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{message.author.id}'")
         res = cursor.fetchone()
         if res == None:
             return None
@@ -96,11 +96,10 @@ async def lvlup(message):
             rank = await rank_query(message.author)
             embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
             await message.channel.send(content=None, embed=embed)
-            cursor.execute(
-                f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author}'")
+            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author.id}'")
             connection.commit()
             connection.close()
-    except sqlite3.OperationalError as err:
+    except psycopg2.OperationalError as err:
         await ErrorHandler(err, connection)
     return
 #----------------------------------------#
