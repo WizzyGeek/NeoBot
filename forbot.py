@@ -20,11 +20,17 @@ from utils.utility import ErrorHandler, rank_query
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
 DATABASE_URL = os.environ['DATABASE_URL']
+configToken = str(os.environ['Token'])
+except Exception:
+    pass
+if configToken is None:
+    configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
+print(DATABASE_URL)
 guild = discord.Guild
 user = discord.Client()
 config = {
     "welchannel": 583703372725747713,
-    "token": 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
+    "token": configToken
 }
 #----------------------------------------#
 @client.event
@@ -251,9 +257,9 @@ async def evalpy(ctx, *, expr):
     except ValueError:
         await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
 #----------------------------------------#
-@sudo.command(name="eval")
+""" @sudo.command(name="eval")
 async def evalus(ctx, *, expr):
-    """evaluates a pythonic expression"""
+    evaluates a pythonic expression
     str(expr)
     expr.replace("```", "")
     try:
@@ -265,7 +271,7 @@ async def evalus(ctx, *, expr):
     except discord.ext.commands.errors.MissingRequiredArgument:
         await ctx.send("umm, what to process?")
     except ValueError:
-        await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
+        await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed") """
 #----------------------------------------#
 @sudo.command(name="dbdump")
 async def dbdump(ctx):

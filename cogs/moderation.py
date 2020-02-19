@@ -20,7 +20,7 @@ class moderation(commands.Cog):
                 await ctx.send("unbanned user")
 
     @commands.command(name="clear", aliases=["purge","clean","delete","del"], description="deletes amount of specified messages, default is 5 eg: \'$clear 10\' or \'$purge 10\' or \'$delete 10\' or \'$del 10\'")
-    @has_permissions(delete_messages=True)
+    @has_permissions(MANAGE_MESSAGES=True)
     async def clear(self, ctx, amount = 5):
         await ctx.channel.purge(limit=amount+1)
 
