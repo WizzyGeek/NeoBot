@@ -18,16 +18,22 @@ from discord.ext import commands
 from utils.utility import ErrorHandler, rank_query
 
 #----------------------------------------#
+
 client = commands.Bot(command_prefix="$")
-DATABASE_URL = os.environ['DATABASE_URL']
-configToken = str(os.environ['Token'])
-except Exception:
-    pass
+
+try:
+    DATABASE_URL = os.environ['DATABASE_URL']
+    configToken = str(os.environ['Token']) 
+except Exception as err:
+    print(err)
+
 if configToken is None:
     configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
 print(DATABASE_URL)
+
 guild = discord.Guild
 user = discord.Client()
+
 config = {
     "welchannel": 583703372725747713,
     "token": configToken
