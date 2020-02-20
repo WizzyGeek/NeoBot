@@ -54,7 +54,7 @@ async def update(message):
     cursor = connection.cursor()
 
     try:
-        cursor.execute("CREATE TABLE level(id INT NOT NULL UNIQUE, user, lvl INT NOT NULL, exp INT), UNIQUE(user)")
+        cursor.execute("CREATE TABLE level(id INT NOT NULL , user, lvl INT NOT NULL, exp INT), UNIQUE(user, id)")
     except psycopg2.OperationalError:
         #await ErrorHandler(err, connection)
         pass
