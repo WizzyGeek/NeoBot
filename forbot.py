@@ -33,8 +33,7 @@ guild = discord.Guild
 user = discord.Client()
 
 config = {
-    "welchannel": 583703372725747713,
-    "token": configToken
+    "welchannel": 583703372725747713
 }
 #----------------------------------------#
 @client.event
@@ -68,7 +67,7 @@ async def update(message):
     if res is not None:
         cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author.id}'")
         connection.commit()
-        await lvlup(message)
+        await lvlup(message.author.id)
         connection.close()
         return
     else:
@@ -86,15 +85,15 @@ async def update(message):
             f"INSERT INTO level VALUES({new_id}, '{message.author.id}', 1, {weight})")
         connection.commit()
         connection.close()
-        await lvlup(message)
+        await lvlup(message.author.id)
         return
 #----------------------------------------#
-async def lvlup(message):
+async def lvlup(id):
     try:
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
 
         cursor = connection.cursor()
-        cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{message.author.id}'")
+        cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{id}'")
         res = cursor.fetchone()
         if res == None:
             return None
@@ -104,9 +103,9 @@ async def lvlup(message):
         lvl_end = floor((msg ** 1/2)/6)
         if lvl < lvl_end:
             rank = await rank_query(message.author)
-            embed = discord.Embed(title=f"{message.author} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
+            embed = discord.Embed(title=f"{getuser(id)} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
             await message.channel.send(content=None, embed=embed)
-            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE user = '{message.author.id}'")
+            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE user = '{id}'")
             connection.commit()
             connection.close()
     except psycopg2.OperationalError as err:
@@ -123,7 +122,7 @@ async def on_member_join(member):
     await member.create_dm()
     await member.dm_channel.send(f'Hi {member.name}, welcome to my Discord server!')
     channel = client.get_channel(config["welchannel"])
-    await channel.send(f"welcome to the gang {member.mention}")
+    await channel.send(f"welcome to the server {member.mention}!")
 #----------------------------------------#
 @client.command(aliases=['c', 'ch'])
 async def chat(ctx, *, you):
@@ -285,6 +284,35 @@ async def dbdump(ctx):
         print("db transferred")
     except:
         print("Error:Db not transferred")
+@sudo.command(name="add_xp",aliases="ax")
+async def add_xp(ctx, amount, user: discord.User):
+    """Gives xp to a user"""
+    User = user.id
+    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+    cursor = connection.cursor()
+    cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{User}'")
+    res = cursor.fetchone()
+    if res is not None:
+        cursor.execute(f"UPDATE level SET exp=exp + {amount} WHERE user = '{User}'")
+        connection.commit()
+        await lvlup(User)
+        connection.close()
+        return
+    else:
+        cursor.execute("SELECT MAX(id) FROM level")
+        res = cursor.fetchone()
+        if res == None:
+            print(res)
+            res = 0
+        elif res != None:
+            if res[0] == None:
+                new_id = 1
+            else:
+                new_id = int(res[0]) + 1
+        cursor.execute(f"INSERT INTO level VALUES({new_id}, '{User}', 1, {amount})")
+        connection.commit()
+        connection.close()
+        await lvlup(User)
 #--------------------------------------------------------------------------------#
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
@@ -292,5 +320,5 @@ for filename in os.listdir('./cogs'):
     else:
         pass
 #----------------------------------------#
-client.run(config["token"])
+client.run(configToken)
 #------------------------------------------------------------------------------------------------------------------------#
