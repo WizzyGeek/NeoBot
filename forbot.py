@@ -54,7 +54,7 @@ async def update(message):
     cursor = connection.cursor()
 
     try:
-        cursor.execute("CREATE TABLE level(id INT NOT NULL UNIQUE, user UNIQUE, lvl INT NOT NULL, exp INT)")
+        cursor.execute("CREATE TABLE level(id INT NOT NULL UNIQUE, user, lvl INT NOT NULL, exp INT), UNIQUE(user)")
     except psycopg2.OperationalError:
         #await ErrorHandler(err, connection)
         pass
@@ -67,7 +67,7 @@ async def update(message):
     if res is not None:
         cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author.id}'")
         connection.commit()
-        await lvlup(message.author.id)
+        await lvlup(message, message.author.id)
         connection.close()
         return
     else:
@@ -81,14 +81,13 @@ async def update(message):
                 new_id = 1
             else:
                 new_id = int(res[0]) + 1
-        cursor.execute(
-            f"INSERT INTO level VALUES({new_id}, '{message.author.id}', 1, {weight})")
+        cursor.execute(f"INSERT INTO level VALUES({new_id}, '{message.author.id}', 1, {weight})")
         connection.commit()
         connection.close()
-        await lvlup(message.author.id)
+        await lvlup(message, message.author.id)
         return
 #----------------------------------------#
-async def lvlup(id):
+async def lvlup(ctx, id):
     try:
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
 
@@ -102,9 +101,9 @@ async def lvlup(id):
         msg = floor(exp/15)
         lvl_end = floor((msg ** 1/2)/6)
         if lvl < lvl_end:
-            rank = await rank_query(message.author)
-            embed = discord.Embed(title=f"{getuser(id)} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
-            await message.channel.send(content=None, embed=embed)
+            rank = await rank_query(id)
+            embed = discord.Embed(title=f"{discord.Client().get_user(id)} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
+            await ctx.channel.send(content=None, embed=embed)
             cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE user = '{id}'")
             connection.commit()
             connection.close()
@@ -295,7 +294,7 @@ async def add_xp(ctx, amount, user: discord.User):
     if res is not None:
         cursor.execute(f"UPDATE level SET exp=exp + {amount} WHERE user = '{User}'")
         connection.commit()
-        await lvlup(User)
+        await lvlup(ctx, User)
         connection.close()
         return
     else:
@@ -312,7 +311,7 @@ async def add_xp(ctx, amount, user: discord.User):
         cursor.execute(f"INSERT INTO level VALUES({new_id}, '{User}', 1, {amount})")
         connection.commit()
         connection.close()
-        await lvlup(User)
+        await lvlup(ctx, User)
 #--------------------------------------------------------------------------------#
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
