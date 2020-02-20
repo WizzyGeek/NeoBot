@@ -26,10 +26,8 @@ try:
     configToken = str(os.environ['Token']) 
 except Exception as err:
     print(err)
-
 if configToken is None:
     configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
-print(DATABASE_URL)
 
 guild = discord.Guild
 user = discord.Client()
