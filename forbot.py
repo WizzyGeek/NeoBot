@@ -284,7 +284,7 @@ async def dbdump(ctx):
         print("db transferred")
     except:
         print("Error:Db not transferred")
-@sudo.command(name="add_xp",aliases="ax")
+@sudo.command(name="add_xp",aliases=["ax"])
 async def add_xp(ctx, amount, user: discord.User):
     """Gives xp to a user"""
     User = user.id
