@@ -54,7 +54,7 @@ async def update(message):
     cursor = connection.cursor()
 
     try:
-        cursor.execute("CREATE TABLE level(id INT NOT NULL, user INT NOT NUll, lvl INT NOT NULL, exp INT ), UNIQUE(user, id);")
+        cursor.execute("CREATE TABLE level(id INTEGER NOT NULL, usr BIGINT NOT NUll, lvl INTEGER NOT NULL, exp INTEGER ), UNIQUE(usr, id);")
     except psycopg2.OperationalError:
         #await ErrorHandler(err, connection)
         pass
@@ -62,10 +62,10 @@ async def update(message):
     weight = (round(len(str(message))**1/2))/2
     if weight > 15:
         weight = 15
-    cursor.execute(f"SELECT user FROM level WHERE user = '{message.author.id}'")
+    cursor.execute(f"SELECT usr FROM level WHERE usr = '{message.author.id}'")
     res = cursor.fetchone()
     if res is not None:
-        cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE user = '{message.author.id}'")
+        cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE usr = '{message.author.id}'")
         connection.commit()
         await lvlup(message, message.author.id)
         connection.close()
@@ -92,7 +92,7 @@ async def lvlup(ctx, id):
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
 
         cursor = connection.cursor()
-        cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{id}'")
+        cursor.execute(f"SELECT lvl, exp FROM level WHERE usr = '{id}'")
         res = cursor.fetchone()
         if res == None:
             return None
@@ -104,7 +104,7 @@ async def lvlup(ctx, id):
             rank = await rank_query(id)
             embed = discord.Embed(title=f"{discord.Client().get_user(id)} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
             await ctx.channel.send(content=None, embed=embed)
-            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE user = '{id}'")
+            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE usr = '{id}'")
             connection.commit()
             connection.close()
     except psycopg2.OperationalError as err:
@@ -210,16 +210,9 @@ async def chat(ctx, *, you):
 
 #----------------------------------------#
 @client.group()
-@commands.is_owner()
+@has_permissions(administrator = True)
 async def sudo(ctx):
-    auth = []
-    if await ctx.bot.is_owner(ctx.author):
-        pass
-    elif ctx.author.id in auth:
-        pass
-    else:
-        await ctx.send("you are not authorised")
-        return Exception("user is bad")
+    return None
 #----------------------------------------#
 @sudo.command(name="load")
 async def load(ctx, extension):
@@ -259,22 +252,6 @@ async def evalpy(ctx, *, expr):
     except ValueError:
         await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
 #----------------------------------------#
-""" @sudo.command(name="eval")
-async def evalus(ctx, *, expr):
-    evaluates a pythonic expression
-    str(expr)
-    expr.replace("```", "")
-    try:
-        await ctx.send(eval(expr))
-    except discord.errors.HTTPException:
-        await ctx.send("executed but no string to send")
-    except SyntaxError as err:
-        await ctx.send(str(err) + "\n *note: single backticks not supported*")
-    except discord.ext.commands.errors.MissingRequiredArgument:
-        await ctx.send("umm, what to process?")
-    except ValueError:
-        await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed") """
-#----------------------------------------#
 @sudo.command(name="dbdump")
 async def dbdump(ctx):
     db = discord.File('level.db')
@@ -289,10 +266,10 @@ async def add_xp(ctx, amount, user: discord.User):
     User = user.id
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
-    cursor.execute(f"SELECT lvl, exp FROM level WHERE user = '{User}'")
+    cursor.execute(f"SELECT lvl, exp FROM level WHERE usr = '{User}'")
     res = cursor.fetchone()
     if res is not None:
-        cursor.execute(f"UPDATE level SET exp=exp + {amount} WHERE user = '{User}'")
+        cursor.execute(f"UPDATE level SET exp=exp + {amount} WHERE usr = '{User}'")
         connection.commit()
         await lvlup(ctx, User)
         connection.close()
