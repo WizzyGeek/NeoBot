@@ -210,7 +210,7 @@ async def chat(ctx, *, you):
 
 #----------------------------------------#
 @client.group()
-@has_permissions(administrator = True)
+@commands.has_permissions(administrator = True)
 async def sudo(ctx):
     return None
 #----------------------------------------#
