@@ -6,6 +6,7 @@ import os
 import random
 import re
 import sqlite3
+import sys
 import psycopg2
 from collections import Counter
 from math import floor, sqrt
