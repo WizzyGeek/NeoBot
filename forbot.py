@@ -254,12 +254,14 @@ async def evalpy(ctx, *, expr):
 #----------------------------------------#
 @sudo.command(name="dbdump")
 async def dbdump(ctx):
-    db = discord.File('level.db')
+    db = discord.File('chatbot.sqlite')
     try:
-        await ctx.send(file=db, content="here are the levels")
+        await ctx.send(file=db, content="here is the chat db")
         print("db transferred")
     except:
         print("Error:Db not transferred")
+    return None
+#----------------------------------------#
 @sudo.command(name="add_xp",aliases=["ax"])
 async def add_xp(ctx, amount, user: discord.User):
     """Gives xp to a user"""

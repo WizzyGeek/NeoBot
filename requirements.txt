@@ -16,4 +16,3 @@ python-dateutil
 pytz
 six
 websockets
-yarl
