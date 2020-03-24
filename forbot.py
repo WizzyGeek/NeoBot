@@ -60,7 +60,7 @@ async def update(message):
     else:
         connection.commit()
 
-    weight = (round(len(str(message))**1/2))/2
+    weight = (round(len(str(message.content))**1/2))/2
     if weight > 15:
         weight = 15
     cursor.execute(f"SELECT usr FROM level WHERE usr = '{message.author.id}'")
