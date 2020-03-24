@@ -55,8 +55,7 @@ async def update(message):
 
     try:
         cursor.execute("CREATE TABLE level(id INTEGER NOT NULL UNIQUE, usr BIGINT NOT NUll UNIQUE, lvl INTEGER NOT NULL, exp INTEGER);")
-    except psycopg2.OperationalError:
-        #await ErrorHandler(err, connection)
+    except psycopg2.errors.DuplicateTable:
         pass
 
     weight = (round(len(str(message))**1/2))/2
