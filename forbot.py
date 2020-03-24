@@ -1,6 +1,7 @@
 #-----------standard-imports-----------#
 import ast
 import asyncio
+import logging
 import os
 import random
 import re
@@ -15,19 +16,22 @@ import discord
 from discord.ext import commands
 
 #-----------module-imports-----------#
-from utils.utility import ErrorHandler, rank_query
+from utils.utility import ErrorHandler, rank_query, update, lvlup
 
 #----------------------------------------#
-
+logging.basicConfig(filename = sys.stdout, format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 client = commands.Bot(command_prefix="$")
-
+logger = logging.getLogger(__name__)
 try:
     DATABASE_URL = os.environ['DATABASE_URL']
     configToken = str(os.environ['Token']) 
 except Exception as err:
-    print(err)
+    logger.exception("Config vars inaccessible!")
+    logger.critical("If datbase is URL not found leveling system will crash!")
+
 if configToken is None:
     configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
+    logger.info("Alternate login token used.")
 
 guild = discord.Guild
 user = discord.Client()
@@ -35,100 +39,37 @@ user = discord.Client()
 config = {
     "welchannel": 583703372725747713
 }
+logger.info("Initialized config variables.")
 #----------------------------------------#
 @client.event
 async def on_message(message):
     if message.author.bot:
-        return
+        return None
     elif isinstance(message.channel, discord.abc.PrivateChannel):
-        return
+        return None 
     else:
         await update(message=message)
-
     await client.process_commands(message)
-
-    return
-#----------------------------------------#
-async def update(message):
-    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute("SAVEPOINT my_save_point")
-        cursor.execute("CREATE TABLE level(id INTEGER NOT NULL UNIQUE, usr BIGINT NOT NUll UNIQUE, lvl INTEGER NOT NULL, exp INTEGER);")
-    except psycopg2.errors.DuplicateTable:
-        cursor.execute("rollback to savepoint my_save_point")
-    finally:
-        cursor.execute("release savepoint my_save_point")
-        connection.commit()
-
-    weight = (round(len(str(message.content))**1/2))/2
-    if weight > 15:
-        weight = 15
-    cursor.execute(f"SELECT usr FROM level WHERE usr = '{message.author.id}'")
-    res = cursor.fetchone()
-    if res is not None:
-        cursor.execute(f"UPDATE level SET exp=exp + {weight} WHERE usr = '{message.author.id}'")
-        connection.commit()
-        await lvlup(message, message.author.id)
-        connection.close()
-        return
-    else:
-        cursor.execute("SELECT MAX(id) FROM level")
-        res = cursor.fetchone()
-        if res == None:
-            print(res)
-            res = 0
-        elif res != None:
-            if res[0] == None:
-                new_id = 1
-            else:
-                new_id = int(res[0]) + 1
-        cursor.execute(f"INSERT INTO level VALUES({new_id}, '{message.author.id}', 1, {weight})")
-        connection.commit()
-        connection.close()
-        await lvlup(message, message.author.id)
-        return
-#----------------------------------------#
-async def lvlup(ctx, id):
-    try:
-        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-
-        cursor = connection.cursor()
-        cursor.execute(f"SELECT lvl, exp FROM level WHERE usr = '{id}'")
-        res = cursor.fetchone()
-        if res == None:
-            return None
-        lvl = int(res[0])
-        exp = int(res[1])
-        msg = floor(exp/15)
-        lvl_end = floor((msg ** 1/2)/6)
-        if lvl < lvl_end:
-            rank = await rank_query(id)
-            embed = discord.Embed(title=f"{discord.Client().get_user(id)} just leveled up", description=f":tada:You now have **{exp}XP** and your level is **{lvl_end}**! Keep going! your rank is **{rank}**", colour=discord.Color.dark_blue())
-            await ctx.channel.send(content=None, embed=embed)
-            cursor.execute(f"UPDATE level SET lvl = {lvl_end} WHERE usr = '{id}'")
-            connection.commit()
-            connection.close()
-    except psycopg2.OperationalError as err:
-        await ErrorHandler(err, connection)
-    return
+    return None
 #----------------------------------------#
 @client.event
 async def on_ready():
     await client.change_presence(activity=discord.Activity(name='The Rainforests', type=discord.ActivityType.watching, status=discord.Status.idle))
-    print('We have logged in as {0.user}'.format(client))
+    logger.info(f"Bot:{client.user},Status = Online")
 #----------------------------------------#
 @client.event
 async def on_member_join(member):
+    logger.info(f"{member.name} intiated welcome process.")
     await member.create_dm()
-    await member.dm_channel.send(f'Hi {member.name}, welcome to my Discord server!')
+    await member.dm_channel.send(f'Hi {member.name}, welcome to the Amazon Rainforest Discord server!')
     channel = client.get_channel(config["welchannel"])
-    await channel.send(f"welcome to the server {member.mention}!")
+    await channel.send(f"welcome to the server {member.mention}! everyone please make them feel welcomed!")
 #----------------------------------------#
 @client.command(aliases=['c', 'ch'])
 async def chat(ctx, *, you):
-    connection = sqlite3.connect('chatbot.sqlite')
+    ctx.send("Under Devlopment! sorry for any inconvenience caused.")
+    logger.info("Chat command requested!")
+    """ connection = sqlite3.connect('chatbot.sqlite')
     cursor = connection.cursor()
 
     create_table_request_list = [
@@ -209,12 +150,13 @@ async def chat(ctx, *, you):
                        (word_id, sentence_id, weight))
 
     connection.commit()
-    await ctx.send(Bot)
+    await ctx.send(Bot) """
 
 #----------------------------------------#
 @client.group()
 @commands.has_permissions(administrator = True)
 async def sudo(ctx):
+    logging.info(f"elevated privilage use detected, USER : {ctx.user.name}")
     return None
 #----------------------------------------#
 @sudo.command(name="load")
@@ -295,11 +237,16 @@ async def add_xp(ctx, amount, user: discord.User):
         connection.close()
         await lvlup(ctx, User)
 #--------------------------------------------------------------------------------#
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        client.load_extension(f'cogs.{filename[:-3]}')
-    else:
-        pass
-#----------------------------------------#
-client.run(configToken)
+def runner():    
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            client.load_extension(f'cogs.{filename[:-3]}')
+        else:
+            pass
+    client.run(configToken)
+    logger 
+    return None
+
+if __name__ = '__main__':
+    runner()
 #------------------------------------------------------------------------------------------------------------------------#

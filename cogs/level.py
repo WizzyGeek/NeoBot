@@ -10,7 +10,7 @@ class level(commands.Cog):
         self.client = client
     
     @commands.command(name="level", aliases=["levelquery"], description="returns your level or another members level requires ping.")
-    async def UserLevelQuery(self, ctx, user: discord.User):
+    async def UserLevelQuery(self, ctx, user = None):
         if user == None:
             user = ctx.author.id
         else:
@@ -22,10 +22,10 @@ class level(commands.Cog):
             lvl = QueryResult[1]
             rank = QueryResult[2]
         except TypeError:
-            await ctx.send(f"{user} is unranked!")
-        embed = discord.Embed(title=f"{str(user)}'s level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
+            await ctx.send(f"{client.get_user(user).mention} is unranked!")
+        embed = discord.Embed(title=f"{client.get_user(user).mention}'s level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
         await ctx.send(embed=embed)
-        return
+        return None
         
     @commands.command(name="leaderboard", aliases=["lb"], description="gives the leaderboard, can be used as $lb")
     async def leaderboard(self, ctx):
