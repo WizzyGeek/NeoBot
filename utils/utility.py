@@ -154,7 +154,7 @@ async def update(message):
             return
     except psycopg2.errors.InFailedSqlTransaction as err:
         await ErrorHandler(err, connection)
-        logger.critical(f"FATAL ERROR OCCURED!! Leveling system crash detected. \n ID:{id},XP:{weight}}", exc_info = True)
+        logger.critical(f"FATAL ERROR OCCURED!! Leveling system crash detected. \n ID:{id},XP:{weight}", exc_info = True)
     return None
 
 #----------------------------------------#
