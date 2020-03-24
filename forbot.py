@@ -55,6 +55,7 @@ async def update(message):
 
     try:
         cursor.execute("CREATE TABLE level(id INTEGER NOT NULL UNIQUE, usr BIGINT NOT NUll UNIQUE, lvl INTEGER NOT NULL, exp INTEGER);")
+        connection.commit()
     except psycopg2.errors.DuplicateTable:
         pass
 
