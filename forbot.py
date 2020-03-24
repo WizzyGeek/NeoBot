@@ -54,10 +54,12 @@ async def update(message):
     cursor = connection.cursor()
 
     try:
+        cursor.execute("SAVEPOINT my_save_point")
         cursor.execute("CREATE TABLE level(id INTEGER NOT NULL UNIQUE, usr BIGINT NOT NUll UNIQUE, lvl INTEGER NOT NULL, exp INTEGER);")
     except psycopg2.errors.DuplicateTable:
-        connection.rollback()
-    else:
+        cursor.execute("rollback to savepoint my_save_point")
+    finally:
+        cursor.execute("release savepoint my_save_point")
         connection.commit()
 
     weight = (round(len(str(message.content))**1/2))/2
