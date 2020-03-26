@@ -29,7 +29,7 @@ class Help(commands.Cog):
         embed.add_field(name="`$sudo`", value="A group of command for admins.")
         channel = await author.create_dm()
         await channel.send(content=None, embed=embed)
-        await ctx.send(content="Check your DMs", delete_after=5.0)
+        await ctx.send(content="Check your DMs")
         return None
     
 def setup(bot):
