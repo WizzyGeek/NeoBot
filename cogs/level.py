@@ -11,7 +11,7 @@ class level(commands.Cog):
     
     @commands.command(name="level", aliases=["levelquery","rank"], description="returns your level or another members level requires ping.")
     async def UserLevelQuery(self, ctx, user:discord.User=None):
-        async with channel.typing():
+        async with ctx.channel.typing():
             if user is None:
                 user = ctx.author.id
             else:
@@ -30,7 +30,7 @@ class level(commands.Cog):
         
     @commands.command(name="leaderboard", aliases=["lb"], description="gives the leaderboard, can be used as $lb")
     async def leaderboard(self, ctx):
-        async with channel.typing():
+        async with ctx.channel.typing():
             users = [f'{str(i[0])}]{str(i[1])}' for i in list(enumerate(await ranking(10), start=1))]
             embed = discord.Embed(title="Leaderboard", colour=discord.Color.dark_blue())
             #embed.add_field(name="rank", value=str("\n".join(series)), inline=True)
