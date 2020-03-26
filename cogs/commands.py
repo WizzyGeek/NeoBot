@@ -80,5 +80,26 @@ class utility(commands.Cog):
         embed = discord.Embed(title="Spreading awareness is important", description=f"many people are still unaware of the **consequences** of deforestation, to save them the least you can do is to educate people, have a look at #what-can-i-do", colour=discord.Color.dark_blue())
         await ctx.send(embed=embed)
 
+    @commands.command(name="rainforest")
+    async def rain(self, ctx):
+        embed = discord.Embed(title="RainForest", description=f"A luxuriant, dense forest rich in biodiversity, We need the rain forests to produce oxygen and clean the atmosphere to help us breathe. We also know that the earth's climate can be affected, as well as the water cycle", colour=discord.Color.green())
+        await ctx.send(embed=embed)
+    
+    @commands.command(name="debate")
+    async def debate(self, ctx):
+        embed = discord.Embed(title="The spirit of debate", description=f"Good debates require the participants to:\nBe fair-minded\nMake a good-faith attempt to persuade\nShow respect", colour=discord.Color.dark_blue())
+        await ctx.send(embed=embed)
+
+    @commands.command(name="climatechange")  
+    async def climate(self, ctx):
+        embed = discord.Embed(title="Climate Change: How Do We Know?", description=f"Just in the last 650,000 years there have been seven cycles of glacial advance and retreat, with the abrupt end of the last ice age about 11,700 years ago marking the beginning of the modern climate era — and of human civilization. Most of these climate changes are attributed to very small variations in Earth’s orbit that change the amount of solar energy our planet receives.", colour=discord.Color.dark_blue())
+        embed.set_image(url="https://climate.nasa.gov/system/content_pages/main_images/203_co2-graph-061219.jpg")
+        await ctx.send(embed=embed)
+
+    @commands.command(name="10myths")
+    async def myths(self, ctx):
+        embed = discord.Embed(title="Top 10 Myths about the enviroment!", url="https://www.wwf.org.uk/updates/10-myths-about-climate-change", colour=discord.Color.dark_blue())
+        await ctx.send(embed=embed)
+
 def setup(client):
     client.add_cog(utility(client))
