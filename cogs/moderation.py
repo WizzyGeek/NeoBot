@@ -5,14 +5,9 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions, MissingPermissions
 
-bot = commands.Bot(command_prefix='$')
+from forbot import bot, log
+
 logger = logging.getLogger(__name__)
-try:
-    log = bot.get_channel(int(os.environ['log']))
-except KeyError:
-    logger.error("Config vars (log id) inaccessible!") # exception avoided on purpose.
-    log_channel = bot.get_channel(616955019727732737)
-    logger.info("Alternate id used.")
 
 class moderation(commands.Cog):
 
@@ -55,9 +50,14 @@ class moderation(commands.Cog):
     @has_permissions(ban_members=True)
     async def ban(self, ctx, member : discord.Member , *,reason="Not given"):
         auth = ctx.author.mention
-        vict = member.name
-        await member.ban(reason=reason)
-        await log.send(embed=discord.Embed(title="Ban!", description=f"{vict} was banned by {auth}").add_field(description=f"reason : {str(reason)}",colour=0x39ff14))
+        vict = member.name 
+        if ctx.author == member:
+            ctx.send("Why would you wanna ban your self?", delete_after = 5.682)
+            return None
+        else:
+            await member.ban(reason=reason)
+            await log.send(embed=discord.Embed(title="Ban!", description=f"{vict} was banned by {auth}").add_field(description=f"reason : {str(reason)}",colour=0x39ff14))
+            return None
 
     @commands.command(name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @has_permissions(kick_members=True)
@@ -65,19 +65,7 @@ class moderation(commands.Cog):
         name = member.name
         await member.kick(reason=reason)
         await ctx.send(f"kicked {name}", delete_after=float(5.682))
-        await log.send(embed=discord.Embed(title="Kick",description=f"Kicked {member.name}\nreason : {reason}",colour=0x39ff14))
-
-    @commands.command(name="report")
-    async def report(self, ctx, user, reason="Not given"):
-        try:
-            name = user.name
-        except Exception:
-            pass
-        author = ctx.author
-        await author.send(f"Reported {user}!\nThe staff look into your matter soon.\nDon't use this feature as spam.")
-        await ctx.message.delete()
-        channel = await bot.fetch_channel(int(620203303736836096))
-        await channel.send(embed=discord.Embed(title="Report",description=f"{author} reported {user}/{name}\nreason : {reason}",colour=0x39ff14))
+        await log.send(embed=discord.Embed(title="Kick",description=f"Kicked {member.name}\nreason: {reason}",colour=0x39ff14))
 
     @kick.error
     @ban.error

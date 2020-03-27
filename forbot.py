@@ -27,12 +27,12 @@ logger = logging.getLogger(__name__)
 try:
     DATABASE_URL = os.environ['DATABASE_URL']
     configToken = str(os.environ['Token'])
-    log_channel = bot.get_channel(int(os.eviron['log']))
+    log = bot.get_channel(int(os.eviron['log']))
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("If datbase is URL not found leveling system will crash!")
     configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
-    log_channel = bot.get_channel(616955019727732737)
+    log = bot.get_channel(616955019727732737)
     logger.info("Alternate login token, id used.")
 
 guild = discord.Guild
@@ -85,6 +85,18 @@ async def chat(ctx, *, you):
     await ctx.send("Under Devlopment! sorry for any inconvenience caused.")
     logger.info("Chat command requested!")
     
+@bot.command(name="report")
+async def report(ctx, user, reason="Not given"):
+    try:
+        name = user.name
+    except Exception:
+        name = user
+    author = ctx.author
+    await author.send(f"Reported {user}!\nThe staff look into your matter soon.\nDon't use this feature as spam.")
+    await ctx.message.delete()
+    channel = bot.get_channel(int(620203303736836096))
+    await channel.send(embed=discord.Embed(title="Report",description=f"{author} reported {name}\nreason:{reason}",colour=0x39ff14))
+    return None
 #----------------------------------------#
 @bot.group()
 @commands.has_permissions(administrator = True)

@@ -13,19 +13,19 @@ class level(commands.Cog):
     async def UserLevelQuery(self, ctx, user:discord.User=None):
         async with ctx.channel.typing():
             if user is None:
-                user = ctx.author.id
+                usrid = ctx.author.id
+                user = ctx.author
             else:
-                id = user.id
-                user = id
-            QueryResult = await LevelsQuery(user)
+                usrid = user.id
+            QueryResult = await LevelsQuery(usrid)
             try:
-                XP = QueryResult[0]
-                lvl = QueryResult[1]
-                rank = QueryResult[2]
+                XP = QueryResult[0][0]
+                lvl = QueryResult[0][1]
+                rank = QueryResult[0][2]
+                embed = discord.Embed(title=f"{user.name} level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
+                await ctx.send(embed=embed)
             except TypeError:
-                await ctx.send(f"{IdPing(user)} is unranked!")
-            embed = discord.Embed(title=f"{IdPing(user)}'s level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
-            await ctx.send(embed=embed)
+                await ctx.send(f"{user.name} is unranked!")
         return None
         
     @commands.command(name="leaderboard", aliases=["lb"], description="gives the leaderboard, can be used as $lb")

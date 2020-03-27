@@ -45,7 +45,7 @@ async def rank_query(user):
                 count += 1
 #----------------------------------------#
 async def IdPing(Id : int):
-    ping = f"<@!{str(Id)}>"
+    ping = f"<@{str(Id)}>"
     return ping
 #----------------------------------------#
 async def ranking(range):
@@ -73,24 +73,24 @@ async def AppendToTuple(data, value):
     Array.append(value)
     return Array
 #----------------------------------------#
-async def LevelsQuery(user):#important!!!!
+async def LevelsQuery(user):#important!!!!-
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
     Rank = await rank_query(user)
     try:
-        cursor.execute(f"SELECT xp, lvl FROM level WHERE usr = {user};")
-        res = cursor.fetchone()
+        cursor.execute(f"SELECT xp, lvl, ROW_NUMBER() OVER (ORDER BY xp) FROM level WHERE usr = {user};")
+        res = cursor.fetchall()
         if res == None:
             return None
         else:
             pass
-        Array = await AppendToTuple(res, Rank)
         connection.commit()
         connection.close()
-        return Array
+        return res
     except Exception as err:
         await ErrorHandler(err, connection)
-        return None
+        logger.error("Transaction fail", exc_info=True)
+        return Exception
 #----------------------------------------#
 async def RankUserQuery(rank):
     connection = sqlite3.connect("level.db")
