@@ -76,7 +76,7 @@ class moderation(commands.Cog):
         author = ctx.author
         await author.send(f"Reported {user}!\nThe staff look into your matter soon.\nDon't use this feature as spam.")
         await ctx.message.delete()
-        channel = discord.Client().get_channel(620203303736836096)
+        channel = await bot.fetch_channel(int(620203303736836096))
         await channel.send(embed=discord.Embed(title="Report",description=f"{author} reported {user}/{name}\nreason : {reason}",colour=0x39ff14))
 
     @kick.error

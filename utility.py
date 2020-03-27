@@ -44,13 +44,14 @@ async def rank_query(user):
             else:
                 count += 1
 #----------------------------------------#
+async def IdPing(Id : int):
+    ping = f"<@!{str(Id)}>"
+    return ping
+#----------------------------------------#
 async def ranking(range):
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
     #------------------------------------#
-    async def IdPing(Id : int):
-        ping = f"<@!{str(Id)}>"
-        return ping
     try:
         cursor.execute(f"SELECT DISTINCT * FROM level ORDER BY xp DESC FETCH FIRST {range} ROWS ONLY;")
         res = cursor.fetchall()

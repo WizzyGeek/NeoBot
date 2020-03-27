@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from utility import LevelsQuery, ranking
+from utility import LevelsQuery, ranking, IdPing
 
 client = commands.Bot(command_prefix="$")
 
@@ -23,8 +23,8 @@ class level(commands.Cog):
                 lvl = QueryResult[1]
                 rank = QueryResult[2]
             except TypeError:
-                await ctx.send(f"{client.get_user(user).mention} is unranked!")
-            embed = discord.Embed(title=f"{client.get_user(user).mention}'s level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
+                await ctx.send(f"{IdPing(user)} is unranked!")
+            embed = discord.Embed(title=f"{IdPing(user)}'s level info", description=f"**Rank**: {rank}\n**lvl**: {lvl}\n**XP**: {XP}", colour=discord.Color.dark_blue())
             await ctx.send(embed=embed)
         return None
         
