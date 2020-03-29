@@ -20,17 +20,17 @@ from discord.ext import commands
 from utility import ErrorHandler, rank_query, update, lvlup
 
 #----------------------------------------#
-os.environ['DATABASE_URL'] = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
 logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 bot = commands.Bot(command_prefix="$")
 logger = logging.getLogger(__name__)
 try:
     DATABASE_URL = os.environ['DATABASE_URL']
     configToken = str(os.environ['Token'])
-    log = bot.get_channel(int(os.eviron['log']))
+    log = bot.get_channel(int(os.environ['log']))
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("If datbase is URL not found leveling system will crash!")
+    DATABASE_URL = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
     configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
     log = bot.get_channel(616955019727732737)
     logger.info("Alternate login token, id used.")
