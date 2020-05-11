@@ -136,26 +136,26 @@ async def unload(ctx, extension):
 def grab_reply(question):
     #Navigate to the Search Reddit Url
     r = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'})
-    answers = json.loads(r.text)	#Load the JSON file
+    answers = json.loads(r.text)    #Load the JSON file
     Children = answers["data"]["children"]
     ans_list= []
     for post in Children:
-	if post["data"]["num_comments"] >= 5:	#Greater then 5 or equal  comments
-		ans_list.append (post["data"]["url"])
+    if post["data"]["num_comments"] >= 5:    #Greater then 5 or equal  comments
+        ans_list.append (post["data"]["url"])
     #If no results are found return "I have no idea"
-	if len(ans_list) == 0:
-		return "I have no idea"
+    if len(ans_list) == 0:
+        return "I have no idea"
     #Pick A Random Post
-    comment_url=ans_list[random.randint(0,len(ans_list)-1)] + '.json?sort=top'	#Grab Random Comment Url and Append .json to end
+    comment_url=ans_list[random.randint(0,len(ans_list)-1)] + '.json?sort=top'    #Grab Random Comment Url and Append .json to end
     #Navigate to the Comments
     r = requests.get(comment_url, headers = {'User-agent': 'Chrome'})
     reply= json.loads(r.text)
     Children = reply[1]['data']['children']
     reply_list= []
     for post in Children:
-	reply_list.append(post["data"]["body"])	#Add Comments to the List
+    reply_list.append(post["data"]["body"])    #Add Comments to the List
     if len(reply_list) == 0:
-	return "I have no clue"
+    return "I have no clue"
     #Return a Random Comment
     reply = reply_list[random.randint(0,len(reply_list)-1)]
     return reply
