@@ -1,6 +1,7 @@
 #-----------standard-imports-----------#
 import ast
 import asyncio
+import json
 import logging
 import os
 import random
@@ -15,6 +16,7 @@ from string import punctuation
 #-----------3rd-party-imports-----------#
 import discord
 from discord.ext import commands
+import requests
 
 #-----------module-imports-----------#
 from utility import ErrorHandler, rank_query, update, lvlup
@@ -24,15 +26,15 @@ logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logg
 bot = commands.Bot(command_prefix="$")
 logger = logging.getLogger(__name__)
 try:
-    DATABASE_URL = os.environ['DATABASE_URL']
+    #DATABASE_URL = os.environ['DATABASE_URL']
     configToken = str(os.environ['Token'])
     log = bot.get_channel(int(os.environ['log']))
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("If datbase is URL not found leveling system will crash!")
-    DATABASE_URL = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
-    configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xd-dYw.gyJH0ZJonpyjoRm1UttTNOrZ7_s'
-    log = bot.get_channel(616955019727732737)
+    #DATABASE_URL = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
+    configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xrllew.wwCCK07SVu5P9srNhquS27dprfU'
+    #log = bot.get_channel(616955019727732737)
     logger.info("Alternate login token, id used.")
 
 guild = discord.Guild
@@ -64,12 +66,12 @@ async def on_message(message):
     elif ctx.valid:
         await bot.process_commands(message)
     else:
-        await update(message=message)
+        #await update(message=message)
     return None
 #----------------------------------------#
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Activity(name='The Rainforests', type=discord.ActivityType.watching, status = discord.Status.idle))
+    await bot.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
     logger.info(f"Bot:{bot.user},Status = Online, Intialisation successful!")
 #----------------------------------------#
 @bot.event
@@ -82,9 +84,10 @@ async def on_member_join(member):
 #----------------------------------------#
 @bot.command(aliases=['c', 'ch'])
 async def chat(ctx, *, you):
-    await ctx.send("Under Devlopment! sorry for any inconvenience caused.")
-    logger.info("Chat command requested!")
-    
+    await ctx.send(str(grab_reply(you)))
+    #logger.info("Chat command requested!")
+
+"""  
 @bot.command(name="report")
 async def report(ctx, user, reason="Not given"):
     try:
@@ -97,6 +100,7 @@ async def report(ctx, user, reason="Not given"):
     channel = bot.get_channel(int(620203303736836096))
     await channel.send(embed=discord.Embed(title="Report",description=f"{author} reported {name}\nreason:{reason}",colour=0x39ff14))
     return None
+"""
 #----------------------------------------#
 @bot.group()
 @commands.has_permissions(administrator = True)
@@ -129,21 +133,97 @@ async def unload(ctx, extension):
     logger.info(f"unloaded Cog {extension}")
     await ctx.send(embed=discord.Embed(title="Done",description=f"unloaded {extension}", colour = 0x00eb04))
 #----------------------------------------#
-@sudo.command(name="evalm")
-async def evalpy(ctx, *, expr):
-    """evaluates by parsing a pythonic expression"""
-    str(expr)
-    expr.replace("```", "")
-    try:
-        await ctx.send(ast.literal_eval(expr))
-    except discord.errors.HTTPException:
-        await ctx.send("executed but no string to send")
-    except SyntaxError as err:
-        await ctx.send(str(err) + "\n *note: single backticks not supported*")
-    except discord.ext.commands.errors.MissingRequiredArgument:
-        await ctx.send("umm, what to process?")
-    except ValueError:
-        await ctx.send(f"i dont know what you did but,\n{expr}\nis not allowed")
+#The main function that will grab a reply
+def grab_reply(question):
+    #Navigate to the Search Reddit Url
+    r = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'})
+    answers = json.loads(r.text)	#Load the JSON file
+    Children = answers["data"]["children"]
+    ans_list= []
+    for post in Children:
+	if post["data"]["num_comments"] >= 5:	#Greater then 5 or equal  comments
+		ans_list.append (post["data"]["url"])
+    #If no results are found return "I have no idea"
+	if len(ans_list) == 0:
+		return "I have no idea"
+    #Pick A Random Post
+    comment_url=ans_list[random.randint(0,len(ans_list)-1)] + '.json?sort=top'	#Grab Random Comment Url and Append .json to end
+    #Navigate to the Comments
+    r = requests.get(comment_url, headers = {'User-agent': 'Chrome'})
+    reply= json.loads(r.text)
+    Children = reply[1]['data']['children']
+    reply_list= []
+    for post in Children:
+	reply_list.append(post["data"]["body"])	#Add Comments to the List
+    if len(reply_list) == 0:
+	return "I have no clue"
+    #Return a Random Comment
+    reply = reply_list[random.randint(0,len(reply_list)-1)]
+    return reply
+
+def insert_returns(body):
+    # insert return stmt if the last expression is a expression statement
+    if isinstance(body[-1], ast.Expr):
+        body[-1] = ast.Return(body[-1].value)
+        ast.fix_missing_locations(body[-1])
+
+    # for if statements, we insert returns into the body and the orelse
+    if isinstance(body[-1], ast.If):
+        insert_returns(body[-1].body)
+        insert_returns(body[-1].orelse)
+
+    # for with blocks, again we insert returns into the body
+    if isinstance(body[-1], ast.With):
+        insert_returns(body[-1].body)
+
+
+@sudo.command(name="eval")
+async def eval_fn(ctx, *, cmd):
+    """Evaluates input.
+    Input is interpreted as newline seperated statements.
+    If the last statement is an expression, that is the return value.
+    Usable globals:
+      - `bot`: the bot instance
+      - `discord`: the discord module
+      - `commands`: the discord.ext.commands module
+      - `ctx`: the invokation context
+      - `__import__`: the builtin `__import__` function
+    Such that `>eval 1 + 1` gives `2` as the result.
+    The following invokation will cause the bot to send the text '9'
+    to the channel of invokation and return '3' as the result of evaluating
+    >eval ```
+    a = 1 + 2
+    b = a * 2
+    await ctx.send(a + b)
+    a
+    ```
+    """
+    fn_name = "_eval_expr"
+
+    cmd = cmd.strip("` ")
+
+    # add a layer of indentation
+    cmd = "\n".join(f"    {i}" for i in cmd.splitlines())
+
+    # wrap in async def body
+    body = f"async def {fn_name}():\n{cmd}"
+
+    parsed = ast.parse(body)
+    body = parsed.body[0].body
+
+    insert_returns(body)
+
+    env = {
+        'bot': ctx.bot,
+        'discord': discord,
+        'commands': commands,
+        'ctx': ctx,
+        '__import__': __import__
+    }
+    exec(compile(parsed, filename="<ast>", mode="exec"), env)
+
+    result = (await eval(f"{fn_name}()", env))
+    await ctx.send(result)
 #----------------------------------------#
 @sudo.command(name="dbdump")
 @commands.is_owner()
@@ -156,6 +236,7 @@ async def dbdump(ctx):
         logger.exception("DB not sent, might be a fatal error")
     return None
 #----------------------------------------#
+"""
 @sudo.command(name="add_xp",aliases=["ax"])
 async def add_xp(ctx, amount, user : discord.User=None):
     """Gives xp to a user"""
@@ -188,6 +269,7 @@ async def add_xp(ctx, amount, user : discord.User=None):
         connection.commit()
         connection.close()
         await lvlup(ctx, User)
+"""
 #----------------------------------------#
 @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")
 @commands.is_owner()

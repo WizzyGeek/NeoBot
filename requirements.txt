@@ -16,3 +16,4 @@ python-dateutil
 pytz
 six
 websockets
+requests

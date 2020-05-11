@@ -1,4 +1,4 @@
-import discord
+﻿import discord
 from discord.ext import commands
 import random
 client = commands.Bot(command_prefix="$")
@@ -75,6 +75,7 @@ class utility(commands.Cog):
         ─────────────────██░
         """)
 
+"""
     @commands.command(name="aware")
     async def aware(self, ctx):
         embed = discord.Embed(title="Spreading awareness is important", description=f"many people are still unaware of the **consequences** of deforestation, to save them the least you can do is to educate people, have a look at #what-can-i-do", colour=discord.Color.dark_blue())
@@ -100,6 +101,7 @@ class utility(commands.Cog):
     async def myths(self, ctx):
         embed = discord.Embed(title="Top 10 Myths about the enviroment!", url="https://www.wwf.org.uk/updates/10-myths-about-climate-change", colour=discord.Color.dark_blue())
         await ctx.send(embed=embed)
+"""
 
 def setup(client):
     client.add_cog(utility(client))

@@ -11,12 +11,14 @@ import psycopg2
 
 logger = logging.getLogger(__name__)
 
-os.environ['DATABASE_URL'] = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
+"""
+#os.environ['DATABASE_URL'] = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
 try:
-    DATABASE_URL = os.environ['DATABASE_URL']
+    #DATABASE_URL = os.environ['DATABASE_URL']
 except Exception as err:
     logger.exception("Config vars inaccessible!")
     logger.warning("If datbase is URL not found leveling system will crash!")
+"""
 #1
 async def ErrorHandler(err, connection):
     """Handles all sql errors must. function is a coro.Needs an open connection."""
@@ -24,6 +26,7 @@ async def ErrorHandler(err, connection):
     connection.close()
     return None
 #----------------------------------------#
+"""
 async def rank_query(user):
     ##print(user)
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -43,11 +46,13 @@ async def rank_query(user):
                 return count
             else:
                 count += 1
+"""
 #----------------------------------------#
 async def IdPing(Id : int):
     ping = f"<@{str(Id)}>"
     return ping
 #----------------------------------------#
+"""
 async def ranking(range):
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
@@ -64,6 +69,7 @@ async def ranking(range):
         logger.info(user)
         users.append(user)
     return users
+"""
 
 #----------------------------------------#
 async def AppendToTuple(data, value):
@@ -73,6 +79,7 @@ async def AppendToTuple(data, value):
     Array.append(value)
     return Array
 #----------------------------------------#
+"""
 async def LevelsQuery(user):#important!!!!-
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
@@ -91,7 +98,9 @@ async def LevelsQuery(user):#important!!!!-
         await ErrorHandler(err, connection)
         logger.error("Transaction fail", exc_info=True)
         return Exception
+"""
 #----------------------------------------#
+"""
 async def RankUserQuery(rank):
     connection = sqlite3.connect("level.db")
     cursor = connection.cursor()
@@ -103,7 +112,9 @@ async def RankUserQuery(rank):
         logger.error("Transaction Failed", exc_info = True)
         return None 
     return res
+"""
 #----------------------------------------#
+"""
 async def update(message):
     connection = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = connection.cursor()
@@ -152,8 +163,9 @@ async def update(message):
         await ErrorHandler(err, connection)
         logger.critical(f"FATAL ERROR OCCURED!! Leveling system crash detected. \n ID:{id},xp:{weight}", exc_info = True)
     return None
-
+"""
 #----------------------------------------#
+"""
 async def lvlup(ctx, id):
     try:
         connection = psycopg2.connect(DATABASE_URL, sslmode='require')
@@ -179,3 +191,4 @@ async def lvlup(ctx, id):
         await ErrorHandler(err, connection)
         logger.critical(f"FATAL ERROR OCCURED, Leveling system crash detected. \n ID:{id},lvl:{lvl_end}", exc_info = True)
     return None
+"""
