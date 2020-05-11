@@ -65,8 +65,7 @@ async def on_message(message):
         return None
     elif ctx.valid:
         await bot.process_commands(message)
-    else:
-        #await update(message=message)
+        
     return None
 #----------------------------------------#
 @bot.event
