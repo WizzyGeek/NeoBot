@@ -30,7 +30,7 @@ try:
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("If datbase is URL not found leveling system will crash!")
-    configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xrllew.wwCCK07SVu5P9srNhquS27dprfU'
+    configToken = 'NjE5ODk2OTcyMTUyOTMwMzA4.XrqbXw.I3umpJzG7m1L8Yp7wDtepFi0iEg'
     logger.info("Alternate login token, id used.")
 
 guild = discord.Guild
@@ -118,8 +118,7 @@ async def unload(ctx, extension):
 #The main function that will grab a reply
 def grab_reply(question):
     #Navigate to the Search Reddit Url
-    r = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'})
-    answers = json.loads(r.text)    #Load the JSON file
+    answers = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'}).jso
     Children = answers["data"]["children"]
     ans_list= []
     for post in Children:
@@ -128,7 +127,7 @@ def grab_reply(question):
         if len(ans_list) == 0:
             return "I have no idea"
     #Pick A Random Post
-    comment_url=ans_list[random.randint(0,len(ans_list)-1)] + '.json?sort=top'    #Grab Random Comment Url and Append .json to end
+    comment_url = ans_list[random.randint(0,len(ans_list)-1)] + '.json?sort=top'    #Grab Random Comment Url and Append .json to end
     #Navigate to the Comments
     r = requests.get(comment_url, headers = {'User-agent': 'Chrome'})
     reply= json.loads(r.text)
