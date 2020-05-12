@@ -19,22 +19,19 @@ from discord.ext import commands
 import requests
 
 #-----------module-imports-----------#
-from utility import ErrorHandler, rank_query, update, lvlup
+#from utility import ErrorHandler, rank_query, update, lvlup
 
 #----------------------------------------#
 logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 bot = commands.Bot(command_prefix="$")
 logger = logging.getLogger(__name__)
 try:
-    #DATABASE_URL = os.environ['DATABASE_URL']
     configToken = str(os.environ['Token'])
     log = bot.get_channel(int(os.environ['log']))
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("If datbase is URL not found leveling system will crash!")
-    #DATABASE_URL = r"postgres://ovspnqbhsmynra:c5e500bb4fe1263ac459911d6461c02683a53ddb2467be4d48f040d7780eb041@ec2-54-197-34-207.compute-1.amazonaws.com:5432/d58tqf1iup8t6e"
     configToken = 'NjQ3MDgxMjI2OTg4OTQ1NDIw.Xrllew.wwCCK07SVu5P9srNhquS27dprfU'
-    #log = bot.get_channel(616955019727732737)
     logger.info("Alternate login token, id used.")
 
 guild = discord.Guild
@@ -83,23 +80,10 @@ async def on_member_join(member):
 #----------------------------------------#
 @bot.command(aliases=['c', 'ch'])
 async def chat(ctx, *, you):
-    await ctx.send(str(grab_reply(you)))
+    reply = str(grab_reply(you))
+    await ctx.send(reply)
     #logger.info("Chat command requested!")
 
-"""  
-@bot.command(name="report")
-async def report(ctx, user, reason="Not given"):
-    try:
-        name = user.name
-    except Exception:
-        name = user
-    author = ctx.author
-    await author.send(f"Reported {user}!\nThe staff look into your matter soon.\nDon't use this feature as spam.")
-    await ctx.message.delete()
-    channel = bot.get_channel(int(620203303736836096))
-    await channel.send(embed=discord.Embed(title="Report",description=f"{author} reported {name}\nreason:{reason}",colour=0x39ff14))
-    return None
-"""
 #----------------------------------------#
 @bot.group()
 @commands.has_permissions(administrator = True)
@@ -158,7 +142,7 @@ def grab_reply(question):
     #Return a Random Comment
     reply = reply_list[random.randint(0,len(reply_list)-1)]
     return reply
-
+#----------------------------------------#
 def insert_returns(body):
     # insert return stmt if the last expression is a expression statement
     if isinstance(body[-1], ast.Expr):
@@ -173,7 +157,7 @@ def insert_returns(body):
     # for with blocks, again we insert returns into the body
     if isinstance(body[-1], ast.With):
         insert_returns(body[-1].body)
-
+#----------------------------------------#
 
 @sudo.command(name="eval")
 async def eval_fn(ctx, *, cmd):
@@ -233,41 +217,6 @@ async def dbdump(ctx):
     except Exception:
         logger.exception("DB not sent, might be a fatal error")
     return None
-#----------------------------------------#
-"""
-@sudo.command(name="add_xp",aliases=["ax"])
-async def add_xp(ctx, amount, user : discord.User=None):
-    """Gives xp to a user"""
-    if user is None:
-        user = ctx.author
-    User = user.id
-    connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-    cursor = connection.cursor()
-    cursor.execute(f"SELECT lvl, exp FROM level WHERE usr = {User}")
-    res = cursor.fetchone()
-    if res is not None:
-        cursor.execute(f"UPDATE level SET exp=exp + {amount} WHERE usr = {User}")
-        await ctx.send(embed=discord.Embed(title="Done", description=f"Gave {user.name},{amount} experience points!", color=0x32CD32))
-        connection.commit()
-        await lvlup(ctx, User)
-        connection.close()
-        return
-    else:
-        cursor.execute("SELECT MAX(id) FROM level")
-        res = cursor.fetchone()
-        if res == None:
-            print(res)
-            res = 0
-        elif res != None:
-            if res[0] == None:
-                new_id = 1
-            else:
-                new_id = int(res[0]) + 1
-        cursor.execute(f"INSERT INTO level VALUES({new_id}, {User}, 1, {amount})")
-        connection.commit()
-        connection.close()
-        await lvlup(ctx, User)
-"""
 #----------------------------------------#
 @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")
 @commands.is_owner()

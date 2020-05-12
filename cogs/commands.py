@@ -1,4 +1,4 @@
-﻿import discord
+import discord
 from discord.ext import commands
 import random
 client = commands.Bot(command_prefix="$")
@@ -39,7 +39,7 @@ class utility(commands.Cog):
 
     @commands.command(name="graffiti", aliases=["art"])
     async def graffiti(self, ctx):
-        await ctx.send("""
+        await ctx.send("""```fix
 
         ──────────────────▒
         ─────────────────░█
@@ -73,7 +73,7 @@ class utility(commands.Cog):
         ────────────────█ღღ█
         ────────────────█ღ█░
         ─────────────────██░
-        """)
+        ```""")
 
 """
     @commands.command(name="aware")
