@@ -118,7 +118,7 @@ async def unload(ctx, extension):
 #The main function that will grab a reply
 def grab_reply(question):
     #Navigate to the Search Reddit Url
-    answers = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'}).jso
+    answers = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'}).json
     Children = answers["data"]["children"]
     ans_list= []
     for post in Children:
