@@ -6,7 +6,6 @@ import logging
 import os
 import random
 import re
-import sqlite3
 import sys
 import psycopg2
 from collections import Counter
@@ -206,17 +205,6 @@ async def eval_fn(ctx, *, cmd):
 
     result = (await eval(f"{fn_name}()", env))
     await ctx.send(result)
-#----------------------------------------#
-@sudo.command(name="dbdump")
-@commands.is_owner()
-async def dbdump(ctx):
-    db = discord.File('chatbot.sqlite')
-    try:
-        await ctx.send(file=db, embed=discord.Embed(description = "here is the chat db", color = 0x576bde))
-        logger.info("Chatbot DB Sent")
-    except Exception:
-        logger.exception("DB not sent, might be a fatal error")
-    return None
 #----------------------------------------#
 @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")
 @commands.is_owner()
