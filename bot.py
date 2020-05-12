@@ -138,7 +138,7 @@ def grab_reply(question):
     if len(reply_list) == 0:
         return "I have no clue"
     #Return a Random Comment
-    reply = reply_list[random.randint(0,len(reply_list)-1)]
+    reply = min(reply_list, key=len)
     return reply
 #----------------------------------------#
 def insert_returns(body):
