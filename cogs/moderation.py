@@ -5,7 +5,6 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import has_permissions, MissingPermissions
 
-from forbot import bot, log
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class moderation(commands.Cog):
             if (user.name, user.discriminator) == (member_name, member_discriminator):
                 await ctx.guild.unban(user)
                 await ctx.send("unbanned {user.name}", delete_after = float(5.682))
-                await log.send(embed=discord.Embed(title="Unbanned User", description = f"Unbanned {user.name} on request of {ctx.author.name}", colour = 0xffa500))
+                #await log.send(embed=discord.Embed(title="Unbanned User", description = f"Unbanned {user.name} on request of {ctx.author.name}", colour = 0xffa500))
                 return None
         else:
             await ctx.send("Sorry I couldn't find the user, try unbanning them using discord!", delete_after=6.0)
@@ -43,7 +42,7 @@ class moderation(commands.Cog):
             await ctx.send(embed=discord.Embed(title="Error", descrition=f"Failed to delete message. status code:{discord.HTTPException.status}", colour=0xff0000))
         else:
             await ctx.send(content=f"Deleted {amount} messages!", delete_after=float(5.682))
-            await log.send(embed=discord.Embed(title=f"Deleted {amount} messages", description=f"{amount} messages deleted in {str(ctx.channel)}", colour = 0x39ff14))
+            #await log.send(embed=discord.Embed(title=f"Deleted {amount} messages", description=f"{amount} messages deleted in {str(ctx.channel)}", colour = 0x39ff14))
 
 
     @commands.command(name="ban", aliases = ["banish"], description = "bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
@@ -56,7 +55,7 @@ class moderation(commands.Cog):
             return None
         else:
             await member.ban(reason=reason)
-            await log.send(embed=discord.Embed(title="Ban!", description=f"{vict} was banned by {auth}").add_field(description=f"reason : {str(reason)}",colour=0x39ff14))
+            #await log.send(embed=discord.Embed(title="Ban!", description=f"{vict} was banned by {auth}").add_field(description=f"reason : {str(reason)}",colour=0x39ff14))
             return None
 
     @commands.command(name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
@@ -65,7 +64,7 @@ class moderation(commands.Cog):
         name = member.name
         await member.kick(reason=reason)
         await ctx.send(f"kicked {name}", delete_after=float(5.682))
-        await log.send(embed=discord.Embed(title="Kick",description=f"Kicked {member.name}\nreason: {reason}",colour=0x39ff14))
+        #await log.send(embed=discord.Embed(title="Kick",description=f"Kicked {member.name}\nreason: {reason}",colour=0x39ff14))
 
     @kick.error
     @ban.error
