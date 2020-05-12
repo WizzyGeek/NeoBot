@@ -137,7 +137,7 @@ def grab_reply(question):
     if len(reply_list) == 0:
         return random.choice("i am not feeling well, ttyl?", "i dunno", "hmm", "i stupid!!", "what?", "i am lightheaded gonna take rest")
     #Return a Random Comment
-    reply = min(, key=len)
+    reply = min(reply_list, key=len)
     return reply
 #----------------------------------------#
 def insert_returns(body):
