@@ -116,7 +116,7 @@ async def unload(ctx, extension):
 #----------------------------------------#
 #The main function that will grab a reply
 def grab_reply(question):
-    fallback = random.choice("i am not feeling well, ttyl?", "i dunno", "hmm", "i stupid!!", "what?", "i am lightheaded gonna take rest")
+    fallback = random.choice(["i am not feeling well, ttyl?", "i dunno", "hmm", "i stupid!!", "what?", "i am lightheaded gonna take rest"])
     header = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18','Accept':'application/json'}
     answers = requests.get(f'https://www.reddit.com/search.json?q={question}&sort=relevance&t=all', headers = header).json()
     #print(answers)
