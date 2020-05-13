@@ -116,27 +116,25 @@ async def unload(ctx, extension):
 #----------------------------------------#
 #The main function that will grab a reply
 def grab_reply(question):
-    #Navigate to the Search Reddit Url
-    answers = requests.get('https://www.reddit.com/search.json?q=' + question + '&sort=relevance&t=all', headers = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18'}).json()
+    fallback = random.choice("i am not feeling well, ttyl?", "i dunno", "hmm", "i stupid!!", "what?", "i am lightheaded gonna take rest")
+    header = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18','Accept':'application/json'}
+    answers = requests.get(f'https://www.reddit.com/search.json?q={question}&sort=relevance&t=all', headers = header).json()
     #print(answers)
     Children = answers["data"]["children"]
     ans_list= []
     for post in Children:
         if post["data"]["num_comments"] >= 5:
-            ans_list.append (post["data"]["url"])
+            ans_list.append(post["data"]["url"])
         if len(ans_list) == 0:
-            return "I have no idea"
-    #Pick A Random Post
-    comment_url = ans_list[random.randint(0,len(ans_list)-1)] + '.json?sort=top'    #Grab Random Comment Url and Append .json to end
-    #Navigate to the Comments
-    reply = requests.get(comment_url, headers = {'User-agent': 'Chrome'}).json()
-    Children = reply[1]['data']['children']
+            print(ans_list,"\n",Children)
+            return fallback   
+    reply = requests.get(f'{ans_list[random.randint(0,len(ans_list)-1)]}.json?sort=top', headers = header).json()
+    hildren = reply[1]['data']['children']
     reply_list= []
-    for post in Children:
-        reply_list.append(post["data"]["body"])    #Add Comments to the List
+    for post in hildren:
+        reply_list.append(post["data"]["body"])
     if len(reply_list) == 0:
-        return random.choice("i am not feeling well, ttyl?", "i dunno", "hmm", "i stupid!!", "what?", "i am lightheaded gonna take rest")
-    #Return a Random Comment
+        return fallback    
     reply = min(reply_list, key=len)
     return reply
 #----------------------------------------#
