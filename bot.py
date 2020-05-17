@@ -123,6 +123,7 @@ def similar(a, b):
     return SequenceMatcher(None, a, b).ratio()
 #----------------------------------------#
 def grab_reply(question):
+    x = 0
     for results in reddit.subreddit('all').search(question): 
         id = results.id
         title = results.title
