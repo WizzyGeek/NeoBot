@@ -1,6 +1,7 @@
 #-----------standard-imports-----------#
 import ast
 import asyncio
+from difflib import SequenceMatcher
 import json
 import logging
 import os
@@ -10,6 +11,7 @@ import sys
 import psycopg2
 from collections import Counter
 from math import floor, sqrt
+import praw
 from string import punctuation
 
 #-----------3rd-party-imports-----------#
@@ -24,6 +26,9 @@ import requests
 logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 bot = commands.Bot(command_prefix="$")
 logger = logging.getLogger(__name__)
+reddit = praw.Reddit(client_id="fylDYmEUkCEfRQ",
+                     client_secret="PqVaKwRzlJSNH5OGJP57VWaoDXk",
+                     user_agent="Small-post-seacrcher")
 try:
     configToken = str(os.environ['Token'])
 except Exception as err:
@@ -114,29 +119,34 @@ async def unload(ctx, extension):
     logger.info(f"unloaded Cog {extension}")
     await ctx.send(embed=discord.Embed(title="Done",description=f"unloaded {extension}", colour = 0x00eb04))
 #----------------------------------------#
-#The main function that will grab a reply
+def similar(a, b):
+    return SequenceMatcher(None, a, b).ratio()
+#----------------------------------------#
 def grab_reply(question):
-    fallback = random.choice(["i am not feeling well, ttyl?", "i dunno", "hmm", "i stupid!!", "what?", "i am lightheaded gonna take rest"])
-    header = {'User-agent':'Small-Discord-chatbot-version-2.0.1.18','Accept':'application/json'}
-    answers = requests.get(f'https://www.reddit.com/search.json?q={question}&sort=relevance&t=all', headers = header).json()
-    #print(answers)
-    Children = answers["data"]["children"]
-    ans_list= []
-    for post in Children:
-        if post["data"]["num_comments"] >= 5:
-            ans_list.append(post["data"]["url"])
-        if len(ans_list) == 0:
-            print(ans_list,"\n",Children)
-            return fallback   
-    reply = requests.get(f'{ans_list[random.randint(0,len(ans_list)-1)]}.json?sort=top', headers = header).json()
-    hildren = reply[1]['data']['children']
-    reply_list= []
-    for post in hildren:
-        reply_list.append(post["data"]["body"])
-    if len(reply_list) == 0:
-        return fallback    
-    reply = min(reply_list, key=len)
-    return reply
+    for results in reddit.subreddit('all').search(question): 
+        id = results.id
+		title = results.title
+		comments = results.num_comments
+		if comments > 10 and similar(question,title) > .6:  
+			submission_ids.append(id)
+			x += 1
+		if x >=10: 
+			break
+	if len(submission_ids) == 0:  
+		return "I have no idea"
+	submission = reddit.submission(id=submission_ids[random.randint(0,len(submission_ids)-1)])  
+	comment_list=[] 
+	x = 0
+	for top_level_comment in submission.comments: 
+		body = top_level_comment.body
+		comment_list.append(body)  
+		x += 1
+		if x >=5:  
+			break
+				
+	if len(comment_list) == 0:  
+		return "I have no clue"
+	return comment_list[random.randint(0,len(comment_list)-1)]
 #----------------------------------------#
 def insert_returns(body):
     # insert return stmt if the last expression is a expression statement

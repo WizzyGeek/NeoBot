@@ -1,6 +1,7 @@
 discord.py
 pandas
 psycopg2
+praw
 PyNaCl
 aiohttp
 async-timeout

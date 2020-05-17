@@ -20,7 +20,6 @@ class Help(commands.Cog):
         embed.add_field(name="`$kick`", value="alias: begone \nKicks the user.```$kick @example#0000 optional reason```")
         embed.add_field(name="`$ban`", value="alias: banish\nBans the user similar to kick")
         embed.add_field(name="`$unban`", value="Unbans a user. Requires users name used as ```$unban example#0000```")
-        embed.add_field(name="`$report`", value="See someone violating rules?```$report example#0000 reason```")
         
         embed.add_field(name="`$8ball`", value="alias: 8b\n usage: ```$8b test?```")
         """
