@@ -125,28 +125,27 @@ def similar(a, b):
 def grab_reply(question):
     for results in reddit.subreddit('all').search(question): 
         id = results.id
-		title = results.title
-		comments = results.num_comments
-		if comments > 10 and similar(question,title) > .6:  
-			submission_ids.append(id)
-			x += 1
-		if x >=10: 
-			break
-	if len(submission_ids) == 0:  
-		return "I have no idea"
-	submission = reddit.submission(id=submission_ids[random.randint(0,len(submission_ids)-1)])  
-	comment_list=[] 
-	x = 0
-	for top_level_comment in submission.comments: 
-		body = top_level_comment.body
-		comment_list.append(body)  
-		x += 1
-		if x >=5:  
-			break
-				
-	if len(comment_list) == 0:  
-		return "I have no clue"
-	return comment_list[random.randint(0,len(comment_list)-1)]
+        title = results.title
+        comments = results.num_comments
+        if comments > 10 and similar(question,title) > .6:  
+            submission_ids.append(id)
+            x += 1
+        if x >=10: 
+            break
+    if len(submission_ids) == 0:  
+        return "I have no idea"
+    submission = reddit.submission(id=submission_ids[random.randint(0,len(submission_ids)-1)])  
+    comment_list=[] 
+    x = 0
+    for top_level_comment in submission.comments: 
+        body = top_level_comment.body
+        comment_list.append(body)  
+        x += 1
+        if x >=5:  
+            break
+    if len(comment_list) == 0:  
+        return "I have no clue"
+    return comment_list[random.randint(0,len(comment_list)-1)]
 #----------------------------------------#
 def insert_returns(body):
     # insert return stmt if the last expression is a expression statement
