@@ -124,6 +124,7 @@ def similar(a, b):
 #----------------------------------------#
 def grab_reply(question):
     x = 0
+    submission_ids = []
     for results in reddit.subreddit('all').search(question): 
         id = results.id
         title = results.title
