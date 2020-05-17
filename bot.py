@@ -129,10 +129,10 @@ def grab_reply(question):
         id = results.id
         title = results.title
         comments = results.num_comments
-        if comments > 10 and similar(question,title) > .6:  
+        if comments > 5 and similar(question,title) > .75:  
             submission_ids.append(id)
             x += 1
-        if x >=10: 
+        if x >=20: 
             break
     if len(submission_ids) == 0:  
         return "I have no idea"
