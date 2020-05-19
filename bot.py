@@ -129,7 +129,7 @@ def grab_reply(question):
         id = results.id
         title = results.title
         comments = results.num_comments
-        if comments > 5 and similar(question,title) > .75:  
+        if comments > 5 and similar(question,title) > .6:  
             submission_ids.append(id)
             x += 1
         if x >=20: 
