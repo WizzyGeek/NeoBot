@@ -234,8 +234,8 @@ class Fun:
         else:
             for i in range(dice):
                 embed.add_field(title = f"Die {i+1}", desc=str(random.randint(1, faces)))
-        finally:
-            await ctx.send(embed=embed)
+      
+        await ctx.send(embed=embed)
     #----------------------------------------#
     @commands.command(pass_context=True)
     async def textflip(self, ctx, *, msg):
