@@ -261,10 +261,6 @@ class Fun:
     async def space(self, ctx, spaces=1, *, msg):
         """Add n spaces between each letter. Ex: [p]space 2 thicc"""
         await ctx.message.delete()
-        spaces = spaces
-        msg = msg
-        else:
-            spaces = ' '
         spaced_message = spaces.join(list(msg))
         await ctx.send(spaced_message)
         
