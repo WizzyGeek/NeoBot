@@ -22,7 +22,7 @@ except Exception as err:
 
 #1
 async def ErrorHandler(err, connection):
-    """Handles all sql errors must. function is a coro.Needs an open connection."""
+    Handles all sql errors must. function is a coro.Needs an open connection.
     connection.commit()
     connection.close()
     return None
