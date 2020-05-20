@@ -266,7 +266,7 @@ class Fun(commands.Cog):
     @space.error
     async def space_error(ctx, err):
         if isinstance(err, commands.MissingRequiredArgument):
-            ctx.send("Give me a string (text) to space out.")
+            ctx.send("Please give me a string (text) to space out.", delete_after=10.0)
     #----------------------------------------#
      
 
