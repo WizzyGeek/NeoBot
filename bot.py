@@ -91,7 +91,7 @@ class Bot(commands.Bot):
         return self.prefixes.get(guild_id, ['$', '.'])
     
     async def set_guild_prefixes(self, guild, prefixes):
-           if not prefixes:
+        if not prefixes:
             c.execute('UPDATE prefix SET prefix=? WHERE id=?', (None, guild.id))
             conn.commit()
             self.prefixes[guild.id] = prefixes
