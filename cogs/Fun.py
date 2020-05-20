@@ -205,7 +205,7 @@ class Fun:
         if isinstance(err, commands.MissingRequiredArgument):
             ctx.send("Provide a sting to search.")
     #----------------------------------------#            
-    @commands.command(pass_context=True, aliases="novowels")
+    @commands.command(pass_context=True, aliases=["novowels"])
     async def vowelreplace(self, ctx, replace, *, msg):
         """Replaces all vowels in a word with a letter"""
         result = ""
