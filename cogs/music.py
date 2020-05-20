@@ -22,6 +22,8 @@ import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
 
+if not discord.opus.is_loaded():
+    discord.opus.load_opus('libopus.so')
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
 
