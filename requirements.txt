@@ -18,3 +18,4 @@ pytz
 six
 websockets
 requests
+youtube_dl
