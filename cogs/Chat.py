@@ -10,7 +10,7 @@ class Chat(commands.Cog):
     def __init__(self, client):
         self.client = client
         
-    @bot.command(aliases=['c', 'ch'])
+    @commands.command(aliases=['c', 'ch'])
     async def chat(self, ctx, *, you):
         reply = str(grab_reply(you))
         await ctx.send(reply)

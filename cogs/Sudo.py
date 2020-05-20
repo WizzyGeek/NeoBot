@@ -5,7 +5,7 @@ class Sudo(commands.Cog):
     def __init__(self, client):
         self.client = client
     #----------------------------------------#
-    @comands.group()
+    @commands.group()
     @commands.has_permissions(administrator = True)
     async def sudo(self, ctx):
         logging.info(f"elevated privilage use detected, USER : {ctx.author.name}")
