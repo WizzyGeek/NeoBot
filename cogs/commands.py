@@ -1,8 +1,5 @@
 import discord
 from discord.ext import commands
-import random
-
-
 
 class utility(commands.Cog):
     def __init__(self, client):
@@ -11,8 +8,6 @@ class utility(commands.Cog):
     @commands.command(name="ping", aliases=["latency", "lag"])
     async def ping(self, ctx):
         await ctx.send('Pong! {0}'.format(client.latency))
-
-    
 
 def setup(bot):
     bot.add_cog(utility(bot))

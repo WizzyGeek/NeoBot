@@ -358,19 +358,21 @@ class Music(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def _pause(self, ctx: commands.Context):
         """Pauses the currently playing song."""
-
         if not ctx.voice_state.is_playing and ctx.voice_state.voice.is_playing():
             ctx.voice_state.voice.pause()
             await ctx.message.add_reaction('⏯')
+        else:
+            ctx.send("Song has already been paused.")
 
     @commands.command(name='resume')
     @commands.has_permissions(manage_guild=True)
     async def _resume(self, ctx: commands.Context):
         """Resumes a currently paused song."""
-
         if not ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
             ctx.voice_state.voice.resume()
             await ctx.message.add_reaction('⏯')
+        else:
+            ctx.send("Song has already been resumed.")
 
     @commands.command(name='stop')
     @commands.has_permissions(manage_guild=True)
@@ -486,6 +488,7 @@ class Music(commands.Cog):
             else:
                 song = Song(source)
                 await ctx.voice_state.songs.put(song)
+                ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else state.next())
                 await ctx.send('Enqueued {}'.format(str(source)))
 
     @_join.before_invoke
