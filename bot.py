@@ -87,7 +87,7 @@ class Bot(commands.Bot):
         proxy_msg.guild = guild
         return local_inject(self, proxy_msg)
     
-     def get_raw_guild_prefixes(self, guild_id):
+    def get_raw_guild_prefixes(self, guild_id):
         return self.prefixes.get(guild_id, ['$', '.'])
     
     async def set_guild_prefixes(self, guild, prefixes):
