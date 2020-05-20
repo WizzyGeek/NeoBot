@@ -222,12 +222,13 @@ class Fun(commands.Cog):
         """Roll dice. Optionally input # of dice and # of sides. Ex: [p]dice 5 12"""
         res = []
         embed = discord.Embed(title="**Dice  rolled..**")
+        dice += 1
         if faces < 9:
-            for i in range(dice):
-                embed.add_field(title = f"Die {i+1}", desc=f'{self.regionals[random.randint(1, faces)]}')
+            for i in range(1, dice):
+                embed.add_field(title = f"Die {i}", desc=f'{self.regionals[random.randint(1, faces)]}')
         else:
-            for i in range(dice):
-                embed.add_field(title = f"Die {i+1}", desc=str(random.randint(1, faces)))
+            for i in range(1, dice):
+                embed.add_field(title = f"Die {i}", desc=str(random.randint(1, faces)))
       
         await ctx.send(embed=embed)
     #----------------------------------------#
@@ -240,7 +241,7 @@ class Fun(commands.Cog):
                 result += self.text_flip[char]
             else:
                 result += char
-        await ctx.message.edit(content=result[::-1])  # slice reverses the string
+        await ctx.send(content=result[::-1])  # slice reverses the string
     #----------------------------------------#
     @commands.command(pass_context=True, aliases=['emojify'])
     async def regional(self, ctx, *, msg):
