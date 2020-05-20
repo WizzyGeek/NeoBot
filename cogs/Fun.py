@@ -4,11 +4,8 @@ import json
 
 from discord.ext import commands
 import discord
-from cogs.utils.checks import embed_perms, cmd_prefix_len, find_channel
-from cogs.utils.config import get_config_value, write_config_value
 
 '''Module for fun/meme commands'''
-
 
 class Fun:
     def __init__(self, bot):
@@ -57,7 +54,6 @@ class Fun:
             ]
 
     emoji_dict = {
-    # these arrays are in order of "most desirable". Put emojis that most convincingly correspond to their letter near the front of each array.
         'a': ['🇦', '🅰', '🍙', '🔼', '4⃣'],
         'b': ['🇧', '🅱', '8⃣'],
         'c': ['🇨', '©', '🗜'],
@@ -96,14 +92,6 @@ class Fun:
         '9': ['9⃣'],
         '?': ['❓'],
         '!': ['❗', '❕', '⚠', '❣'],
-
-        # emojis that contain more than one letter can also help us react
-        # letters that we are trying to replace go in front, emoji to use second
-        #
-        # if there is any overlap between characters that could be replaced,
-        # e.g. 💯 vs 🔟, both could replace "10",
-        # the longest ones & most desirable ones should go at the top
-        # else you'll have "100" -> "🔟0" instead of "100" -> "💯".
         'combination': [['cool', '🆒'],
                         ['back', '🔙'],
                         ['soon', '🔜'],
@@ -177,24 +165,30 @@ class Fun:
                     react_me = react_me.replace(char, Fun.emoji_dict[char][0])
         return react_me
     #----------------------------------------#
-    @commands.command(pass_context=True, aliases=['8ball', '8b'])
-    async def ball8(self, ctx, *, msg: str):
-        """Let the 8ball decide your fate. Ex: [p]8ball Will I get good?"""
-        answer = random.randint(0, 19)
-        if embed_perms(ctx.message):
-            if answer < 10:
-                color = 0x008000
-            elif 10 <= answer < 15:
-                color = 0xFFD700
-            else:
-                color = 0xFF0000
-            em = discord.Embed(color=color)
-            em.add_field(name='\u2753 Question', value=msg)
-            em.add_field(name='\ud83c\udfb1 8ball', value=self.ball[answer], inline=False)
-            await ctx.send(content=None, embed=em)
-            await ctx.message.delete()
-        else:
-            await ctx.send('\ud83c\udfb1 ``{}``'.format(random.choice(self.ball)))
+    @commands.command(aliases=['8ball', '8b', "luckyball"])
+    async def _bball(self, ctx, *, question):
+        ans = ['● It is certain.',
+            '● It is decidedly so.',
+            '● Without a doubt.',
+            '● Yes - definitely.',
+            '● You may rely on it.',
+            '● As I see it, yes.',
+            '● Most likely.',
+            '● Outlook good.',
+            '● Yes.',
+            '● Signs point to yes.',
+            '● Reply hazy, try again.',
+            '● Ask again later.',
+            '● Better not tell you now.',
+            '● Cannot predict now.',
+            '● Concentrate and ask again.',
+            '● Don\'t count on it.',
+            '● My reply is no.',
+            '● My sources say no.',
+            '● Outlook not so good.',
+            '● Very doubtful.',
+            ]
+        await ctx.send(f"{random.choice(ans)}")
     #----------------------------------------#
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: str):
@@ -248,7 +242,7 @@ class Fun:
                 result += char
         await ctx.message.edit(content=result[::-1])  # slice reverses the string
     #----------------------------------------#
-    @commands.command(pass_context=True)
+    @commands.command(pass_context=True, aliases=['emojify'])
     async def regional(self, ctx, *, msg):
         """Replace letters with regional indicator emojis"""
         await ctx.message.delete()
@@ -256,6 +250,11 @@ class Fun:
         regional_list = [self.regionals[x.lower()] if x.isalnum() or x in ["!", "?"] else x for x in msg]
         regional_output = '\u200b'.join(regional_list)
         await ctx.send(regional_output)
+        
+    @regional.error
+    async def regional_error(ctx, err):
+        if isinstance(err, commands.MissingRequiredArgument):
+            ctx.send("Give me a string (text) to emojify.")
     #----------------------------------------#
     @commands.command(pass_context=True)
     async def space(self, ctx, spaces=1, *, msg):
@@ -269,91 +268,6 @@ class Fun:
         if isinstance(err, commands.MissingRequiredArgument):
             ctx.send("Give me a string (text) to space out.")
     #----------------------------------------#
-    # given String react_me, return a list of emojis that can construct the string with no duplicates (for the purpose of reacting)
-    # TODO make it consider reactions already applied to the message
-    @commands.command(pass_context=True, aliases=['r'])
-    async def react(self, ctx, msg: str, msg_id="last", channel="current", prefer_combine: bool = False):
-        """Add letter(s) as reaction to previous message. Ex: [p]react hot"""
-        await ctx.message.delete()
-        msg = msg.lower()
-
-        msg_id = None if not msg_id.isdigit() else int(msg_id)
-
-        limit = 25 if msg_id else 1
-
-        reactions = []
-        non_unicode_emoji_list = []
-        react_me = ""  # this is the string that will hold all our unicode converted characters from msg
-
-        # replace all custom server emoji <:emoji:123456789> with "<" and add emoji ids to non_unicode_emoji_list
-        char_index = 0
-        emotes = re.findall(r"<a?:(?:[a-zA-Z0-9]+?):(?:[0-9]+?)>", msg)
-        react_me = re.sub(r"<a?:([a-zA-Z0-9]+?):([0-9]+?)>", "", msg)
-        
-        for emote in emotes:
-            reactions.append(discord.utils.get(self.bot.emojis, id=int(emote.split(":")[-1][:-1])))
-            non_unicode_emoji_list.append(emote)
-            
-        
-        if Fun.has_dupe(non_unicode_emoji_list):
-            return await ctx.send(self.bot.bot_prefix + "You requested that I react with at least two of the exact same specific emoji. I'll try to find alternatives for alphanumeric text, but if you specify a specific emoji must be used, I can't help.")
-
-        react_me_original = react_me  # we'll go back to this version of react_me if prefer_combine is false but we can't make the reaction happen unless we combine anyway.
-
-        if Fun.has_dupe(react_me):  # there's a duplicate letter somewhere, so let's go ahead try to fix it.
-            if prefer_combine:  # we want a smaller reaction string, so we'll try to combine anything we can right away
-                react_me = Fun.replace_combos(react_me)
-            react_me = Fun.replace_letters(react_me)
-            print(react_me)
-            if Fun.has_dupe(react_me):  # check if we were able to solve the dupe
-                if not prefer_combine:  # we wanted the most legible reaction string possible, even if it was longer, but unfortunately that's not possible, so we're going to combine first anyway
-                    react_me = react_me_original
-                    react_me = Fun.replace_combos(react_me)
-                    react_me = Fun.replace_letters(react_me)
-                    if Fun.has_dupe(react_me):  # this failed too, so there's really nothing we can do anymore.
-                        return await ctx.send(self.bot.bot_prefix + "Failed to fix all duplicates. Cannot react with this string.")
-                else:
-                    return await ctx.send(self.bot.bot_prefix + "Failed to fix all duplicates. Cannot react with this string.")
-                    
-
-            lt_count = 0
-            for char in react_me:
-                if char not in "0123456789":  # these unicode characters are weird and actually more than one character.
-                    if char != '⃣':  # </3
-                        reactions.append(char)
-                else:
-                    reactions.append(self.emoji_dict[char][0])
-        else:  # probably doesn't matter, but by treating the case without dupes seperately, we can save some time
-            lt_count = 0
-            for char in react_me:
-                if char in "abcdefghijklmnopqrstuvwxyz0123456789!?":
-                    reactions.append(self.emoji_dict[char][0])
-                else:
-                    reactions.append(char)
-
-        if channel == "current":
-            async for message in ctx.message.channel.history(limit=limit):
-                if (not msg_id and message.id != ctx.message.id) or (msg_id == message.id):
-                    for i in reactions:
-                        try:
-                            await message.add_reaction(i)
-                        # :ok_hand: lit fam :ok_hand:
-                        except:
-                            pass
-        else:
-            found_channel = find_channel(ctx.guild.channels, channel)
-            if not found_channel:
-                found_channel = find_channel(self.bot.get_all_channels(), channel)
-            if found_channel:
-                async for message in found_channel.history(limit=limit):
-                    if (not msg_id and message.id != ctx.message.id) or (msg_id == message.id):
-                        for i in reactions:
-                            try:
-                                await message.add_reaction(i)
-                            except:
-                                pass
-            else:
-                await ctx.send(self.bot.bot_prefix + "Channel not found.")
      
 
 def setup(bot):
