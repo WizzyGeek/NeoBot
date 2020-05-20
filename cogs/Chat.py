@@ -12,7 +12,7 @@ class Chat(commands.Cog):
         
     @commands.command(aliases=['c', 'ch'])
     async def chat(self, ctx, *, you):
-        reply = str(grab_reply(you))
+        reply = str(Chat.grab_reply(you))
         await ctx.send(reply)
         #logger.info("Chat command requested!")
     #----------------------------------------#
@@ -31,7 +31,7 @@ class Chat(commands.Cog):
             id = results.id
             title = results.title
             comments = results.num_comments
-            if comments > 5 and similar(question,title) > .6:  
+            if comments > 5 and Chat.similar(question,title) > .6:  
                 submission_ids.append(id)
                 x += 1
             if x >=20: 
