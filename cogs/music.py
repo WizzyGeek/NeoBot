@@ -364,7 +364,7 @@ class Music(commands.Cog):
             ctx.voice_state.voice.pause()
             await ctx.message.add_reaction('⏯')
         else:
-            ctx.send("Song has already been paused.")
+            await ctx.send("Song has already been paused.")
 
     @commands.command(name='resume')
     @commands.has_permissions(manage_guild=True)
@@ -374,7 +374,7 @@ class Music(commands.Cog):
             ctx.voice_state.voice.resume()
             await ctx.message.add_reaction('⏯')
         else:
-            ctx.send("Song has already been resumed.")
+            await ctx.send("Song has already been resumed.")
 
     @commands.command(name='stop')
     @commands.has_permissions(manage_guild=True)
@@ -490,7 +490,7 @@ class Music(commands.Cog):
             else:
                 song = Song(source)
                 await ctx.voice_state.songs.put(song)
-                ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else state.next())
+                #ctx.voice_client.play(song, after=lambda e: print('Player error: %s' % e) if e else ctx.voice_state.next())
                 await ctx.send('Enqueued {}'.format(str(source)))
 
     @_join.before_invoke
