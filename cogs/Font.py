@@ -172,3 +172,6 @@ class Font(commands.Cog):
     @commands.command(name='smallcaps', aliases=['sc'])
     async def _smallcaps(self, ctx, *, sentence: str):
         await ctx.send(smallcaps(sentence))
+        
+def setup(bot):
+    bot.add_cog(Font(bot))

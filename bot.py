@@ -79,7 +79,7 @@ class Bot(commands.Bot):
         elif isinstance(error, commands.CommandInvokeError):
             print(f'In {ctx.command.qualified_name}:', file=sys.stderr)
             traceback.print_tb(error.original.__traceback__)
-            print(f'{error.original.__class__.__name__}: {error.original}', file=sys.stderr)
+            print(f'{error.original.__class__.__name__}: {error.original}')
             
     async def on_ready(self):
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))

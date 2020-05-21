@@ -7,7 +7,7 @@ class Help(commands.Cog):
     
     @commands.command(name="help", aliases=['welp','jelp','gelp','yelp'], description = "Welp?")
     async def welp(self, ctx):
-        ctx.send("under construction")
+        await ctx.send("under construction")
         
 def setup(bot):
     bot.remove_command("help")
