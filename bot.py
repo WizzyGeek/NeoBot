@@ -84,7 +84,7 @@ class Bot(commands.Bot):
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(f"Bot:{self.user},Status = Online, Intialisation successful!")
         for server in self.guilds:
-            c.execute("INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFILCT DO NOTHING")
+            c.execute(f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFILCT DO NOTHING")
             conn.commit()
         
     def get_guild_prefixes(self, guild, *, local_inject=_prefix_callable):
