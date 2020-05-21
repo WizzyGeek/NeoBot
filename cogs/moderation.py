@@ -48,8 +48,8 @@ class moderation(commands.Cog):
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True) 
     async def kick(self, ctx, user: discord.Member, *, reason: str = "No reason specified"):
-        server = ctx.message.server
-        log_channel = discord.utils.get(ctx.message.server.channels, id = 709339678863786084)
+        guild = ctx.message.guild
+        log_channel = discord.utils.get(ctx.message.guild.channels, id = 709339678863786084)
         userID = (user.id)
         embed = discord.Embed(title="Member Kicked", color = 0x3C80E2)
         embed.add_field(name="Member", value="{} ".format(user) + "(<@{}>)".format(userID), inline=True)
@@ -79,8 +79,8 @@ class moderation(commands.Cog):
     @commands.command(name="ban", aliases = ["banish"], description = "bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True) 
     async def ban(self, ctx, user: discord.Member, *, reason: str = "Not given"):
-        server = ctx.message.server
-        log_channel = discord.utils.get(ctx.message.server.channels, id = 709339678863786084)
+        guild = ctx.message.guild
+        log_channel = discord.utils.get(ctx.message.guild.channels, id = 709339678863786084)
         userID = (user.id)
         embed = discord.Embed(title="Member Banned", color = 0x3C80E2)
         embed.add_field(name="Member", value="{} ".format(user) + "(<@{}>)".format(userID), inline=True)
@@ -159,27 +159,27 @@ class moderation(commands.Cog):
             
     @commands.command(pass_context=True)
     @commands.has_permissions(administrator=True)
-    async def serverinfo(self, ctx):
-        embed = discord.Embed(title="{}'s info".format(ctx.message.server.name), description="Information on the server", color=0xcc0000)
-        embed.add_field(name="Server Name", value=ctx.message.server.name, inline=True)
-        embed.add_field(name="Server ID", value=ctx.message.server.id, inline=True)
-        embed.add_field(name="Members", value=len(ctx.message.server.members))
-        embed.add_field(name="Owner", value=ctx.message.server.owner, inline=True)
-        embed.add_field(name="Role Count", value=len(ctx.message.server.roles))
+    async def guildinfo(self, ctx):
+        embed = discord.Embed(title="{}'s info".format(ctx.message.guild.name), description="Information on the guild", color=0xcc0000)
+        embed.add_field(name="guild Name", value=ctx.message.guild.name, inline=True)
+        embed.add_field(name="guild ID", value=ctx.message.guild.id, inline=True)
+        embed.add_field(name="Members", value=len(ctx.message.guild.members))
+        embed.add_field(name="Owner", value=ctx.message.guild.owner, inline=True)
+        embed.add_field(name="Role Count", value=len(ctx.message.guild.roles))
 
-        servMade = ctx.message.server.created_at
+        servMade = ctx.message.guild.created_at
         servMade2 = servMade.strftime("%B %d, %Y %I:%M %p")
         embed.add_field(name="Created", value="{}".format(servMade2))
 
-        embed.set_thumbnail(url=ctx.message.server.icon_url)
+        embed.set_thumbnail(url=ctx.message.guild.icon_url)
         embed.set_footer(text="Requested by {}".format(ctx.message.author))
         embed.timestamp = datetime.utcnow()
         await self.bot.say(embed=embed)
-        print("Server Info requested")
+        print("guild Info requested")
         await self.bot.delete_message(ctx.message)
         
-    @serverinfo.error
-    async def serverinfo_error(self, error, ctx):
+    @guildinfo.error
+    async def guildinfo_error(self, error, ctx):
         if isinstance(error, discord.ext.commands.CheckFailure):
             userID = (ctx.message.author.id)
             await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to perform this action**" % (userID))
