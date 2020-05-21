@@ -13,7 +13,7 @@ class moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @command.command(name="warn")
+    @commands.command(name="warn")
     @commands.has_permission(kick_members=True)
     async def warn(sel, ctx, user: discord.Member, reason : str = "No reason"):
         await user.send(f"You sere warned in {user.guild.name} for {reason}")
