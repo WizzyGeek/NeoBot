@@ -31,7 +31,7 @@ class Chat(commands.Cog):
             id = results.id
             title = results.title
             comments = results.num_comments
-            if comments > 5 and Chat.similar(question,title) > .6:  
+            if comments > 1 and Chat.similar(question,title) > .8:  
                 submission_ids.append(id)
                 x += 1
             if x >=20: 

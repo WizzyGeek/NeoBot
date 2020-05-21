@@ -1,20 +1,34 @@
 import logging
 import os
+import psycopg2
+import datetime
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import has_permissions, MissingPermissions
 
 
 logger = logging.getLogger(__name__)
+conn = psycopg2.connect(DATABASE_URL)
+c = conn.cursor()
+
 
 class moderation(commands.Cog):
-
     def __init__(self, bot):
         self.bot = bot
+    
+    @command.command(name="warn")
+    @commands.has_permission(kick_members=True)
+    async def warn(sel, ctx, user: discord.Member, reason : str = "No reason"):
+        await user.send(f"You sere warned in {user.guild.name} for {reason}")
+        log = self.bot.get_channel(709339678863786084)
+        embed=discord.Embed(title="Member Warn", description=f"{user.mention} was warned for {reason}", color=0xfe0146)
+        embed.add_field(name="Responsible Moderator", value=f"{ctx.author.mention}", inline=True)
+        await log.send(embed=embed)
+        await ctx.send(f"Warned {user.name}!", delete_after=10.0)
+        
 
     @commands.command(name="unban", aliases=["removeban"], description="A command to unban single user using dicriminator and name eg: $unban example#0000")
-    @has_permissions(ban_members=True)
+    @commandshas_permissions(ban_members=True)
     async def unban(self, ctx, *,member):
         banned_ppl = await ctx.guild.bans()
         member_name,member_discriminator = member.split('#')
