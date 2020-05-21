@@ -65,11 +65,11 @@ class moderation(commands.Cog):
         
     @kick.error
     async def kick_error(self, error, ctx):
-        if isinstance(error, discord.ext.commands.BadArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             userID = (ctx.message.author.id)
             botMessage = await self.bot.send(ctx.message.channel,"<@%s>: **Sorry, I couldn't find this user**" % (userID), delete_after=5.0)
             await self.bot.delete_message(ctx.message)              
-        elif isinstance(error, discord.ext.commands.CheckFailure): # Message to the user if they don't have perms
+        elif isinstance(error, commands.MissingPermissions): # Message to the user if they don't have perms
             userID = (ctx.message.author.id)
             await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to kick users!**" % (userID), delete_after=5.0)
             await self.bot.delete_message(ctx.message)
@@ -96,11 +96,11 @@ class moderation(commands.Cog):
         
     @ban.error
     async def ban_error(self, error, ctx):
-        if isinstance(error, discord.ext.commands.BadArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             userID = (ctx.message.author.id)
             botMessage = await self.bot.send(ctx.message.channel,"<@%s>: **Sorry, I couldn't find this user**" % (userID), delete_after=5.0)
             await self.bot.delete_message(ctx.message)              
-        elif isinstance(error, discord.ext.commands.CheckFailure): # Message to the user if they don't have perms
+        elif isinstance(error, commands.MissingPermissions):
             userID = (ctx.message.author.id)
             await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to ban users!**" % (userID), delete_after=5.0)
             await self.bot.delete_message(ctx.message)
@@ -108,11 +108,10 @@ class moderation(commands.Cog):
             raise error
             
             
-    @ban.error
     @clear.error
     @unban.error
     async def permit_error(self, error, ctx):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, commands.MissingPermissions):
             await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!")
         else:
             return None
