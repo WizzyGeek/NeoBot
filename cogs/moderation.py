@@ -102,7 +102,7 @@ class moderation(commands.Cog):
             await self.bot.delete_message(ctx.message)              
         elif isinstance(error, commands.MissingPermissions):
             userID = (ctx.message.author.id)
-            await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to ban users!**" % (userID), delete_after=5.0)
+            await self.bot.send(ctx.message.author,"<@%s>: **I don't have permission to ban users!**" % (userID), delete_after=5.0)
             await self.bot.delete_message(ctx.message)
         else:
             raise error
