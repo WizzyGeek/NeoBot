@@ -65,7 +65,7 @@ class Bot(commands.Bot):
         for filename in os.listdir('./cogs'):
             if filename.endswith('.py') and filename != '__init__.py':
                 try:
-                    bot.load_extension(f'cogs.{filename[:-3]}')
+                    self.load_extension(f'cogs.{filename[:-3]}')
                 except:
                     logger.exception(f"failed to initialise cog: {filename}")
                 logger.info(f"Initialized cog: {filename}")
@@ -82,7 +82,7 @@ class Bot(commands.Bot):
             print(f'{error.original.__class__.__name__}: {error.original}', file=sys.stderr)
             
     async def on_ready():
-        await bot.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
+        await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(f"Bot:{bot.user},Status = Online, Intialisation successful!")
         
     def get_guild_prefixes(self, guild, *, local_inject=_prefix_callable):
@@ -112,7 +112,7 @@ class Bot(commands.Bot):
         if member.Guid.id == 583689248117489675:
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server!verify yoursel, read the rules and get some roles.')
-            channel = bot.get_channel(config["welchannel"])
+            channel = self.get_channel(config["welchannel"])
             embed = discord.Embed(title = "Welcome!", description = f"welcome to the server {member.mention}! everyone please make them feel welcomed!")
             await channel.send(embed=embed, content=None)
         else:
