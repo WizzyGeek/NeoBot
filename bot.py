@@ -56,7 +56,7 @@ class Bot(commands.Bot):
     def __init__(self, token):
         super().__init__(command_prefix=_prefix_callable,
                          description="Assassinations's discord bot")
-        c.execute('SELECT * FROM prefix WHERE 1')#to work
+        c.execute('SELECT * FROM prefix')
         prefix_rows = c.fetchall()
         pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
         self.prefixes = {int(id): prefixes.split(',') for (id, prefixes) in pre.items()}
