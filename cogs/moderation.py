@@ -1,6 +1,5 @@
 import logging
 import os
-import psycopg2
 import datetime
 
 import discord
@@ -8,8 +7,6 @@ from discord.ext import commands
 
 
 logger = logging.getLogger(__name__)
-conn = psycopg2.connect(DATABASE_URL)
-c = conn.cursor()
 
 
 class moderation(commands.Cog):
