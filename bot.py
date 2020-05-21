@@ -77,9 +77,8 @@ class Bot(commands.Bot):
         elif isinstance(error, commands.DisabledCommand):
             await ctx.author.send('Sorry. This command is disabled and cannot be used.')
         elif isinstance(error, commands.CommandInvokeError):
-            print(f'In {ctx.command.qualified_name}:', file=sys.stderr)
+            logger.exception("Fatal Error occured:")
             traceback.print_tb(error.original.__traceback__)
-            print(f'{error.original.__class__.__name__}: {error.original}')
             
     async def on_ready(self):
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
