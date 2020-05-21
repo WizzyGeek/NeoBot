@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands
 
-from bot import korosensei
+#from bot import korosensei
 
 class Prefix(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.prefixes = korosensei.prefixes
+        self.prefixes = bot.prefixes
         
     @commands.command(name="prefix")
     async def prefix(self, ctx, prefix=None):

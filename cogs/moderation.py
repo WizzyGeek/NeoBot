@@ -38,35 +38,76 @@ class moderation(commands.Cog):
             log.info(f"Purge request failed due to permissions, channel:{str(ctx.channel)}")
             await ctx.send(embed=discord.Embed(title="Failed",description="I don't have delete messages permission, please check!", colour = 0xffa500))
         except discord.HTTPException:
-            log.warning(f"HTTPException caught status code : {discord.HTTPException.status}", exc_info = True)
+            log.warning(f"HTTPException caught, status code : {discord.HTTPException.status}", exc_info = True)
             await ctx.send(embed=discord.Embed(title="Error", descrition=f"Failed to delete message. status code:{discord.HTTPException.status}", colour=0xff0000))
         else:
             await ctx.send(content=f"Deleted {amount} messages!", delete_after=float(5.682))
             #await log.send(embed=discord.Embed(title=f"Deleted {amount} messages", description=f"{amount} messages deleted in {str(ctx.channel)}", colour = 0x39ff14))
+            
 
-
-    @commands.command(name="ban", aliases = ["banish"], description = "bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
-    @has_permissions(ban_members=True)
-    async def ban(self, ctx, member : discord.Member , *,reason="Not given"):
-        auth = ctx.author.mention
-        vict = member.name 
-        if ctx.author == member:
-            ctx.send("Why would you wanna ban your self?", delete_after = 5.682)
-            return None
-        else:
-            await member.ban(reason=reason)
-            #await log.send(embed=discord.Embed(title="Ban!", description=f"{vict} was banned by {auth}").add_field(description=f"reason : {str(reason)}",colour=0x39ff14))
-            return None
-
-    @commands.command(name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
-    @has_permissions(kick_members=True)
-    async def kick(self, ctx, member : discord.Member , *,reason="Not given"):
-        name = member.name
-        await member.kick(reason=reason)
-        await ctx.send(f"kicked {name}", delete_after=float(5.682))
-        #await log.send(embed=discord.Embed(title="Kick",description=f"Kicked {member.name}\nreason: {reason}",colour=0x39ff14))
-
+    @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
+    @commands.has_permissions(kick_members=True) 
+    async def kick(self, ctx, user: discord.Member, *, reason: str = "No reason specified"):
+        server = ctx.message.server
+        log_channel = discord.utils.get(ctx.message.server.channels, id = 709339678863786084)
+        userID = (user.id)
+        embed = discord.Embed(title="Member Kicked", color = 0x3C80E2)
+        embed.add_field(name="Member", value="{} ".format(user) + "(<@{}>)".format(userID), inline=True)
+        embed.add_field(name="Mod", value="{}".format(ctx.message.author), inline=True)
+        embed.add_field(name="Reason", value="{}".format(reason), inline=False)
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.timestamp = datetime.utcnow()
+        
+        await self.bot.send(log_channel, embed=embed)
+        await ctx.send(f"Kicked {user.name}", delete_after = 7.0)
+        await self.bot.kick(user)
+        await self.bot.delete_message(ctx.message)
+        
     @kick.error
+    async def kick_error(self, error, ctx):
+        if isinstance(error, discord.ext.commands.BadArgument):
+            userID = (ctx.message.author.id)
+            botMessage = await self.bot.send(ctx.message.channel,"<@%s>: **Sorry, I couldn't find this user**" % (userID), delete_after=5.0)
+            await self.bot.delete_message(ctx.message)              
+        elif isinstance(error, discord.ext.commands.CheckFailure): # Message to the user if they don't have perms
+            userID = (ctx.message.author.id)
+            await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to kick users!**" % (userID), delete_after=5.0)
+            await self.bot.delete_message(ctx.message)
+        else:
+            raise error
+        
+    @commands.command(name="ban", aliases = ["banish"], description = "bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
+    @commands.has_permissions(ban_members=True) 
+    async def ban(self, ctx, user: discord.Member, *, reason: str = "Not given"):
+        server = ctx.message.server
+        log_channel = discord.utils.get(ctx.message.server.channels, id = 709339678863786084)
+        userID = (user.id)
+        embed = discord.Embed(title="Member Banned", color = 0x3C80E2)
+        embed.add_field(name="Member", value="{} ".format(user) + "(<@{}>)".format(userID), inline=True)
+        embed.add_field(name="Mod", value="{}".format(ctx.message.author), inline=True)
+        embed.add_field(name="Reason", value="{}".format(reason), inline=False)
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.timestamp = datetime.utcnow()
+        
+        await self.bot.send(log_channel, embed=embed)
+        await ctx.send(f"Banned {user.name}", delete_after = 7.0)
+        await self.bot.kick(user)
+        await self.bot.delete_message(ctx.message)
+        
+    @ban.error
+    async def ban_error(self, error, ctx):
+        if isinstance(error, discord.ext.commands.BadArgument):
+            userID = (ctx.message.author.id)
+            botMessage = await self.bot.send(ctx.message.channel,"<@%s>: **Sorry, I couldn't find this user**" % (userID), delete_after=5.0)
+            await self.bot.delete_message(ctx.message)              
+        elif isinstance(error, discord.ext.commands.CheckFailure): # Message to the user if they don't have perms
+            userID = (ctx.message.author.id)
+            await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to ban users!**" % (userID), delete_after=5.0)
+            await self.bot.delete_message(ctx.message)
+        else:
+            raise error
+            
+            
     @ban.error
     @clear.error
     @unban.error
@@ -75,6 +116,75 @@ class moderation(commands.Cog):
             await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!")
         else:
             return None
+    
+    @commands.command(pass_context=True)
+    @commands.has_permissions(ban_members=True)
+    async def info(self, ctx, user: discord.Member):
+        embed = discord.Embed(title="{}'s Info".format(user.name), color=0x00cda1)
+        embed.add_field(name="Username", value=user, inline=True)
+        embed.add_field(name="ID", value=user.id, inline=True)
+        embed.add_field(name="Status", value=user.status, inline=True)
+        embed.add_field(name="Highest Role", value=user.top_role)
+
+        userMade = user.created_at
+        userMade2 = userMade.strftime("%B %d, %Y %I:%M %p")
+        embed.add_field(name="Created", value="{}".format(userMade2))
+
+        userJoin = user.joined_at
+        userJoin2 = userJoin.strftime("%B %d, %Y %I:%M %p")
+        embed.add_field(name="Joined", value="{}".format(userJoin2))
+
+        embed.set_thumbnail(url=user.avatar_url)
+        embed.set_footer(text="Requested by {}".format(ctx.message.author))
+        embed.timestamp = datetime.utcnow()
+        await self.bot.say(embed=embed)
+        await self.bot.delete_message(ctx.message)
+        
+    
+    @info.error
+    async def info_error(self, error, ctx):
+        if isinstance(error, discord.ext.commands.BadArgument):
+            userID = (ctx.message.author.id)
+            botMessage = await self.bot.send(ctx.message.channel,"<@%s>: **Sorry, I couldn't find this user**" % (userID))
+            await self.bot.delete_message(ctx.message)        
+            await asyncio.sleep(5)
+            try:
+                await self.bot.delete_message(botMessage)
+            except:
+                pass
+        
+        elif isinstance(error, discord.ext.commands.CheckFailure):
+            userID = (ctx.message.author.id)
+            await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to perform this action**" % (userID))
+            await self.bot.delete_message(ctx.message)
+            
+    @commands.command(pass_context=True)
+    @commands.has_permissions(administrator=True)
+    async def serverinfo(self, ctx):
+        embed = discord.Embed(title="{}'s info".format(ctx.message.server.name), description="Information on the server", color=0xcc0000)
+        embed.add_field(name="Server Name", value=ctx.message.server.name, inline=True)
+        embed.add_field(name="Server ID", value=ctx.message.server.id, inline=True)
+        embed.add_field(name="Members", value=len(ctx.message.server.members))
+        embed.add_field(name="Owner", value=ctx.message.server.owner, inline=True)
+        embed.add_field(name="Role Count", value=len(ctx.message.server.roles))
+
+        servMade = ctx.message.server.created_at
+        servMade2 = servMade.strftime("%B %d, %Y %I:%M %p")
+        embed.add_field(name="Created", value="{}".format(servMade2))
+
+        embed.set_thumbnail(url=ctx.message.server.icon_url)
+        embed.set_footer(text="Requested by {}".format(ctx.message.author))
+        embed.timestamp = datetime.utcnow()
+        await self.bot.say(embed=embed)
+        print("Server Info requested")
+        await self.bot.delete_message(ctx.message)
+        
+    @serverinfo.error
+    async def serverinfo_error(self, error, ctx):
+        if isinstance(error, discord.ext.commands.CheckFailure):
+            userID = (ctx.message.author.id)
+            await self.bot.send(ctx.message.author,"<@%s>: **You don't have permission to perform this action**" % (userID))
+            await self.bot.delete_message(ctx.message)
 
 def setup(bot):
     bot.add_cog(moderation(bot))
