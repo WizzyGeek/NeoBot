@@ -1,5 +1,4 @@
 import logging
-import os
 import datetime
 
 import discord
@@ -14,8 +13,8 @@ class moderation(commands.Cog):
         self.bot = bot
     
     @commands.command(name="warn")
-    @commands.has_permission(kick_members=True)
-    async def warn(sel, ctx, user: discord.Member, reason : str = "No reason"):
+    @commands.has_permissions(kick_members=True)
+    async def warn(self, ctx, user: discord.Member, reason : str = "No reason"):
         await user.send(f"You sere warned in {user.guild.name} for {reason}")
         log = self.bot.get_channel(709339678863786084)
         embed=discord.Embed(title="Member Warn", description=f"{user.mention} was warned for {reason}", color=0xfe0146)
@@ -25,7 +24,7 @@ class moderation(commands.Cog):
         
 
     @commands.command(name="unban", aliases=["removeban"], description="A command to unban single user using dicriminator and name eg: $unban example#0000")
-    @commandshas_permissions(ban_members=True)
+    @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, *,member):
         banned_ppl = await ctx.guild.bans()
         member_name,member_discriminator = member.split('#')
@@ -41,7 +40,7 @@ class moderation(commands.Cog):
 
 
     @commands.command(name="clear", aliases=["purge","clean","delete","del"], description="deletes amount of specified messages, default is 5 eg: \'$clear 10\' or \'$purge 10\' or \'$delete 10\' or \'$del 10\'")
-    @has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount = 5):
         try:
             await ctx.channel.purge(limit=amount+1)
@@ -59,7 +58,6 @@ class moderation(commands.Cog):
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True) 
     async def kick(self, ctx, user: discord.Member, *, reason: str = "No reason specified"):
-        guild = ctx.message.guild
         log_channel = discord.utils.get(ctx.message.guild.channels, id = 709339678863786084)
         userID = (user.id)
         embed = discord.Embed(title="Member Kicked", color = 0x3C80E2)
@@ -90,7 +88,6 @@ class moderation(commands.Cog):
     @commands.command(name="ban", aliases = ["banish"], description = "bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True) 
     async def ban(self, ctx, user: discord.Member, *, reason: str = "Not given"):
-        guild = ctx.message.guild
         log_channel = discord.utils.get(ctx.message.guild.channels, id = 709339678863786084)
         userID = (user.id)
         embed = discord.Embed(title="Member Banned", color = 0x3C80E2)

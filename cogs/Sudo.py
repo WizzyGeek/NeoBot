@@ -36,6 +36,7 @@ class Sudo(commands.Cog):
         logger.info(f"unloaded Cog {extension}")
         await ctx.send(embed=discord.Embed(title="Done",description=f"unloaded {extension}", colour = 0x00eb04))
     #----------------------------------------#
+    @staticmethod
     def insert_returns(body):
         if isinstance(body[-1], ast.Expr):
             body[-1] = ast.Return(body[-1].value)

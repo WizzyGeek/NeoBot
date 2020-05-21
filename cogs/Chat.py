@@ -1,8 +1,6 @@
-import discord
 from discord.ext import commands
 import praw
 from difflib import SequenceMatcher
-import json
 import random
 
 

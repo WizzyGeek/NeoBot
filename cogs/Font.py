@@ -1,7 +1,7 @@
 """A cog to change font of a string"""
 import re
-import string
-import discord
+
+
 
 from discord.ext import commands
  

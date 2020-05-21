@@ -1,6 +1,6 @@
 import random
 import re
-import json
+
 
 from discord.ext import commands
 import discord
@@ -129,18 +129,20 @@ class Fun(commands.Cog):
 
     # used in textflip
     text_flip = {}
-    char_list = "!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}"
-    alt_char_list = "{|}zʎxʍʌnʇsɹbdouɯlʞɾᴉɥƃɟǝpɔqɐ,‾^[\]Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀@¿<=>;:68ㄥ9ϛㄣƐᄅƖ0/˙-'+*(),⅋%$#¡"[::-1]
+    char_list = r"!#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}"
+    alt_char_list = r"{|}zʎxʍʌnʇsɹbdouɯlʞɾᴉɥƃɟǝpɔqɐ,‾^[\]Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀@¿<=>;:68ㄥ9ϛㄣƐᄅƖ0/˙-'+*(),⅋%$#¡"[::-1]
     for idx, char in enumerate(char_list):
         text_flip[char] = alt_char_list[idx]
         text_flip[alt_char_list[idx]] = char
     #----------------------------------------#
     # used in [p]react, checks if it's possible to react with the duper string or not
+    @staticmethod
     def has_dupe(duper):
         collect_my_duper = list(filter(lambda x: x != '⃣', duper))  #   ⃣ appears twice in the number unicode thing, so that must be stripped
         return len(set(collect_my_duper)) != len(collect_my_duper)
     #----------------------------------------#
     # used in [p]react, replaces e.g. 'ng' with '🆖'
+    @staticmethod
     def replace_combos(react_me):
         for combo in Fun.emoji_dict['combination']:
             if combo[0] in react_me:
@@ -148,6 +150,7 @@ class Fun(commands.Cog):
         return react_me
     #----------------------------------------#
     # used in [p]react, replaces e.g. 'aaaa' with '🇦🅰🍙🔼'
+    @staticmethod
     def replace_letters(react_me):
         for char in "abcdefghijklmnopqrstuvwxyz0123456789!?":
             char_count = react_me.count(char)
@@ -166,7 +169,7 @@ class Fun(commands.Cog):
         return react_me
     #----------------------------------------#
     @commands.command(aliases=['8ball', '8b', "luckyball"])
-    async def _bball(self, ctx, *, question):
+    async def _bball(self, ctx):
         ans = ['● It is certain.',
             '● It is decidedly so.',
             '● Without a doubt.',
@@ -201,7 +204,7 @@ class Fun(commands.Cog):
         await ctx.send(f'http://lmgtfy.com/?q={query.replace(" ", "+")}')
         
     @l2g.error
-    async def l2g_error(ctx, err):
+    async def l2g_error(self, ctx, err):
         if isinstance(err, commands.MissingRequiredArgument):
             ctx.send("Provide a sting to search.")
     #----------------------------------------#            
@@ -220,7 +223,6 @@ class Fun(commands.Cog):
     @commands.command(pass_context=True)
     async def dice(self, ctx, dice=1, faces=6):
         """Roll dice. Optionally input # of dice and # of sides. Ex: [p]dice 5 12"""
-        res = []
         embed = discord.Embed(title="**Dice  rolled..**")
         dice += 1
         if faces < 9:
@@ -253,7 +255,7 @@ class Fun(commands.Cog):
         await ctx.send(regional_output)
         
     @regional.error
-    async def regional_error(ctx, err):
+    async def regional_error(self, ctx, err):
         if isinstance(err, commands.MissingRequiredArgument):
             ctx.send("Give me a string (text) to emojify.")
     #----------------------------------------#
@@ -265,8 +267,8 @@ class Fun(commands.Cog):
         await ctx.send(spaced_message)
         
     @space.error
-    async def space_error(ctx, err):
-        if isinstance(err, commands.MissingRequiredArgument):
+    async def space_error(self, ctx, err):
+        if isinstance(self, err, commands.MissingRequiredArgument):
             ctx.send("Please give me a string (text) to space out.", delete_after=10.0)
     #----------------------------------------#
      

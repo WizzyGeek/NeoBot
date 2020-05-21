@@ -1,10 +1,7 @@
 #-----------standard-imports-----------#
-import asyncio
 import logging
 import os
 import psycopg2
-import random
-from string import punctuation
 import traceback
 
 #-----------3rd-party-imports-----------#
@@ -23,8 +20,8 @@ try:
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("datbase is URL not found")
-    configToken = "token"
-    DATABASE_URL = "url"
+    configToken = "NjE5ODk2OTcyMTUyOTMwMzA4.Xrp-YA.XwCmQhyxZxF3UH0uEB7yYk-BOMs"
+    DATABASE_URL = "postgres://ithbzktccgqgpm:873e756fadf0f84d6b8eaaa5879f563c80ed67b39d61219d44002be7289d2993@ec2-34-194-198-176.compute-1.amazonaws.com:5432/d7i6p70doodtdc"
     logger.info("Alternate login token, id used.")
 
 guild = discord.Guild
@@ -36,10 +33,9 @@ c = conn.cursor()
 
 try:
     c.execute("CREATE TABLE IF NOT EXISTS prefix(id BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
-    c.execute
     conn.commit()
 except:
-    logger.exception("Config vars inaccessible!")
+    logger.exception("Psycopg2 error occured!")
 
 #----------------------------------------#
 def _prefix_callable(bot, msg):
@@ -53,7 +49,7 @@ def _prefix_callable(bot, msg):
     return base
 
 class Bot(commands.Bot):
-    def __init__(self, token):
+    def __init__(self):
         super().__init__(command_prefix=_prefix_callable,
                          description="Assassinations's discord bot")
         c.execute('SELECT * FROM prefix')
@@ -68,8 +64,10 @@ class Bot(commands.Bot):
                     self.load_extension(f'cogs.{filename[:-3]}')
                 except:
                     logger.exception(f"failed to initialise cog: {filename}")
-                logger.info(f"Initialized cog: {filename}")
-        logger.info("Initialised cogs and vars, running bot")
+                else:
+                    logger.info(f"Initialized cog: {filename}")
+        else: 
+            logger.info("Initialised cogs and vars, running bot")
                 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
@@ -128,6 +126,6 @@ class Bot(commands.Bot):
 
 #--------------------------------------------------------------------------------#
 if __name__ == '__main__':
-    korosensei = Bot(configToken)
+    korosensei = Bot()
     korosensei.run()
 #------------------------------------------------------------------------------------------------------------------------#
