@@ -1,6 +1,4 @@
 import logging
-import datetime
-
 import discord
 from discord.ext import commands
 
@@ -65,7 +63,6 @@ class moderation(commands.Cog):
         embed.add_field(name="Mod", value="{}".format(ctx.message.author), inline=True)
         embed.add_field(name="Reason", value="{}".format(reason), inline=False)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.timestamp = datetime.utcnow()
         
         await self.bot.send(log_channel, embed=embed)
         await ctx.send(f"Kicked {user.name}", delete_after = 7.0)
@@ -95,7 +92,6 @@ class moderation(commands.Cog):
         embed.add_field(name="Mod", value="{}".format(ctx.message.author), inline=True)
         embed.add_field(name="Reason", value="{}".format(reason), inline=False)
         embed.set_thumbnail(url=user.avatar_url)
-        embed.timestamp = datetime.utcnow()
         
         await self.bot.send(log_channel, embed=embed)
         await ctx.send(f"Banned {user.name}", delete_after = 7.0)
