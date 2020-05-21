@@ -81,7 +81,7 @@ class Bot(commands.Bot):
             traceback.print_tb(error.original.__traceback__)
             print(f'{error.original.__class__.__name__}: {error.original}', file=sys.stderr)
             
-    async def on_ready():
+    async def on_ready(self):
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(f"Bot:{bot.user},Status = Online, Intialisation successful!")
         
