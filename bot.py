@@ -108,7 +108,7 @@ class Bot(commands.Bot):
             conn.commit()
             self.prefixes[guild.id] = sorted(set(prefixes))
             
-    async def on_member_join(member):
+    async def on_member_join(self, member):
         if member.Guid.id == 583689248117489675:
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server!verify yoursel, read the rules and get some roles.')
