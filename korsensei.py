@@ -30,7 +30,6 @@ __status__ = "Development"
 #----------------------------------------#
 client = commands.Bot(command_prefix="$")
 guild = discord.Guild
-user = discord.Client()
 #config for different servers can be put as a nested json objNect
 config = {
     "welchannel": 583703372725747713,
