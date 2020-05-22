@@ -67,37 +67,6 @@ class utility(commands.Cog):
         for emoji, _ in choices:
             await poll.add_reaction(emoji)
             
-    @commands.command()
-    async def strawpoll(self, ctx, *, question_and_choices: str=None):
-        """
-        Usage: !strawpoll my question | answer a | answer b | answer c\nAt least two answers required.
-        """
-        if question_and_choices is None:
-            return await ctx.send("Usage: !strawpoll my question | answer a | answer b | answer c\nAt least two answers required.")
-        if "|" in question_and_choices:
-            delimiter = "|"
-        else:
-            delimiter = ","
-        question_and_choices = question_and_choices.split(delimiter)
-        if len(question_and_choices) == 1:
-            return await ctx.send("Not enough choices supplied")
-        elif len(question_and_choices) >= 31:
-            return await ctx.send("Too many choices")
-        question, *choices = question_and_choices
-        choices = [x.lstrip() for x in choices]
-        print(choices)
-        header = {"Content-Type": "application/json"}
-        payload = {
-            "title": question,
-            "options": choices,
-            "multi": False
-        }
-        print(payload)
-        async with self.bot.session.post("https://www.strawpoll.me/api/v2/polls", headers=header, json=payload) as r:
-            data = await r.json()
-        print(data)
-        id = data["id"]
-        await ctx.send(f"http://www.strawpoll.me/{id}")
 
 def setup(bot):
     bot.add_cog(utility(bot))
