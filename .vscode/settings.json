@@ -1,0 +1,40 @@
+{
+    "python.pythonPath": "C:\\Program Files (x86)\\Python38-32\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "websearch.engines" :[
+        {
+            "Name": "DuckDuckGo",
+            "URI": "duckduckgo.$#$/?q="
+        },
+        {
+            "Name": "Google",
+            "URI": "www.google.$#$/search?q="
+        },
+        {
+            "Name": "Bing",
+            "URI": "www.bing.$#$/search?q="
+        },
+        {
+            "Name": "AOL",
+            "URI": "search.aol.$#$/aol/search?q="
+        },
+        {
+            "Name": "Yahoo",
+            "URI": "search.yahoo.$#$/search?&p="
+        },
+        {
+            "Name": "Ask",
+            "URI": "www.ask.$#$/web?q="
+        },
+        {
+            "Name": "Yandex",
+            "URI": "yandex.$#$/search/?text="
+        },
+        {
+            "Name": "StartPage",
+            "URI": "`www.startpage.$#$/do/search?query="
+        }
+    ],
+    "websearch.default_engine": "Google"
+}
