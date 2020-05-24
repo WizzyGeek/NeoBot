@@ -34,6 +34,7 @@ import logging
 import os
 import psycopg2
 import traceback
+import json
 
 #-----------3rd-party-imports-----------#
 import discord
@@ -50,8 +51,10 @@ try:
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("datbase is URL not found")
-    configToken = "Token"  
-    DATABASE_URL = "url"
+    with open("secret.json", "r") as reader:
+        data = json.loads(reader.read())
+    configToken = data['Token']  
+    DATABASE_URL = data['DATABASE_URL']
     logger.info("Alternate login token, id used.")
 #----------------------------------------#
 guild = discord.Guild
