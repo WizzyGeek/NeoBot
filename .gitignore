@@ -54,4 +54,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+## Secrets ##
+secret.json
+
 # End of https://www.gitignore.io/api/linux,windows,visualstudiocode

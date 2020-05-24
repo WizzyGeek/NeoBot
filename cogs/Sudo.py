@@ -1,21 +1,37 @@
+import ast
+import logging
+
 import discord
 from discord.ext import commands
 
+logger = logging.getLogger(__name__)
+
+def insert_returns(body):
+    if isinstance(body[-1], ast.Expr):
+        body[-1] = ast.Return(body[-1].value)
+        ast.fix_missing_locations(body[-1])
+    if isinstance(body[-1], ast.If):
+        insert_returns(body[-1].body)
+        insert_returns(body[-1].orelse)
+    if isinstance(body[-1], ast.With):
+        insert_returns(body[-1].body)
+            
 class Sudo(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
     #----------------------------------------#
     @commands.group()
     @commands.has_permissions(administrator = True)
     async def sudo(self, ctx):
-        logging.info(f"elevated privilage use detected, USER : {ctx.author.name}")
+        logger.info(f"elevated privilage use detected, USER : {ctx.author.name}")
         return None
     #----------------------------------------#
     @sudo.command(name="load")
     @commands.is_owner()
     async def load(self, ctx, extension):
         """loads a cog"""
-        bot.load_extension(f"cogs.{extension}")
+        # To Test if .pysc can be loaded
+        self.bot.load_extension(f"cogs.{extension}") 
         logger.info(f"Loaded Cog {extension}")
         await ctx.send(embed=discord.Embed(title="Done",description=f"loaded {extension}"))
     #----------------------------------------#
@@ -23,8 +39,8 @@ class Sudo(commands.Cog):
     @commands.is_owner()
     async def reload(self, ctx, *, extension):
         """reloads a cog"""
-        bot.unload_extension(f"cogs.{extension}")
-        bot.load_extension(f"cogs.{extension}")
+        self.bot.unload_extension(f"cogs.{extension}")
+        self.bot.load_extension(f"cogs.{extension}")
         logger.info(f"Reloaded Cog {extension}")
         await ctx.send(embed=discord.Embed(title="Done",description=f"Reloaded {extension}"))
     #----------------------------------------#
@@ -32,20 +48,9 @@ class Sudo(commands.Cog):
     @commands.is_owner()
     async def unload(self, ctx, extension):
         """unloads a cog"""
-        bot.unload_extension(f"cogs.{extension}")
+        self.bot.unload_extension(f"cogs.{extension}")
         logger.info(f"unloaded Cog {extension}")
         await ctx.send(embed=discord.Embed(title="Done",description=f"unloaded {extension}", colour = 0x00eb04))
-    #----------------------------------------#
-    @staticmethod
-    def insert_returns(body):
-        if isinstance(body[-1], ast.Expr):
-            body[-1] = ast.Return(body[-1].value)
-            ast.fix_missing_locations(body[-1])
-        if isinstance(body[-1], ast.If):
-            insert_returns(body[-1].body)
-            insert_returns(body[-1].orelse)
-        if isinstance(body[-1], ast.With):
-            insert_returns(body[-1].body)
     #----------------------------------------#
     @sudo.command(name="eval")
     async def eval_fn(self, ctx, *, cmd):
@@ -95,14 +100,14 @@ class Sudo(commands.Cog):
         result = (await eval(f"{fn_name}()", env))
         await ctx.send(result)
     #----------------------------------------#
-    @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")
-    @commands.is_owner()
-    async def reboot(self, ctx):
-        logger.info(f"[IMP]Reboot request from {ctx.author.name} received.")
-        await bot.logout()
-        await bot.login(configToken)
-        return None
-
+    # command not needed
+    # @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")
+    # @commands.is_owner()
+    # async def reboot(self, ctx):
+    #     logger.info(f"[IMP]Reboot request from {ctx.author.name} received.")
+    #     await self.bot.logout()
+    #     await self.bot.run()
+    #     return None
     #--------------------------------------------------------------------------------#
 def setup(bot):
     bot.add_cog(Sudo(bot))
