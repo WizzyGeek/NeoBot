@@ -87,6 +87,7 @@ class Bot(commands.Bot):
         pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
         self.prefixes = {int(id): prefixes.split(',') for (id, prefixes) in pre.items()}
         self.token = configToken
+        self.DeleteTime = 10.0 # The time to wait before deleting message. 
         
         for filename in os.listdir('./cogs'):
             if filename.endswith('.py') and filename != '__init__.py':
@@ -129,8 +130,8 @@ class Bot(commands.Bot):
             conn.commit()
             self.prefixes[guild.id] = prefixes
             return True # useful for set prefix command
-        elif len(prefixes) > 15:
-            return RuntimeError('Cannot have more than 10 custom prefixes.')
+        elif len(prefixes) > 10:
+            return False
         else:
             c.execute('UPDATE prefix SET prefix=? WHERE id=?',(','.join(sorted(set(prefixes))), str(guild.id)))
             conn.commit()
