@@ -1,3 +1,31 @@
+# Korosensei another discord Bot
+#
+# __author__ = "TEEN-BOOM"
+#
+# Requirments:
+# discord.py
+# pandas
+# psycopg2
+# praw
+# PyNaCl
+# aiohttp
+# async-timeout
+# attrs
+# cffi
+# chardet
+# dnspython
+# idna
+# multidict
+# numpy
+# pycparser
+# python-dateutil
+# pytz
+# six
+# websockets
+# requests
+# youtube_dl
+# 
+# Approximate Enviroment Sixe : 146 MiB
 #-----------standard-imports-----------#
 import logging
 import os
@@ -10,33 +38,31 @@ from discord.ext import commands
 
 #-----------module-imports-----------#
 #from utility import ErrorHandler, rank_query, update, lvlup
-
 #----------------------------------------#
 logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 logger = logging.getLogger(__name__)
 try:
-    configToken = str(os.environ['Token'])
+    configToken = str(os.environ['Token'])                     # modify this section if you are using a config file
     DATABASE_URL = str(os.environ['DATABASE_URL'])
 except Exception as err:
     logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
     logger.warning("datbase is URL not found")
-    configToken = "NjE5ODk2OTcyMTUyOTMwMzA4.Xrp-YA.XwCmQhyxZxF3UH0uEB7yYk-BOMs"
-    DATABASE_URL = "postgres://ithbzktccgqgpm:873e756fadf0f84d6b8eaaa5879f563c80ed67b39d61219d44002be7289d2993@ec2-34-194-198-176.compute-1.amazonaws.com:5432/d7i6p70doodtdc"
+    configToken = "Token"  
+    DATABASE_URL = "url"
     logger.info("Alternate login token, id used.")
-
+#----------------------------------------#
 guild = discord.Guild
 config = {"welchannel": 583703372725747713}
 logger.info("Initialised config variables.")
-
+#----------------------------------------#
 conn = psycopg2.connect(DATABASE_URL)
 c = conn.cursor()
-
+#----------------------------------------#
 try:
     c.execute("CREATE TABLE IF NOT EXISTS prefix(id BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
     conn.commit()
 except:
     logger.exception("Psycopg2 error occured!")
-
 #----------------------------------------#
 def _prefix_callable(bot, msg):
     user_id = bot.user.id
@@ -47,11 +73,12 @@ def _prefix_callable(bot, msg):
     else:
         base.extend(bot.prefixes.get(msg.guild.id, ['$', '.']))
     return base
+#----------------------------------------#
 
 class Bot(commands.Bot):
+    #----------------------------------------#
     def __init__(self):
-        super().__init__(command_prefix=_prefix_callable,
-                         description="Assassinations's discord bot")
+        super().__init__(command_prefix=_prefix_callable, description="Assassinations's discord bot")
         c.execute('SELECT * FROM prefix')
         prefix_rows = c.fetchall()
         pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
@@ -68,7 +95,7 @@ class Bot(commands.Bot):
                     logger.info(f"Initialized cog: {filename}")
         else: 
             logger.info("Initialised cogs and vars, running bot")
-                
+    #----------------------------------------#            
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send('This command cannot be used in private messages.')
@@ -77,39 +104,38 @@ class Bot(commands.Bot):
         elif isinstance(error, commands.CommandInvokeError):
             logger.exception("Fatal Error occured:")
             traceback.print_tb(error.original.__traceback__)
-            
+    #----------------------------------------#        
     async def on_ready(self):
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(f"Bot:{self.user},Status = Online, Intialisation successful!")
         for server in self.guilds:
             c.execute(f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING")
             conn.commit()
-        
+    #----------------------------------------#    
     def get_guild_prefixes(self, guild, *, local_inject=_prefix_callable):
         proxy_msg = discord.Object(id=None)
         proxy_msg.guild = guild
         return local_inject(self, proxy_msg)
-    
+    #----------------------------------------#
     def get_raw_guild_prefixes(self, guild_id):
         return self.prefixes.get(guild_id, ['$', '.'])
-    
+    #----------------------------------------#
     async def set_guild_prefixes(self, guild, prefixes):
         if not prefixes:
-            c.execute('UPDATE prefix SET prefix=? WHERE id=?', (None, guild.id))
+            c.execute(f'UPDATE prefix SET prefix={None} WHERE id={guild.id}')
             conn.commit()
             self.prefixes[guild.id] = prefixes
+            return True # useful for set prefix command
         elif len(prefixes) > 15:
-            raise RuntimeError('Cannot have more than 10 custom prefixes.')
+            return RuntimeError('Cannot have more than 10 custom prefixes.')
         else:
-            c.execute('''UPDATE prefix
-                         SET prefix=? 
-                         WHERE id=?''',
-                      (','.join(sorted(set(prefixes))), str(guild.id)))
+            c.execute('UPDATE prefix SET prefix=? WHERE id=?',(','.join(sorted(set(prefixes))), str(guild.id)))
             conn.commit()
             self.prefixes[guild.id] = sorted(set(prefixes))
-            
+            return True
+    #----------------------------------------#
     async def on_member_join(self, member):
-        if member.Guid.id == 583689248117489675:
+        if member.Guid.id == 583689248117489675: # Change this to enable welcoming also change these strings!
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server!verify yoursel, read the rules and get some roles.')
             channel = self.get_channel(config["welchannel"])
@@ -117,13 +143,10 @@ class Bot(commands.Bot):
             await channel.send(embed=embed, content=None)
         else:
             return
-            
+    #----------------------------------------#       
     def run(self):
         logger.info("logging in process start")
         super().run(self.token, reconnect=True)
-
-#----------------------------------------#
-
 #--------------------------------------------------------------------------------#
 if __name__ == '__main__':
     korosensei = Bot()
