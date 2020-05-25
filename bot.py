@@ -91,9 +91,16 @@ class Bot(commands.Bot):
         self.prefixes = {int(id): prefixes.split(',') for (id, prefixes) in pre.items()}
         self.token = configToken
         self.DeleteTime = 10.0 # The time to wait before deleting message. 
-        
+        # I am too lazy so here's the embeds
+        self.GreenEmbed = discord.Embed(colour=discord.Colour.green())
+        self.TealEmbed = discord.Embed(colour=discord.Colour.teal())
+        self.BlueEmbed = discord.Embed(colour=discord.Colour.blue())
+        self.BlurpleEmbed = discord.Embed(colour=discord.Colour.blurple())
+        self.RedEmbed = discord.Embed(colour=discord.Colour.red())
+        self.DarkRedEmbed = discord.Embed(colour=discord.Colour.dark_red())
+        self.GoldEmbed = discord.Embed(colour=discord.Colour.gold())
         for filename in os.listdir('./cogs'):
-            if filename.endswith('.py') and filename != '__init__.py':
+            if filename.endswith('.py') and filename != '__init__.py': # dump the file in the folder and Voila!
                 try:
                     self.load_extension(f'cogs.{filename[:-3]}')
                 except:
