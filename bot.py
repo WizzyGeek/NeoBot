@@ -57,7 +57,6 @@ except Exception as err:
     DATABASE_URL = data['DATABASE_URL']
     logger.info("Alternate login token, id used.")
 #----------------------------------------#
-guild = discord.Guild
 config = {"welchannel": 583703372725747713}
 logger.info("Initialised config variables.")
 #----------------------------------------#
