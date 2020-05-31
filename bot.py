@@ -49,13 +49,15 @@ try:
     configToken = str(os.environ['Token'])                     # modify this section if you are using a config file
     DATABASE_URL = str(os.environ['DATABASE_URL'])
 except Exception as err:
-    logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
-    logger.warning("datbase is URL not found")
-    with open("secret.json", "r") as reader:
-        data = json.loads(reader.read())
-    configToken = data['Token']  
-    DATABASE_URL = data['DATABASE_URL']
-    logger.info("Alternate login token, id used.")
+    try:
+        with open("secret.json", "r") as reader:
+            data = json.loads(reader.read())
+    except Exception:
+        logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
+        logger.warning("datbase is URL not found")
+        configToken = data['Token']  
+        DATABASE_URL = data['DATABASE_URL']
+        logger.info("Alternate login token, id used.")
 #----------------------------------------#
 config = {"welchannel": 583703372725747713}
 logger.info("Initialised config variables.")
