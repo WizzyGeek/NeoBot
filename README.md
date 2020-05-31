@@ -1,5 +1,6 @@
 # korosensei a discord bot<br>
-==
+
+
 ![Discord](https://img.shields.io/discord/583689248117489675?logo=DISCORD&style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/TEEN-BOOM/korosensei?style=for-the-badge)
 [![Python](https://forthebadge.com/images/badges/made-with-python.svg)](https://www.python.org/)
@@ -8,7 +9,8 @@
 [![Warranty](https://img.shields.io/badge/NO-WARRANTY!-ff0000?style=for-the-badge&logo=appveyor&labelColor=cc0000)]()
 
 ## Hosting 
-==
+
+
 self-hosting rquires you to create a file named `secret.json`
 with the following structure 
 ```
