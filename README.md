@@ -1,4 +1,4 @@
-# 『![test](https://opensource.org/files/osi_favicon.png)』Korosensei a discord bot
+# ⦗![test](https://opensource.org/files/osi_favicon.png)⦘Korosensei a discord bot
 
 [![Python](https://forthebadge.com/images/badges/made-with-python.svg)](https://www.python.org/)<br>
 [![:o](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://secureimg.stitcher.com/feedimagesplain328/158438.jpg)<br>
