@@ -22,8 +22,18 @@ import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
 
-if not discord.opus.is_loaded():
-    discord.opus.load_opus('libopus.so')
+def load_opus_lib():
+    opus_libs = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib', 'libopus.so']
+    if discord.opus.is_loaded():
+        return True
+    for opus_lib in opus_libs:
+        try:
+            discord.opus.load_opus(opus_lib)
+            return
+        except OSError:
+            pass
+        else:
+            raise RuntimeError('Could not load an opus lib. Tried %s' % (', '.join(opus_libs)))
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
 

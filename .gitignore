@@ -55,6 +55,6 @@ $RECYCLE.BIN/
 *.lnk
 
 ## Secrets ##
-secret.json
+# secret.json 
 
 # End of https://www.gitignore.io/api/linux,windows,visualstudiocode

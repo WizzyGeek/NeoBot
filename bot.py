@@ -46,23 +46,37 @@ from discord.ext import commands
 logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 logger = logging.getLogger(__name__)
 try:
-    configToken = str(os.environ['Token'])                     # modify this section if you are using a config file
+    configToken = str(os.environ['Token'])                     
     DATABASE_URL = str(os.environ['DATABASE_URL'])
-except Exception as err:
+except Exception:
+    logger.warning("Enviroment Variables don't contain credetials, seeking secret.json")
     try:
         with open("secret.json", "r") as reader:
             data = json.loads(reader.read())
     except Exception:
-        logger.error("Config vars inaccessible!", exc_info = True) # exception avoided on purpose.
-        logger.warning("datbase is URL not found")
-        configToken = data['Token']  
-        DATABASE_URL = data['DATABASE_URL']
-        logger.info("Alternate login token, id used.")
+        logger.error("secret.json not found | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
+        quit() # Sorry python lords, I couldn't do it gracefully without this.
+    else:
+        try:
+            configToken = data['Token']  
+            DATABASE_URL = data['DATABASE_URL']
+        except KeyError:
+            logger.error("secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
+            quit()
+        except Exception:
+            logger.exception("An unexpected error occured")
+        else:
+            logger.info("Credentials initialised")
 #----------------------------------------#
 config = {"welchannel": 583703372725747713}
 logger.info("Initialised config variables.")
 #----------------------------------------#
-conn = psycopg2.connect(DATABASE_URL)
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+except NameError:
+    logger.exception("unexpected error occured!")
+except Exception:
+    logger.exception("Cannot connect to postgre database")
 c = conn.cursor()
 #----------------------------------------#
 try:
