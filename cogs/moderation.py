@@ -1,7 +1,7 @@
 import logging
 import discord
 from discord.ext import commands
-from bot import Bot
+from bot import Bot # ignore error here this is not the top level script 
 
 # import psycopg2
 
