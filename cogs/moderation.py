@@ -21,7 +21,7 @@ class Search:
         None - When:
             user not found ctx.guild.members or user is invalid 
     """
-    def __init__(self, bot, ctx=None, user=None):
+    def __init__(self, bot : Bot, ctx=None, user=None):
         self.bot = bot
         self.user = user
         self.ctx = ctx
@@ -52,7 +52,7 @@ class moderation(commands.Cog):
     """    
     def __init__(self, bot : Bot):
         self.bot = bot
-        self.log = bot.log
+        self.log = bot.get_channel(bot.log)
         self.prefixes = bot.prefixes
         self.DeleteTime = bot.DeleteTime
     
@@ -139,7 +139,7 @@ class moderation(commands.Cog):
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True) 
     async def kick(self, ctx, usr, *, reason: str = "No reason specified"):
-        user = await Search(self.bot, ctx=ctx, user=usr)
+        user = await Search(self.bot, ctx=ctx, user=usr).get()
         embed = discord.Embed(title="Member Kicked", color = 0x3C80E2)
         embed.add_field(name="Member", value=f"{user.name} with id {user.id}", inline=True)
         embed.add_field(name="Mod", value="{}".format(ctx.message.author), inline=True)
@@ -165,7 +165,8 @@ class moderation(commands.Cog):
         
     @commands.command(name="ban", aliases = ["banish"], description = "bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True) 
-    async def ban(self, ctx, user: discord.Member, *, reason: str = "Not given"):
+    async def ban(self, ctx, usr, *, reason: str = "Not given"):
+        user = await Search(self.bot, ctx=ctx, user=usr).get() 
         embed = discord.Embed(title="Member Banned", color = 0x3C80E2)
         embed.add_field(name="Member", value=f"{user.name} with id {user.id}", inline=True)
         embed.add_field(name="Mod", value="{}".format(ctx.message.author), inline=True)

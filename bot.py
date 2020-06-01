@@ -111,7 +111,7 @@ class Bot(commands.Bot):
         self.dburl = self.config.dburl
         self.rid = self.config.rid
         self.rsecret = self.config.rsecret
-        self.log = self.get_channel(config["log"])
+        self.log = config["log"]
         super().__init__(command_prefix=_prefix_callable, description="Assassinations's discord bot")
         c.execute('SELECT * FROM prefix')
         prefix_rows = c.fetchall()

@@ -3,14 +3,15 @@ import praw
 from difflib import SequenceMatcher
 import random
 
+from bot import Bot # ignore error here this is not the top level script, cause I use intellisense.
 
 class Chat(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: Bot):
         self.bot = bot
         
     @commands.command(aliases=['c', 'ch'])
     async def chat(self, ctx, *, you):
-        reply = str(Chat.grab_reply(you))
+        reply = str(self.grab_reply(you))
         await ctx.send(reply)
         #logger.info("Chat command requested!")
     #----------------------------------------#
@@ -18,10 +19,9 @@ class Chat(commands.Cog):
     def similar(a, b):
         return SequenceMatcher(None, a, b).ratio()
     #----------------------------------------#
-    @staticmethod
-    def grab_reply(question):
-        reddit = praw.Reddit(client_id="fylDYmEUkCEfRQ",
-                     client_secret="PqVaKwRzlJSNH5OGJP57VWaoDXk",
+    def grab_reply(self, question):
+        reddit = praw.Reddit(client_id=self.bot.config.rid,
+                     client_secret=self.bot.rsecret,
                      user_agent="Small-post-seacrcher")
         x = 0
         submission_ids = []
