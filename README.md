@@ -25,4 +25,6 @@ Also you will need to change `config` dict at line 67 in bot.py
 Apart from this you will need to install all dependencies.
 
 #### For heroku 
-you need to set the value for config variables, token an reddit (reccomended) or use a `secret.json` file. 
+you need to set the value for config variables, token and reddit (reccomended) or use a `secret.json` file.
+The buildpacks and addons should be added.
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TEEN-BOOM/korosensei.git)
