@@ -8,7 +8,7 @@
     "repository": "https://github.com/TEEN-BOOM/korosensei.git",
     "env": {
         "token": {
-            "decription": "The bot's token",
+            "description": "The bot's token",
             "value": "<token>"
         },
         "reddit_id": {
