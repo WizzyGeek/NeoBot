@@ -5,8 +5,8 @@ import random
 
 
 class Chat(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         
     @commands.command(aliases=['c', 'ch'])
     async def chat(self, ctx, *, you):
@@ -39,9 +39,9 @@ class Chat(commands.Cog):
         submission = reddit.submission(id=submission_ids[random.randint(0,len(submission_ids)-1)])  
         comment_list=[] 
         x = 0
-        for top_level_comment in submission.comments: 
+        for top_level_comment in submission.comments:
             body = top_level_comment.body
-            comment_list.append(body)  
+            comment_list.append(body)
             x += 1
             if x >=5:  
                 break

@@ -52,7 +52,7 @@ class moderation(commands.Cog):
     """    
     def __init__(self, bot : Bot):
         self.bot = bot
-        self.log = bot.get_channel(709339678863786084)
+        self.log = bot.log
         self.prefixes = bot.prefixes
         self.DeleteTime = bot.DeleteTime
     

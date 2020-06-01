@@ -1,0 +1,37 @@
+{
+    "name": "Korosensei",
+    "description": "A Modular Discord Bot",
+    "keywords":[
+        "Python",
+        "discord.py"
+    ],
+    "repository": "https://github.com/TEEN-BOOM/korosensei.git",
+    "env": {
+        "token": {
+            "decription": "The bot's token",
+            "value": "<token>"
+        },
+        "reddit_id": {
+            "description": "The reddit script id",
+            "value": "<id>"
+        },
+        "reddit_secret": {
+            "description": "The reddit script client secret",
+            "value": "<secret>"
+        }
+    },
+    "addons": [
+        "heroku-postgresql"
+    ],
+    "buildpacks": [
+        {
+            "url": "heroku/python"
+        },
+        {
+            "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+        },
+        {
+            "url": "https://github.com/xrisk/heroku-opus.git"
+        }
+    ]
+}

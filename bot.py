@@ -1,30 +1,22 @@
-# Korosensei another discord Bot
-#
+# Korosensei, a Discord chatbot.
+# Copyright (C) 2020  TEEN BOOM 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 # __author__ = "TEEN-BOOM"
 #
-# Requirments:
-# discord.py
-# pandas
-# psycopg2
-# praw
-# PyNaCl
-# aiohttp
-# async-timeout
-# attrs
-# cffi
-# chardet
-# dnspython
-# idna
-# multidict
-# numpy
-# pycparser
-# python-dateutil
-# pytz
-# six
-# websockets
-# requests
-# youtube_dl
-# 
+# Requirments: requirements.txt 
+# &
 # libopus
 # ffmpeg
 # 
@@ -46,10 +38,12 @@ from discord.ext import commands
 logging.basicConfig(format = '%(name)s:%(levelname)s: %(message)s', level = logging.INFO)
 logger = logging.getLogger(__name__)
 try:
-    configToken = str(os.environ['Token'])                     
+    token = str(os.environ['token']) # Redunant
     DATABASE_URL = str(os.environ['DATABASE_URL'])
+    reddit_id = str(os.environ['reddit_id'])
+    reddit_secret = str(os.environ['reddit_secret'])
 except Exception:
-    logger.warning("Enviroment Variables don't contain credetials, seeking secret.json")
+    logger.warning("Enviroment Variables don't contain credentials, seeking secret.json")
     try:
         with open("secret.json", "r") as reader:
             data = json.loads(reader.read())
@@ -58,8 +52,10 @@ except Exception:
         quit() # Sorry python lords, I couldn't do it gracefully without this.
     else:
         try:
-            configToken = data['Token']  
+            token = data['token']
             DATABASE_URL = data['DATABASE_URL']
+            reddit_id = data['reddit']['id']
+            reddit_secret = data['reddit']['secret']
         except KeyError:
             logger.error("secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
             quit()
@@ -68,7 +64,10 @@ except Exception:
         else:
             logger.info("Credentials initialised")
 #----------------------------------------#
-config = {"welchannel": 583703372725747713}
+config = {
+    "welchannel": 583703372725747713,
+    "log": 709339678863786084
+    }
 logger.info("Initialised config variables.")
 #----------------------------------------#
 try:
@@ -84,6 +83,14 @@ try:
     conn.commit()
 except:
     logger.exception("Psycopg2 error occured!")
+
+class Config:
+    "Class to hold all Bot vars"
+    def __init__(self, token=token, DATABASE_URL = DATABASE_URL, reddit_id = reddit_id, reddit_secret = reddit_secret):
+        self.token = token
+        self.dburl = DATABASE_URL
+        self.rid = reddit_id
+        self.rsecret = reddit_secret
 #----------------------------------------#
 def _prefix_callable(bot, msg):
     user_id = bot.user.id
@@ -95,16 +102,21 @@ def _prefix_callable(bot, msg):
         base.extend(bot.prefixes.get(msg.guild.id, ['$', '.']))
     return base
 #----------------------------------------#
-
 class Bot(commands.Bot):
     #----------------------------------------#
     def __init__(self):
+        self.config = Config()
+        #shortcuts
+        self.token = self.config.token
+        self.dburl = self.config.dburl
+        self.rid = self.config.rid
+        self.rsecret = self.config.rsecret
+        self.log = self.get_channel(cofig[log])
         super().__init__(command_prefix=_prefix_callable, description="Assassinations's discord bot")
         c.execute('SELECT * FROM prefix')
         prefix_rows = c.fetchall()
         pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
         self.prefixes = {int(id): prefixes.split(',') for (id, prefixes) in pre.items()}
-        self.token = configToken
         self.DeleteTime = 10.0 # The time to wait before deleting message. 
         # I am too lazy so here's the embeds
         self.GreenEmbed = discord.Embed(colour=discord.Colour.green())
@@ -174,7 +186,7 @@ class Bot(commands.Bot):
             return
     #----------------------------------------#       
     def run(self):
-        logger.info("logging in process start")
+        logger.info("Logging in...")
         super().run(self.token, reconnect=True)
 #--------------------------------------------------------------------------------#
 if __name__ == '__main__':
