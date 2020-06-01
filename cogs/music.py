@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+# Valentin B.'s bot with slight modiications
 """
 Copyright (c) 2019 Valentin B.
 A simple music bot written in discord.py using youtube-dl.
@@ -14,6 +13,7 @@ You also need FFmpeg in your PATH environment variable or the FFmpeg.exe binary 
 import asyncio
 import functools
 import itertools
+import logging
 import math
 import random
 
@@ -22,6 +22,8 @@ import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
 
+logger = logging.getLogger(__name__)
+
 def load_opus_lib():
     opus_libs = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib', 'libopus.so']
     if discord.opus.is_loaded():
@@ -29,11 +31,15 @@ def load_opus_lib():
     for opus_lib in opus_libs:
         try:
             discord.opus.load_opus(opus_lib)
-            return
+            return True
         except OSError:
             pass
-        else:
-            raise RuntimeError('Could not load an opus lib. Tried %s' % (', '.join(opus_libs)))
+    else:
+        logger.error('Could not load an opus lib. Tried %s' % (', '.join(opus_libs)))
+        return ValueError("specified opus not found")
+
+status = load_opus_lib()
+logger.info(f"{status}")
 # Silence useless bug reports messages
 youtube_dl.utils.bug_reports_message = lambda: ''
 
