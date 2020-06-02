@@ -11,6 +11,7 @@ You also need FFmpeg in your PATH environment variable or the FFmpeg.exe binary 
 """
 
 import asyncio
+import collections
 import functools
 import itertools
 import logging
@@ -180,7 +181,6 @@ class Song:
 
         return embed
 
-
 class SongQueue(asyncio.Queue):
     def __getitem__(self, item):
         if isinstance(item, slice):
@@ -188,7 +188,7 @@ class SongQueue(asyncio.Queue):
         else:
             return self._queue[item]
 
-    def __iter__(self):
+    def __iter__(self)
         return self._queue.__iter__()
 
     def __len__(self):

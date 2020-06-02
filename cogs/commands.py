@@ -1,4 +1,10 @@
+import shlex
+
 from discord.ext import commands
+
+async def to_keycap(c):
+    return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
+
 
 class utility(commands.Cog):
     def __init__(self, bot):
@@ -53,8 +59,7 @@ class utility(commands.Cog):
             return await ctx.send('Need Read Message History and Add Reactions permissions.')
 
         question = questions_and_choices[0]
-        choices = [(to_keycap(e), v)
-                   for e, v in enumerate(questions_and_choices[1:], 1)]
+        choices = [(await to_keycap(e), v) for e, v in enumerate(questions_and_choices[1:], 1)]
 
         try:
             await ctx.message.delete()
