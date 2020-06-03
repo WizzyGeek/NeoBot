@@ -2,12 +2,13 @@ import shlex
 
 from discord.ext import commands
 
+from bot import Bot
 async def to_keycap(c):
     return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
 
 
 class utility(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot : Bot):
         self.bot = bot
         
     @commands.command()
@@ -22,7 +23,7 @@ class utility(commands.Cog):
         """
         Quick and easy yes/no poll, for multiple answers, see !quickpoll
         """
-        msg = await ctx.send("**{}** asks: {}".format(ctx.message.author, question.replace("@", "@\u200b")))
+        msg = await ctx.send(self.bot.Qembed(ctx, title="Poll", content = question))
         try:
             await ctx.message.delete()
         except:
@@ -66,11 +67,12 @@ class utility(commands.Cog):
         except:
             pass
 
-        fmt = '{0} asks: {1}\n\n{2}'
-        answer = '\n'.join('%s: %s' % t for t in choices)
-        poll = await ctx.send(fmt.format(ctx.message.author, question.replace("@", "@\u200b"), answer.replace("@", "@\u200b")))
-        for emoji, _ in choices:
-            await poll.add_reaction(emoji)
+        fmt = '{0}\n\n{1}'
+        answer = '\n'.join('%s| %s' % t for t in choices)
+        embed = await self.bot.Qembed(ctx, title="Poll", content=fmt.format(question.replace("@", "@\u200b"), answer.replace("@", "@\u200b")))
+        poll = await ctx.send(embed=embed)
+        for choice in choices:
+            await poll.add_reaction(choice[0])
             
 
 def setup(bot):

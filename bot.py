@@ -32,12 +32,14 @@ __status__ = "Development"
 import logging
 import os
 import psycopg2
+# import sys
 import traceback
 import json
 
 #-----------3rd-party-imports-----------#
 import discord
 from discord.ext import commands
+import praw
 
 #-----------module-imports-----------#
 #from utility import ErrorHandler, rank_query, update, lvlup
@@ -130,6 +132,9 @@ class Bot(commands.Bot):
         self.rid = self.config.rid
         self.rsecret = self.config.rsecret
         self.log = config["log"]
+        self.reddit = praw.Reddit(client_id=self.config.rid,
+                                  client_secret=self.rsecret,
+                                  user_agent="Small-post-seacrcher")
         super().__init__(command_prefix=_prefix_callable,
                          description="Assassinations's discord bot")
         c.execute('SELECT * FROM prefix')
@@ -165,14 +170,15 @@ class Bot(commands.Bot):
         elif isinstance(error, commands.DisabledCommand):
             await ctx.author.send('Sorry. This command is disabled and cannot be used.')
         elif isinstance(error, commands.CommandInvokeError):
-            logger.exception("Fatal Error occured:")
+            logger.error(f'In {ctx.command.qualified_name}:')
             traceback.print_tb(error.original.__traceback__)
+            logger.error(f'{error.original.__class__.__name__}: {error.original}')
     #----------------------------------------#
 
     async def on_ready(self):
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
-            f"Bot:{self.user},Status = Online, Intialisation successful!")
+            f"Bot:{self.user}, Status = Online, Intialisation successful!")
         for server in self.guilds:
             c.execute(
                 f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING")
@@ -207,11 +213,15 @@ class Bot(commands.Bot):
     # Quick embed
 
     async def Qembed(self, ctx, Colour=None, title: str = None, content: str = None, NameValuePairs: list = None):
+        """
+        A method to quickly create embeds
 
-        if t is None:
-            t = discord.Embed.Empty
-        if c is None:
-            c = discord.Embed.Empty
+        embed = self.bot.Qembed(ctx, title="test", content = "passed", NameValuePairs = [("this is the first name", "this is the 1st value"),("this is the 2nd name", "this is the 2nd value")] )
+        """
+        if title is None:
+            title = discord.Embed.Empty
+        if content is None:
+            content = discord.Embed.Empty
         if Colour is None:
             Colour = ctx.author.colour
         if Colour in [1, '1']:
@@ -223,15 +233,12 @@ class Bot(commands.Bot):
         else:
             pass
         embed = discord.Embed(title=title, description=content,
-                              timestamp=ctx.message.created_at)
+                              timestamp=ctx.message.created_at, colour=Colour)
         embed.set_footer(
-            text=f"Requested by {str(ctx.author)}", icon_url=ctx.author.avatar_url)
+            text=f"{str(ctx.author)}", icon_url=ctx.author.avatar_url)
         if NameValuePairs is not None:
             for pair in NameValuePairs:
-                if pair[2] is True:
-                    embed.add_field(name=pair[0], value=pair[1])
-                elif pair[2] is False:
-                    embed.add_field(name=pair[0], value=pair[1])
+                embed.add_field(name=pair[0], value=pair[1])
         return embed
 
     #----------------------------------------#

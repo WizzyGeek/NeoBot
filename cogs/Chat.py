@@ -1,3 +1,4 @@
+import pprint
 import random
 from difflib import SequenceMatcher
 
@@ -25,9 +26,7 @@ class Chat(commands.Cog):
     #----------------------------------------#
 
     def grab_reply(self, question):
-        reddit = praw.Reddit(client_id=self.bot.config.rid,
-                             client_secret=self.bot.rsecret,
-                             user_agent="Small-post-seacrcher")
+        reddit = self.bot.reddit
         x = 0
         submission_ids = []
         for results in reddit.subreddit('all').search(question):
@@ -55,7 +54,6 @@ class Chat(commands.Cog):
             return "I have no clue"
         return comment_list[random.randint(0, len(comment_list)-1)]
     #----------------------------------------#
-
 
 def setup(bot):
     bot.add_cog(Chat(bot))

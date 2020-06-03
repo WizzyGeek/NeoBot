@@ -6,6 +6,7 @@ from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 
+
 def insert_returns(body):
     if isinstance(body[-1], ast.Expr):
         body[-1] = ast.Return(body[-1].value)
@@ -15,26 +16,31 @@ def insert_returns(body):
         insert_returns(body[-1].orelse)
     if isinstance(body[-1], ast.With):
         insert_returns(body[-1].body)
-            
+
+
 class Sudo(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     #----------------------------------------#
+
     @commands.group()
-    @commands.has_permissions(administrator = True)
+    @commands.has_permissions(administrator=True)
     async def sudo(self, ctx):
-        logger.info(f"elevated privilage use detected, USER : {ctx.author.name}")
+        logger.info(
+            f"elevated privilage use detected, USER : {ctx.author.name}")
         return None
     #----------------------------------------#
+
     @sudo.command(name="load")
     @commands.is_owner()
     async def load(self, ctx, extension):
         """loads a cog"""
         # To Test if .pysc can be loaded
-        self.bot.load_extension(f"cogs.{extension}") 
+        self.bot.load_extension(f"cogs.{extension}")
         logger.info(f"Loaded Cog {extension}")
-        await ctx.send(embed=discord.Embed(title="Done",description=f"loaded {extension}"))
+        await ctx.send(embed=discord.Embed(title="Done", description=f"loaded {extension}"))
     #----------------------------------------#
+
     @sudo.command(name="reload")
     @commands.is_owner()
     async def reload(self, ctx, *, extension):
@@ -42,16 +48,18 @@ class Sudo(commands.Cog):
         self.bot.unload_extension(f"cogs.{extension}")
         self.bot.load_extension(f"cogs.{extension}")
         logger.info(f"Reloaded Cog {extension}")
-        await ctx.send(embed=discord.Embed(title="Done",description=f"Reloaded {extension}"))
+        await ctx.send(embed=discord.Embed(title="Done", description=f"Reloaded {extension}"))
     #----------------------------------------#
+
     @sudo.command(name="unload")
     @commands.is_owner()
     async def unload(self, ctx, extension):
         """unloads a cog"""
         self.bot.unload_extension(f"cogs.{extension}")
         logger.info(f"unloaded Cog {extension}")
-        await ctx.send(embed=discord.Embed(title="Done",description=f"unloaded {extension}", colour = 0x00eb04))
+        await ctx.send(embed=discord.Embed(title="Done", description=f"unloaded {extension}", colour=0x00eb04))
     #----------------------------------------#
+
     @sudo.command(name="eval")
     async def eval_fn(self, ctx, *, cmd):
         """Evaluates input.
@@ -109,5 +117,7 @@ class Sudo(commands.Cog):
     #     await self.bot.run()
     #     return None
     #--------------------------------------------------------------------------------#
+
+
 def setup(bot):
     bot.add_cog(Sudo(bot))

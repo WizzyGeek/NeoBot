@@ -1,5 +1,7 @@
+git+https://github.com/danilobellini/fractal.git
 discord.py
 pandas
+Pillow
 psycopg2
 praw
 PyNaCl

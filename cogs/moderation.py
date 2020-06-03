@@ -23,8 +23,7 @@ class Search:
             user not found ctx.guild.members or user is invalid 
     """
 
-    def __init__(self, bot: Bot, ctx=None, user=None):
-        self.bot = bot
+    def __init__(self, ctx, user=None):
         self.user = user
         self.ctx = ctx
 
@@ -35,15 +34,14 @@ class Search:
             return self.ctx.author
 
         if isinstance(self.user, int):
-            return await self.bot.fetch_user(int(self.user))
+            return await self.ctx.bot.fetch_user(int(self.user))
         elif isinstance(self.user, discord.Member) or isinstance(self.user, discord.User):
             return self.user
         elif isinstance(self.user, str) and self.ctx is not None:  # ugly, help me
             try:
                 members = await self.ctx.guild.members
-                user_name, user_disc = self.user.split('#')
                 for usr in members:
-                    if (usr.name, usr.discriminator) == (user_name, user_disc):
+                    if str(usr) == self.user:
                         return usr
                 else:
                     print(type(self.user))
@@ -72,7 +70,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="warn")
     @commands.has_permissions(kick_members=True)
-    async def warn(self, ctx, usr, *, reason: str = "No reason"):
+    async def warn(self, ctx, usr : , *, reason: str = "No reason"):
         """Warns a discord user and logs it to self.log
 
         Arguments:
@@ -82,7 +80,7 @@ class moderation(commands.Cog):
         Keyword Arguments:
             reason {Optional[str]} -- Provide the reason to warn a user (default: {"No reason"})
         """
-        user = await Search(self.bot, user=usr, ctx=ctx).get()
+        user = await Search(user=usr, ctx=ctx).get()
         if user is not None:
             await user.send(f"You sere warned in {user.guild.name} for {reason}")
             embed = discord.Embed(title="Member Warned", color=0x3C80E2)
@@ -97,7 +95,7 @@ class moderation(commands.Cog):
             await ctx.send(f"Warned {user.name}!", delete_after=self.DeleteTime)
         else:
             embed = self.bot.RedEmbed.add_field(
-                title="Woops", name="An error occured!", value=f"I was not able to find {usr}")
+                name="An error occured!", value=f"I was not able to find {usr}")
             await ctx.send(embed=embed, delete_after=self.DeleteTime + 5.0)
 
     @commands.command(name="unban", aliases=["removeban"], description="A command to unban single user using dicriminator and name eg: $unban example#0000")
@@ -144,6 +142,7 @@ class moderation(commands.Cog):
             return None
         else:
             await ctx.send(embed=self.bot.BlurpleEmbed.add_field(value=f"I couldn't figure out who that is 🙍. Please ensure that this argument : {member} is correct", delete_after=self.DeleteTime))
+
     @commands.command(name="clear", aliases=["purge", "clean", "delete", "del"], description="deletes amount of specified messages, default is 5 eg: \'$clear 10\' or \'$purge 10\' or \'$delete 10\' or \'$del 10\'")
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount=5):
@@ -158,7 +157,7 @@ class moderation(commands.Cog):
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, usr: discord.Member or discord.User, *, reason: str = "No reason specified"):
-        user = await Search(self.bot, ctx=ctx, user=usr).get()
+        user = await Search(ctx=ctx, user=usr).get()
         if await user.check() is False:
             embed = discord.Embed(title="Member Kicked", color=0x3C80E2)
             embed.add_field(
@@ -190,7 +189,7 @@ class moderation(commands.Cog):
     @commands.command(name="ban", aliases=["banish"], description="bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, usr, *, reason: str = "Not given"):
-        user = await Search(self.bot, ctx=ctx, user=usr).get()
+        user = await Search(ctx=ctx, user=usr).get()
         if await user.check() is True:
             embed = discord.Embed(title="Member Banned", color=0x3C80E2)
             embed.add_field(
@@ -230,7 +229,7 @@ class moderation(commands.Cog):
     @commands.command(name="userinfo", aliases=["uinfo"])
     @commands.has_permissions(ban_members=True)
     async def userinfo(self, ctx, usr):
-        user = await Search(self.bot, ctx=ctx, user=usr).get()
+        user = await Search(ctx=ctx, user=usr).get()
         roles = [role.mention for role in user.roles]
         embed = discord.Embed(
             timestamp=ctx.message.created_at, color=user.colour)
@@ -271,7 +270,8 @@ class moderation(commands.Cog):
             name="Owner", value=ctx.message.guild.owner, inline=True)
         embed.add_field(name="Role Count", value=len(ctx.message.guild.roles))
 
-        embed.add_field(name="Created", value=ctx.message.guild.created_at.strftime("%B, %#d %B %Y, %I:%M %p UTC"))
+        embed.add_field(name="Created", value=ctx.message.guild.created_at.strftime(
+            "%B, %#d %B %Y, %I:%M %p UTC"))
 
         embed.set_thumbnail(url=ctx.message.guild.icon_url)
         embed.set_footer(text=f"Requested by {ctx.message.author}")
