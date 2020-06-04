@@ -10,18 +10,17 @@ filename = lambda kwargs: "_".join(item_str(*pair) for pair in kwargs.items())
 
 # Example list
 kwargs_list = [
-
-  OrderedDict([("model", "mandelbrot"),
+    OrderedDict([("model", "mandelbrot"),
                ("size", Point(605, 600)),
                ("depth", 256),
                ("zoom", 90),
                ("center", Point(-1.255, .38)),
-  ])
+    ])
 ]
 
 # Creates all examples
 if __name__ == "__main__":
-  for kwargs in kwargs_list:
-    kwargs["output"] = pathlib.Path(__file__).parent.absolute() / "img" / f"{filename(kwargs)}.png"
-    kwargs["show"] = False
-    exec_command(kwargs)
+    for kwargs in kwargs_list:
+        kwargs["output"] = pathlib.Path(__file__).parent.absolute() / "img" / f"{filename(kwargs)}.png"
+        kwargs["show"] = False
+        exec_command(kwargs)

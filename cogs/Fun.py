@@ -206,13 +206,13 @@ class Fun(commands.Cog):
     
 
     @commands.command(pass_context=True, aliases=['pick'])
-    async def choose(self, ctx, *, choices: str):
+    async def choose(self, ctx, *, choices: commands.clean_content):
         """Choose randomly from the options you give. [p]choose this | that"""
         await ctx.send(self.bot.bot_prefix + 'I choose: ``{}``'.format(random.choice(choices.split("|"))))
     #----------------------------------------#
 
     @commands.command(pass_context=True, aliases=['lmgtfy', 'google'])
-    async def l2g(self, ctx, *, query: str):
+    async def l2g(self, ctx, *, query: commands.clean_content):
         """Creates a lmgtfy link. Ex: [p]l2g how do i become cool."""
         await ctx.send(f'http://lmgtfy.com/?q={query.replace(" ", "+")}')
 
@@ -223,16 +223,20 @@ class Fun(commands.Cog):
     #----------------------------------------#
 
     @commands.command(pass_context=True, aliases=["novowels"])
-    async def vowelreplace(self, ctx, replace, *, msg):
+    async def vowelreplace(self, ctx, replace : commands.clean_content, *, msg : commands.clean_content):
         """Replaces all vowels in a word with a letter"""
         result = ""
+        if replace is None:
+            return await ctx.send(msg)
+        elif len(replace) > 2:
+            return await ctx.send(f"You must provide at most 2 symbols for replacing vowels not {replace}.")
         for letter in msg:
             if letter.lower() in "aeiou":
                 result += replace
             else:
                 result += letter
         await ctx.message.delete()
-        await ctx.send(result)
+        return await ctx.send(result)
     #----------------------------------------#
 
     @commands.command(pass_context=True)
@@ -253,7 +257,7 @@ class Fun(commands.Cog):
     #----------------------------------------#
 
     @commands.command(pass_context=True)
-    async def textflip(self, ctx, *, msg):
+    async def textflip(self, ctx, *, msg : commands.clean_content):
         """Flip given text."""
         result = ""
         for char in msg:
@@ -261,11 +265,11 @@ class Fun(commands.Cog):
                 result += self.text_flip[char]
             else:
                 result += char
-        await ctx.send(content=result[::-1])  # slice reverses the string
+        return await ctx.send(content=result[::-1])  # slice reverses the string
     #----------------------------------------#
 
     @commands.command(pass_context=True, aliases=['emojify'])
-    async def regional(self, ctx, *, msg):
+    async def regional(self, ctx, *, msg : commands.clean_content):
         """Replace letters with regional indicator emojis"""
         await ctx.message.delete()
         msg = list(msg)
@@ -281,7 +285,7 @@ class Fun(commands.Cog):
     #----------------------------------------#
 
     @commands.command(pass_context=True)
-    async def space(self, ctx, spaces=1, *, msg):
+    async def space(self, ctx, spaces=1, *, msg : commands.clean_content):
         """Add n spaces between each letter. Ex: [p]space 2 thicc"""
         await ctx.message.delete()
         spaced_message = spaces.join(list(msg))

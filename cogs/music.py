@@ -26,10 +26,10 @@ import youtube_dl
 from async_timeout import timeout
 from discord.ext import commands
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)# .setLevel(logging.INFO)
 
 
-def load_opus_lib():
+def load_opus_lib(logger):
     opus_libs = [
         ('libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll'),
         ('libopus.so.0', 'libopus.0.dylib', 'libopus.so')
@@ -73,16 +73,18 @@ def load_opus_lib():
     elif plt:
         logger.info(
             f"Undefined Platform : {plt} Detected. Please start an issue at https://github.com/TEEN-BOOM/korosensei/issues/new")
+        return try_load()
     else:
         logger.info(
             "Python doesn't support your platform, treating as Linux/Windows")
         return try_load()
 
-
-status = load_opus_lib()
-logger.info(f"Opus loaded : {status}")
+try:
+    load_opus_lib(logger)
+except Exception:
+    logger.exception("Couldn't load opus as an unexpected error occured..")
 # Silence useless bug reports messages
-youtube_dl.utils.bug_reports_message = lambda: ''
+# youtube_dl.utils.bug_reports_message = lambda: ''
 
 
 class VoiceError(Exception):
@@ -236,7 +238,7 @@ class SongQueue(asyncio.Queue):
             return self._queue[item]
 
     def __iter__(self):
-        return self._queue.__iter__()
+        return self._queue.__iter__() # deque()'s generator
 
     def __len__(self):
         return self.qsize()

@@ -42,74 +42,71 @@ from discord.ext import commands
 import praw
 
 #-----------module-imports-----------#
+from cogs.Utilty.Context import DBContext # Pylint import error here, reason unknown
 #from utility import ErrorHandler, rank_query, update, lvlup
 #----------------------------------------#
 logging.basicConfig(
-    format='%(name)s:%(levelname)s: %(message)s', level=logging.INFO)
+        format='%(name)s:%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
-try:
-    token = str(os.environ['token'])  # Redunant
-    DATABASE_URL = str(os.environ['DATABASE_URL'])
-    reddit_id = str(os.environ['reddit_id'])
-    reddit_secret = str(os.environ['reddit_secret'])
-except Exception:
-    logger.warning(
-        "Enviroment Variables don't contain credentials, seeking secret.json")
-    try:
-        with open("secret.json", "r") as reader:
-            data = json.loads(reader.read())
-    except Exception:
-        logger.error(
-            "secret.json not found | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
-        quit()  # Sorry python lords, I couldn't do it gracefully without this.
-    else:
-        try:
-            token = data['token']
-            DATABASE_URL = data['DATABASE_URL']
-            reddit_id = data['reddit']['id']
-            reddit_secret = data['reddit']['secret']
-        except KeyError:
-            logger.error(
-                "secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
-            quit()
-        except Exception:
-            logger.exception("An unexpected error occured")
-        else:
-            logger.info("Credentials initialised")
-#----------------------------------------#
-config = {
-    "welchannel": 583703372725747713,
-    "log": 709339678863786084
-}
-logger.info("Initialised config variables.")
-#----------------------------------------#
-try:
-    conn = psycopg2.connect(DATABASE_URL)
-except NameError:
-    logger.exception("unexpected error occured!")
-except Exception:
-    logger.exception("Cannot connect to postgre database")
-c = conn.cursor()
-#----------------------------------------#
-try:
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS prefix(id BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
-    conn.commit()
-except:
-    logger.exception("Psycopg2 error occured!")
-
 
 class Config:
     "Class to hold all Bot vars"
 
-    def __init__(self, token=token, DATABASE_URL=DATABASE_URL, reddit_id=reddit_id, reddit_secret=reddit_secret):
-        self.token = token
-        self.dburl = DATABASE_URL
-        self.rid = reddit_id
-        self.rsecret = reddit_secret
+    def __init__(self):
+        try:
+            self.token = str(os.environ['token'])  # Redunant
+            self.DATABASE_URL = str(os.environ['DATABASE_URL'])
+            self.reddit_id = str(os.environ['reddit_id'])
+            self.reddit_secret = str(os.environ['reddit_secret'])
+            self.config = {
+                "welchannel": 583703372725747713,
+                "log": 709339678863786084
+            }
+        except Exception:
+            logger.warning(
+                "Enviroment Variables don't contain credentials, seeking secret.json")
+            try:
+                with open("secret.json", "r") as reader:
+                    self.data = json.loads(reader.read())
+            except Exception:
+                logger.error(
+                    "secret.json not found | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
+                quit()  # Sorry python lords, I couldn't do it gracefully without this.
+            else:
+                try:
+                    self.creds = self.data['credentials']
+                    self.token = self.creds['token']
+                    self.dburl = self.creds['DATABASE_URL']
+                    self.reddit = self.data['reddit']
+                    self.rid = self.reddit['id']
+                    self.rsecret = self.reddit['secret']
+                    self.config = self.data["config"] # TODO: REMOVE THIS  
+                except KeyError:
+                    logger.exception(
+                        "secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
+                    quit()
+                except Exception:
+                    logger.exception("An unexpected error occured")
+                else:
+                    logger.info("Credentials initialised")
+        #----------------------------------------#
+        try:
+            self.conn = psycopg2.connect(self.dburl)
+        except NameError:
+            logger.exception("unexpected error occured!")
+        except Exception:
+            logger.exception("Cannot connect to postgre database")
+        self.cur = self.conn.cursor()
+        # logger.debug(f"Initialised config variables : {self.__dict__}") # Dangerous enable in secure condition only
+        #----------------------------------------#
+        try:
+            self.cur.execute(
+                "CREATE TABLE IF NOT EXISTS prefix(id BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
+            self.conn.commit()
+        except:
+            logger.exception("Psycopg2 error occured!")
+        logger.info("Config Object initialised")
 #----------------------------------------#
-
-
 def _prefix_callable(bot, msg):
     user_id = bot.user.id
     base = ['<@!{}> '.format(user_id), '<@{}> '.format(user_id)]
@@ -120,25 +117,25 @@ def _prefix_callable(bot, msg):
         base.extend(bot.prefixes.get(msg.guild.id, ['$', '.']))
     return base
 #----------------------------------------#
-
-
 class Bot(commands.Bot):
     #----------------------------------------#
-    def __init__(self):
-        self.config = Config()
+    def __init__(self, ConfigObj):
+        self.config = ConfigObj
         # shortcuts
         self.token = self.config.token
         self.dburl = self.config.dburl
         self.rid = self.config.rid
         self.rsecret = self.config.rsecret
-        self.log = config["log"]
-        self.reddit = praw.Reddit(client_id=self.config.rid,
+        self.log = self.config.config["log"]
+        self.cur = self.config.cur
+        self.conn = self.config.conn
+        self.reddit_client = praw.Reddit(client_id=self.rid,
                                   client_secret=self.rsecret,
                                   user_agent="Small-post-seacrcher")
         super().__init__(command_prefix=_prefix_callable,
                          description="Assassinations's discord bot")
-        c.execute('SELECT * FROM prefix')
-        prefix_rows = c.fetchall()
+        self.cur.execute('SELECT * FROM prefix')
+        prefix_rows = self.cur.fetchall()
         pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
         self.prefixes = {int(id): prefixes.split(',')
                          for (id, prefixes) in pre.items()}
@@ -180,9 +177,9 @@ class Bot(commands.Bot):
         logger.info(
             f"Bot:{self.user}, Status = Online, Intialisation successful!")
         for server in self.guilds:
-            c.execute(
+            self.cur.execute(
                 f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING")
-            conn.commit()
+            self.conn.commit()
     #----------------------------------------#
 
     def get_guild_prefixes(self, guild, *, local_inject=_prefix_callable):
@@ -197,19 +194,24 @@ class Bot(commands.Bot):
 
     async def set_guild_prefixes(self, guild, prefixes):
         if not prefixes:
-            c.execute(f'UPDATE prefix SET prefix={None} WHERE id={guild.id}')
-            conn.commit()
+            self.cur.execute(f'UPDATE prefix SET prefix={None} WHERE id={guild.id}')
+            self.conn.commit()
             self.prefixes[guild.id] = prefixes
             return True  # useful for set prefix command
         elif len(prefixes) > 10:
             return False
         else:
-            c.execute('UPDATE prefix SET prefix=? WHERE id=?',
+            self.cur.execute('UPDATE prefix SET prefix=? WHERE id=?',
                       (','.join(sorted(set(prefixes))), str(guild.id)))
-            conn.commit()
+            self.conn.commit()
             self.prefixes[guild.id] = sorted(set(prefixes))
             return True
     #----------------------------------------#
+    async def get_context(self, message, *, cls=DBContext):
+        # when you override this method, you pass your new Context
+        # subclass to the super() method, which tells the bot to
+        # use the new MyContext class
+        return await super().get_context(message, cls=cls)
     # Quick embed
 
     async def Qembed(self, ctx, Colour=None, title: str = None, content: str = None, NameValuePairs: list = None):
@@ -247,7 +249,7 @@ class Bot(commands.Bot):
         if member.Guid.id == 583689248117489675:  # Change this to enable welcoming also change these strings!
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.')
-            channel = self.get_channel(config["welchannel"])
+            channel = self.get_channel(self.config.config["welchannel"])
             embed = discord.Embed(
                 title="Welcome!", description=f"welcome to the server {member.mention}! everyone please make them feel welcomed!")
             await channel.send(embed=embed, content=None)
@@ -262,6 +264,7 @@ class Bot(commands.Bot):
 
 #--------------------------------------------------------------------------------#
 if __name__ == '__main__':
-    korosensei = Bot()
+    Config = Config()
+    korosensei = Bot(Config)
     korosensei.run()
 #------------------------------------------------------------------------------------------------------------------------#

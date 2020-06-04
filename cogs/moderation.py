@@ -1,7 +1,16 @@
 import logging
+import sys
+# from pathlib import Path
+
+# file = Path(__file__).resolve() # i appreciate pep 8 but this is ugly, switch to setup.py in future
+# parent, root = file.parent, file.parents[1]
+# sys.path.append(str(root))
+
 import discord
 from discord.ext import commands
-from bot import Bot  # ignore error here this is not the top level script
+
+# from bot import Bot
+
 
 # import psycopg2
 
@@ -62,7 +71,7 @@ class moderation(commands.Cog):
     A moderation cog in discord.py-rewrite
     """
 
-    def __init__(self, bot: Bot):
+    def __init__(self, bot):
         self.bot = bot
         self.log = bot.get_channel(bot.log)
         self.prefixes = bot.prefixes
@@ -70,7 +79,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="warn")
     @commands.has_permissions(kick_members=True)
-    async def warn(self, ctx, usr : , *, reason: str = "No reason"):
+    async def warn(self, ctx, usr: discord.Member or discord.User, *, reason: str = "No reason"):
         """Warns a discord user and logs it to self.log
 
         Arguments:
@@ -188,7 +197,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="ban", aliases=["banish"], description="bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, usr, *, reason: str = "Not given"):
+    async def ban(self, ctx, usr: discord.Member or discord.User, *, reason: str = "Not given"):
         user = await Search(ctx=ctx, user=usr).get()
         if await user.check() is True:
             embed = discord.Embed(title="Member Banned", color=0x3C80E2)

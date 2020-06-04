@@ -1,4 +1,4 @@
-git+https://github.com/danilobellini/fractal.git
+git+https://github.com/TEEN-BOOM/fractal.git
 discord.py
 pandas
 Pillow

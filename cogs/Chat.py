@@ -1,16 +1,22 @@
 import pprint
 import random
 from difflib import SequenceMatcher
+# import sys
+# from pathlib import Path
+
+# file = Path(__file__).resolve() # i appreciate pep 8 but this is ugly, switch to setup.py in future
+# parent, root = file.parent, file.parents[1]
+# sys.path.append(str(root))
 
 import praw
 from discord.ext import commands
 
-# ignore error here this is not the top level script, cause I use intellisense.
-from bot import Bot
+# ignore error here this is not the top level script
+# from bot import Bot
 
 
 class Chat(commands.Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.command(aliases=['c', 'ch'])
@@ -26,7 +32,7 @@ class Chat(commands.Cog):
     #----------------------------------------#
 
     def grab_reply(self, question):
-        reddit = self.bot.reddit
+        reddit = self.bot.reddit_client
         x = 0
         submission_ids = []
         for results in reddit.subreddit('all').search(question):
