@@ -12,15 +12,16 @@ class Help(commands.Cog):
     async def help(self, ctx): # TODO: HelpCommand class 
         """The first level Command for help"""
         # await ctx.send("under construction")
-        main_prefix = self.prefixes[ctx.guild.id][0]
-        embed = self.bot.Qembed(ctx, title="Help", content="Use `help <category>` for help on a category", Colour=1)
-        embed.add_field(name=":hammer: Moderation ", value=f"`{main_prefix}help moderation`\nAll moderation command", inline=True)
-        embed.add_field(name=":musical_note: Music", value=f"`{main_prefix}help music`\nMusic commands", inline=True)
-        embed.add_field(name=":abcd: Font", value=f"`{main_prefix}help font`\nFont changing commands", inline=True)
-        embed.add_field(name=":smile: Fun", value=f"`{main_prefix}help fun`\nFun commands", inline=True)
-        embed.add_field(name=":hammer_pick: Utility", value=f"`{main_prefix}help utility`\nUtility commands ", inline=True)
-        embed.add_field(name=":wrench: Misc", value=f"`{main_prefix}help misc`\nMiscellaneous command", inline=True)
-        await ctx.send(embed=embed)
+        if ctx.invoked_subcoomand is None:
+            main_prefix = self.prefixes[ctx.guild.id][0]
+            embed = self.bot.Qembed(ctx, title="Help", content="Use `help <category>` for help on a category", Colour=1)
+            embed.add_field(name=":hammer: Moderation ", value=f"`{main_prefix}help moderation`\nAll moderation command", inline=True)
+            embed.add_field(name=":musical_note: Music", value=f"`{main_prefix}help music`\nMusic commands", inline=True)
+            embed.add_field(name=":abcd: Font", value=f"`{main_prefix}help font`\nFont changing commands", inline=True)
+            embed.add_field(name=":smile: Fun", value=f"`{main_prefix}help fun`\nFun commands", inline=True)
+            embed.add_field(name=":hammer_pick: Utility", value=f"`{main_prefix}help utility`\nUtility commands ", inline=True)
+            embed.add_field(name=":wrench: Misc", value=f"`{main_prefix}help misc`\nMiscellaneous command", inline=True)
+            await ctx.send(embed=embed)
 
     @help.error
     async def help_error(self, ctx, error):
@@ -45,8 +46,8 @@ class Help(commands.Cog):
         embed.add_field(name="guildinfo", value=f"Info on the server\n`{main_prefix}ginfo`", inline=True)
         await ctx.author.send(embed=embed)
         await ctx.message.add_reaction("✅")
-        await ctx.send(f"{ctx.author.mention} check your DMs")
-        
+        await ctx.send(f"{ctx.author.mention} check your DMs", delete_after=self.bot.DeleteTime)
+
 def setup(bot):
     bot.remove_command("help")
     bot.add_cog(Help(bot))

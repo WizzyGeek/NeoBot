@@ -8,13 +8,24 @@ class DBContext(commands.Context):
         self.db = self.bot.conn
         self.cur = self.bot.cur
 
-    def is_target(self, user: discord.User or discord.Member) -> bool:
+    def is_target(self, user: discord.abc.User) -> bool:
         """
         args:
-            user: discord.User or discord.Member
+            user: discord.abc.User
         returns:
             bool
         evaluates:
             ctx.author == user
         """
         return self.author == user
+
+    def is_above(self, user: discord.Member) -> bool:
+        """
+        args:
+            user: discord.abc.User
+        returns:
+            bool
+        evaluates:
+            ctx.author.top_role > user.top_role 
+        """
+        return self.author.top_role > user.top_role or self.author == self.guild.owner

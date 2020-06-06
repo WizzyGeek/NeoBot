@@ -71,7 +71,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="warn")
     @commands.has_permissions(kick_members=True)
-    async def warn(self, ctx, usr: discord.Member or discord.User, *, reason: str = "No reason"):
+    async def warn(self, ctx, usr: discord.Member, *, reason: str = "No reason"):
         """Warns a discord user and logs it to self.log
 
         Arguments:
@@ -82,7 +82,7 @@ class moderation(commands.Cog):
             reason {Optional[str]} -- Provide the reason to warn a user (default: {"No reason"})
         """
         user = await Search(user=usr, ctx=ctx).get()
-        if user is not None:
+        if user is not None and ctx.is_above(user):
             await user.send(f"You sere warned in {user.guild.name} for {reason}")
             embed = discord.Embed(title="Member Warned", color=0x3C80E2)
             embed.add_field(
@@ -180,10 +180,10 @@ class moderation(commands.Cog):
 
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, usr: discord.Member or discord.User, *, reason: str = "No reason specified"):
+    async def kick(self, ctx, usr: discord.Member, *, reason: str = "No reason specified"):
         """kicks a user from the guild"""
         user = await Search(ctx=ctx, user=usr).get()
-        if await user.check() is False:
+        if not ctx.is_target(user) and ctx.is_above(user):
             embed = discord.Embed(title="Member Kicked", color=0x3C80E2)
             await self.log_embed(ctx, user, embed, reason)
             await self.log.send(embed=embed)
@@ -191,8 +191,10 @@ class moderation(commands.Cog):
             await ctx.author.send(f"You were  ")
             await ctx.guild.kick(user, reason=reason)
             await ctx.message.delete()
+        elif ctx.is_target(user):
+            await ctx.send(embed=self.bot.Qembed(ctx, content="Why would you kick yourself? just leave..."), delete_after=self.bot.DeleteTime)
         else:
-            await ctx.send(embed=discord.Embed(colour=ctx.author.colour, description="Why would you kick yourself? just leave..."))
+            await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."), delete_after=self.bot.DeleteTime)
 
     @kick.error
     async def kick_error(self, ctx, error):
@@ -215,15 +217,17 @@ class moderation(commands.Cog):
     async def ban(self, ctx, usr: discord.Member or discord.User, *, reason: str = "Not given"):
         """Bans a user"""
         user = await Search(ctx=ctx, user=usr).get()
-        if await user.check() is True:
+        if not ctx.is_target(user) and ctx.is_above(user):
             embed = discord.Embed(title="Member Banned", color=0x3C80E2)
             await self.log_embed(ctx, user, embed, reason)
             await self.log.send(embed=embed)
             await ctx.send(f"Banned {user.name}", delete_after=self.DeleteTime)
             await ctx.guild.ban(user, reason=reason, delete_message_days=2)
             await ctx.message.delete()
-        else:
+        elif ctx.is_target:
             await ctx.send(embed=discord.Embed(colour=ctx.author.colour, description="Why would you ban yourself?"))
+        else:
+            await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."), delete_after=self.bot.DeleteTime)
 
     @ban.error
     async def ban_error(self, ctx, error):
@@ -234,6 +238,8 @@ class moderation(commands.Cog):
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send("**You don't have permission to ban users!**", delete_after=self.DeleteTime)
             await ctx.message.delete()
+        elif isinstance(error, discord.Forbidden):
+            await ctx.send("I don't have sufficient permissions", delete_after=self.bot.DeleteTime)
         else:
             raise error
 
@@ -242,9 +248,9 @@ class moderation(commands.Cog):
     async def permit_error(self, ctx, error):
         """Purge, unban error"""
         if isinstance(error, commands.MissingPermissions):
-            await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!")
+            await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!", delete_after=self.bot.DeleteTime)
         elif isinstance(error, discord.Forbidden):
-            await ctx.send
+            await ctx.send("I dont seem to have all required permissions.", delete_after=self.bot.DeleteTime)
         else:
             return None
 
@@ -300,7 +306,7 @@ class moderation(commands.Cog):
     async def info_error(self, ctx, error):
         """info commands error handler"""
         await ctx.send(embed=discord.Embed(description="**Aww Snap! something went wrong**\nI have informed my devlopers", colour=ctx.author.colour))
-        logger.exception(f"info command failed: ")
+        logger.exception("info command failed: %s", error)
 
 def setup(bot):
     """Moderation cog setup"""

@@ -73,7 +73,6 @@ class utility(commands.Cog):
         poll = await ctx.send(embed=embed)
         for choice in choices:
             await poll.add_reaction(choice[0])
-
-
+            
 def setup(bot):
     bot.add_cog(utility(bot))
