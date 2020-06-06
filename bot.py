@@ -57,7 +57,7 @@ class Config:
     def __init__(self):
         try:
             self.token = str(os.environ['token'])  # Redunant
-            self.DATABASE_URL = str(os.environ['DATABASE_URL'])
+            self.dburl = str(os.environ['DATABASE_URL'])
             self.reddit_id = str(os.environ['reddit_id'])
             self.reddit_secret = str(os.environ['reddit_secret'])
             self.config = {
