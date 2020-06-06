@@ -99,22 +99,8 @@ class moderation(commands.Cog):
                 name="An error occured!", value=f"I was not able to find {usr}")
             await ctx.send(embed=embed, delete_after=self.DeleteTime + 5.0)
 
-    @commands.command(
-        name="unban",
-        aliases=["removeban"],
-        description="A command to unban single user using dicriminator and name eg: $unban example#0000")
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, member, *, reason):
-        """Unban a banned user
-
-        Arguments:
-            ctx {discord.ext.commands.Context()} -- The context object
-            member {str, int} -- [description]
-            reason {[type]} -- [description]
-        """
-        async def unbann(ctx, user):
+    async def unbann(self, ctx, user, reason):
             await ctx.guild.unban(user)
-            await ctx.send("Unbanned {user.name}", delete_after=self.DeleteTime)
             embed = discord.Embed(title="Member Unbanned", colour=0xffa500)
             embed.add_field(
                 name="Member", value=f"{user.mention}({user.name}) with id {user.id}", inline=True)
@@ -126,34 +112,41 @@ class moderation(commands.Cog):
             await self.log.send(embed=embed)
             return None
 
-        if isinstance(member, str):
+    @commands.command(name="unban", aliases=["removeban"], description="A command to unban single user using dicriminator and name eg: $unban example#0000")
+    @commands.has_permissions(ban_members=True)
+    async def unban(self, ctx, member: int, *, reason: str = "None Given"):
+        """Unban a banned user
+
+        Arguments:
+            ctx {discord.ext.commands.Context()} -- The context object
+            member {str, int} -- [description]
+            reason {[type]} -- [description]
+        """
+        if isinstance(member, int):
+            user = await self.bot.fetch_user(member)
+            bans = await ctx.guild.bans()
+            if user in map(lambda x: x.user, bans):
+                await self.unbann(ctx, user, reason)
+                await ctx.send(f"Unbanned {user}")
+            else:
+                await ctx.send("Either that user doesn't exist or the user is already unbanned.")
+        elif isinstance(member, str):
             banned_ppl = await ctx.guild.bans()
-            try:
-                member_name, member_discriminator = member.split('#')
-            except:
-                main_prefix = self.prefixes[ctx.guild.id][0]
-                await ctx.send(
-                    f"Please provide the user's id or their username like `{main_prefix}unban example#000`", delete_after=self.DeleteTime)
             for bans in banned_ppl:
                 user = bans.user
-                if (user.name, user.discriminator) == (member_name, member_discriminator):
-                    await unbann(ctx, user)
+                if str(user) == str(member):
+                    await self.unbann(ctx, user, reason)
                     return None
             else:
                 await ctx.send(
-                    "Sorry I couldn't find the user, try unbanning them using discord or give me the id.", delete_after=self.DeleteTime)
-        elif isinstance(int(member), int):
-            user = await self.bot.fetch_user(member)
-            await unbann(ctx, user)
-            return None
+                    "Sorry I couldn't find the user, try unbanning them using discord or give me the id.")
         else:
             await ctx.send(
-                embed=self.bot.BlurpleEmbed.add_field(value=f"I couldn't figure out who that is 🙍. Please ensure that this argument : {member} is correct",
-                delete_after=self.DeleteTime))
+                embed=self.bot.BlurpleEmbed.add_field(value=f"I couldn't figure out who that is 🙍. Please ensure that this argument : {member} is correct"))
 
     @commands.command(name="clear",
-        aliases=["purge", "clean", "delete", "del"], 
-        description="deletes amount of specified messages, default is 5 eg: \'$clear 10\' or \'$purge 10\' or \'$delete 10\' or \'$del 10\'")
+                      aliases=["purge", "clean", "delete", "del"],
+                      description="deletes amount of specified messages, default is 5 eg: \'$clear 10\' or \'$purge 10\' or \'$delete 10\' or \'$del 10\'")
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount=5):
         """
@@ -167,11 +160,11 @@ class moderation(commands.Cog):
             await ctx.send(content=f"Deleted {amount} messages!", delete_after=self.DeleteTime)
             await self.log.send(
                 embed=discord.Embed(title=f"Deleted {amount} messages", description=f"{amount} messages deleted in {str(ctx.channel)}", colour=0x39ff14))
-    
+
     async def log_embed(self, ctx, user: discord.Member or discord.User, embed: discord.Embed, reason):
         """Refactered code for log message info"""
         embed.add_field(
-                name="Member", value=f"{user.name} with id {user.id}", inline=True)
+            name="Member", value=f"{user.name} with id {user.id}", inline=True)
         embed.add_field(name="Mod", value="{}".format(
             ctx.message.author), inline=True)
         embed.add_field(
@@ -192,17 +185,17 @@ class moderation(commands.Cog):
             await ctx.guild.kick(user, reason=reason)
             await ctx.message.delete()
         elif ctx.is_target(user):
-            await ctx.send(embed=self.bot.Qembed(ctx, content="Why would you kick yourself? just leave..."), delete_after=self.bot.DeleteTime)
+            await ctx.send(embed=self.bot.Qembed(ctx, content="Why would you kick yourself? just leave..."))
         else:
-            await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."), delete_after=self.bot.DeleteTime)
+            await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."))
 
     @kick.error
     async def kick_error(self, ctx, error):
         """Error Handlerish for kick command"""
-        if isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("**Sorry, I couldn't find this user**", delete_after=self.DeleteTime)
             await ctx.message.delete()
-        elif isinstance(error, commands.MissingPermissions):
+        elif isinstance(error, commands.errors.MissingPermissions):
             await ctx.send("**You don't have permission to kick users!**", delete_after=self.DeleteTime)
             await ctx.message.delete()
         elif isinstance(error, discord.Forbidden):
@@ -211,8 +204,8 @@ class moderation(commands.Cog):
             raise error
 
     @commands.command(name="ban",
-        aliases=["banish"], 
-        description="bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
+                      aliases=["banish"],
+                      description="bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, usr: discord.Member or discord.User, *, reason: str = "Not given"):
         """Bans a user"""
@@ -225,17 +218,17 @@ class moderation(commands.Cog):
             await ctx.guild.ban(user, reason=reason, delete_message_days=2)
             await ctx.message.delete()
         elif ctx.is_target:
-            await ctx.send(embed=discord.Embed(colour=ctx.author.colour, description="Why would you ban yourself?"))
+            await ctx.send(embed=self.bot.Qembed(content="Why would you ban yourself?"))
         else:
-            await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."), delete_after=self.bot.DeleteTime)
+            await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."))
 
     @ban.error
     async def ban_error(self, ctx, error):
         """Ban Error handler"""
-        if isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("**Sorry, I couldn't find this user**", delete_after=self.DeleteTime)
             await ctx.message.delete()
-        elif isinstance(error, commands.MissingPermissions):
+        elif isinstance(error, commands.errors.MissingPermissions):
             await ctx.send("**You don't have permission to ban users!**", delete_after=self.DeleteTime)
             await ctx.message.delete()
         elif isinstance(error, discord.Forbidden):
@@ -247,12 +240,13 @@ class moderation(commands.Cog):
     @unban.error
     async def permit_error(self, ctx, error):
         """Purge, unban error"""
-        if isinstance(error, commands.MissingPermissions):
+        if isinstance(error, commands.errors.MissingPermissions):
             await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!", delete_after=self.bot.DeleteTime)
         elif isinstance(error, discord.Forbidden):
             await ctx.send("I dont seem to have all required permissions.", delete_after=self.bot.DeleteTime)
         else:
-            return None
+            await ctx.send(embed=discord.Embed(description="**Aww Snap! something went wrong**\nI have informed my devlopers", colour=ctx.author.colour))
+            logger.exception("info command failed: %s", error)
 
     @commands.command(name="userinfo", aliases=["uinfo"])
     # @commands.has_permissions(ban_members=True)
@@ -270,7 +264,8 @@ class moderation(commands.Cog):
             "%B, %#d %B %Y, %I:%M %p UTC"), inline=False)
         embed.add_field(name="Joined", value=user.joined_at.strftime(
             "%B, %#d %B %Y, %I:%M %p UTC"))
-        embed.add_field(name=f"{len(roles)} Roles", value=" ".join(roles), inline=False)
+        embed.add_field(name=f"{len(roles)} Roles",
+                        value=" ".join(roles), inline=False)
         embed.add_field(name="Bot?", value=user.bot)
         embed.set_author(name=f"User Info - {user}")
         embed.set_thumbnail(url=user.avatar_url)
@@ -298,8 +293,8 @@ class moderation(commands.Cog):
 
         embed.set_thumbnail(url=ctx.message.guild.icon_url)
         embed.set_footer(text=f"Requested by {ctx.message.author}")
-        await self.bot.say(embed=embed)
-        await self.bot.delete_message(ctx.message)
+        await ctx.send(embed=embed)
+        await ctx.message.delete()
 
     @guildinfo.error
     @userinfo.error
@@ -307,6 +302,7 @@ class moderation(commands.Cog):
         """info commands error handler"""
         await ctx.send(embed=discord.Embed(description="**Aww Snap! something went wrong**\nI have informed my devlopers", colour=ctx.author.colour))
         logger.exception("info command failed: %s", error)
+
 
 def setup(bot):
     """Moderation cog setup"""

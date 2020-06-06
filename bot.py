@@ -256,7 +256,7 @@ class Bot(commands.Bot):
     #----------------------------------------#
 
     async def on_member_join(self, member):
-        if member.Guid.id == 583689248117489675:  # Change this to enable welcoming also change these strings!
+        if member.guild.id == 583689248117489675:  # Change this to enable welcoming also change these strings!
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.')
             channel = self.get_channel(self.config.config["welchannel"])

@@ -12,7 +12,7 @@ class Help(commands.Cog):
     async def help(self, ctx): # TODO: HelpCommand class 
         """The first level Command for help"""
         # await ctx.send("under construction")
-        if ctx.invoked_subcoomand is None:
+        if ctx.invoked_subcommand is None:
             main_prefix = self.prefixes[ctx.guild.id][0]
             embed = self.bot.Qembed(ctx, title="Help", content="Use `help <category>` for help on a category", Colour=1)
             embed.add_field(name=":hammer: Moderation ", value=f"`{main_prefix}help moderation`\nAll moderation command", inline=True)
@@ -29,7 +29,7 @@ class Help(commands.Cog):
         if isinstance(error, commands.errors.CommandOnCooldown):
             await ctx.send(
                 embed=self.bot.Qembed(ctx, title="Slow Down!",
-                                      content=f"""This command has a 10 second cooldown for
+                                      content=f"""This command has a 5 second cooldown for
                                                   each user. Try again in `{error.retry_after} seconds`"""))
 
 
