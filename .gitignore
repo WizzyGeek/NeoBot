@@ -162,10 +162,10 @@ $RECYCLE.BIN/
 secret.json
 
 ## img ##
-img/
 *.png
 
 ## prebuilt cache ##
 !mandelbrot-size=500x300-depth=100-zoom=1.2-center=-1.5x0-show=False.png
 !julia-size=500x300-depth=100-zoom=1.2--0.456+0.67j-show=False.png
+
 # End of https://www.gitignore.io/api/linux,windows,visualstudiocode
