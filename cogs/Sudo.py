@@ -125,7 +125,7 @@ class Sudo(commands.Cog):
 
             cleaned = self.cleanup_code(response.content)
 
-            if cleaned in ('quit', 'exit', 'exit()'):
+            if cleaned in ('quit', 'exit', 'exit()', 'quit()'):
                 await ctx.send('Exiting.')
                 self.sessions.remove(ctx.channel.id)
                 return
@@ -179,7 +179,6 @@ class Sudo(commands.Cog):
             except discord.HTTPException as e:
                 await ctx.send(f'Unexpected error: `{e}`')
     #----------------------------------------#
-
     @sudo.command(pass_context=True, hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
         """Evaluates a code"""

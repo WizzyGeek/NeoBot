@@ -18,7 +18,8 @@ class Prefix(commands.Cog):
             result = await self.bot.set_guild_prefixes(ctx.guild, prefix.split(","))
             if result is True:
                 main_prefix = self.prefixes[ctx.guild.id][0]
-                await ctx.send(f"The main prefix is set to {main_prefix}, all prefixes are {self.prefixes[ctx.guild.id]}")
+                n = ",\n"
+                await ctx.send(embed=self.bot.Qembed(title=f"Prefix - {main_prefix}", content=f"All prefixes are: \n{n.join(self.prefixes[ctx.guild.id][1:])}"))
             else:
                 await ctx.send(
                     "Please ensure that all prefixes are seperated with `,`\n Also you can't have more than 10 prefixes",

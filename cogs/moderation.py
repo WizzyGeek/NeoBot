@@ -250,7 +250,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="userinfo", aliases=["uinfo"])
     # @commands.has_permissions(ban_members=True)
-    async def userinfo(self, ctx, usr):
+    async def userinfo(self, ctx, usr, no_pm=True):
         user = await Search(ctx=ctx, user=usr).get()
         roles = [role.mention for role in user.roles]
         embed = discord.Embed(
@@ -273,7 +273,7 @@ class moderation(commands.Cog):
         await ctx.send(embed=embed)
         await ctx.message.delete()
 
-    @commands.command(name="serverinfo", aliases=["si"])
+    @commands.command(name="serverinfo", aliases=["si", "guildinfo", "ginfo", "gi"], no_pm=True)
     # @commands.has_permissions(administrator=True)
     async def guildinfo(self, ctx):
         embed = discord.Embed(title="{}'s info".format(
