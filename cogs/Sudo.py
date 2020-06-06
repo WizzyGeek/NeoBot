@@ -90,7 +90,7 @@ class Sudo(commands.Cog):
         return content.strip('` \n')
     #----------------------------------------#
 
-    @commands.command(pass_context=True, hidden=True)
+    @sudo.command(pass_context=True, hidden=True)
     async def repl(self, ctx):
         """Launches an interactive REPL session."""
         variables = {
@@ -180,7 +180,7 @@ class Sudo(commands.Cog):
                 await ctx.send(f'Unexpected error: `{e}`')
     #----------------------------------------#
 
-    @commands.command(pass_context=True, hidden=True, name='eval')
+    @sudo.command(pass_context=True, hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
         """Evaluates a code"""
 
