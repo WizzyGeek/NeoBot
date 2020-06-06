@@ -58,8 +58,8 @@ class Config:
         try:
             self.token = str(os.environ['token'])  # Redunant
             self.dburl = str(os.environ['DATABASE_URL'])
-            self.reddit_id = str(os.environ['reddit_id'])
-            self.reddit_secret = str(os.environ['reddit_secret'])
+            self.rid = str(os.environ['reddit_id'])
+            self.rsecret = str(os.environ['reddit_secret'])
             self.config = {
                 "welchannel": 583703372725747713,
                 "log": 709339678863786084
