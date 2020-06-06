@@ -2,28 +2,27 @@ import shlex
 
 from discord.ext import commands
 
-from bot import Bot
 async def to_keycap(c):
     return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
 
 
 class utility(commands.Cog):
-    def __init__(self, bot : Bot):
+    def __init__(self, bot):
         self.bot = bot
-        
+
     @commands.command()
     async def ping(self, ctx):
         """
         used to check if the bot is alive
         """
-        await ctx.send("pong! {0:.2f}ms".format(self.bot.latency * 1000))
-        
+        await ctx.send(embed=self.bot.Qembed(ctx, title="pong!", content="Bot latency is {0:.2f}ms".format(self.bot.latency * 1000)))
+
     @commands.command(no_pm=True)
     async def poll(self, ctx, *, question: str):
         """
         Quick and easy yes/no poll, for multiple answers, see !quickpoll
         """
-        msg = await ctx.send(self.bot.Qembed(ctx, title="Poll", content = question))
+        msg = await ctx.send(embed = self.bot.Qembed(ctx, title="Poll", content=question))
         try:
             await ctx.message.delete()
         except:
@@ -32,7 +31,7 @@ class utility(commands.Cog):
         no_thumb = "👎"
         await msg.add_reaction(yes_thumb)
         await msg.add_reaction(no_thumb)
-        
+
     @commands.command(no_pm=True)
     async def quickpoll(self, ctx, *, questions_and_choices: str):
         """
@@ -69,11 +68,12 @@ class utility(commands.Cog):
 
         fmt = '{0}\n\n{1}'
         answer = '\n'.join('%s| %s' % t for t in choices)
-        embed = await self.bot.Qembed(ctx, title="Poll", content=fmt.format(question.replace("@", "@\u200b"), answer.replace("@", "@\u200b")))
+        embed = self.bot.Qembed(
+            ctx, title="Poll", content=fmt.format(question.replace("@", "@\u200b"), answer.replace("@", "@\u200b")))
         poll = await ctx.send(embed=embed)
         for choice in choices:
             await poll.add_reaction(choice[0])
-            
+
 
 def setup(bot):
     bot.add_cog(utility(bot))

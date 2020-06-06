@@ -5,6 +5,7 @@ import io
 import inspect
 from contextlib import redirect_stdout
 import traceback
+import textwrap
 
 import discord
 from discord.ext import commands
@@ -12,21 +13,12 @@ from discord.ext import commands
 logger = logging.getLogger(__name__)
 
 
-def insert_returns(body):
-    if isinstance(body[-1], ast.Expr):
-        body[-1] = ast.Return(body[-1].value)
-        ast.fix_missing_locations(body[-1])
-    if isinstance(body[-1], ast.If):
-        insert_returns(body[-1].body)
-        insert_returns(body[-1].orelse)
-    if isinstance(body[-1], ast.With):
-        insert_returns(body[-1].body)
-
-
 class Sudo(commands.Cog):
+    
     def __init__(self, bot):
         self.bot = bot
         self.sessions = set()
+        self._last_result = None
     #----------------------------------------#
 
     @commands.group()
@@ -42,83 +34,51 @@ class Sudo(commands.Cog):
     async def load(self, ctx, extension):
         """loads a cog"""
         # To Test if .pysc can be loaded
-        self.bot.load_extension(f"cogs.{extension}")
-        logger.info(f"Loaded Cog {extension}")
-        await ctx.send(embed=discord.Embed(title="Done", description=f"loaded {extension}"))
+        try:
+            self.bot.load_extension(f"cogs.{extension}")
+        except Exception as err:
+            logger.exception("Extension load failed")
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to load {extension}", Colour=3).add_field(name="Error", value=err))
+        else:
+            logger.info(f"Loaded Cog {extension}")
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Done", content=f"loaded {extension}", Colour=1))
     #----------------------------------------#
 
     @sudo.command(name="reload")
     @commands.is_owner()
     async def reload(self, ctx, *, extension):
         """reloads a cog"""
-        self.bot.unload_extension(f"cogs.{extension}")
-        self.bot.load_extension(f"cogs.{extension}")
-        logger.info(f"Reloaded Cog {extension}")
-        await ctx.send(embed=discord.Embed(title="Done", description=f"Reloaded {extension}"))
+        try:
+            self.bot.unload_extension(f"cogs.{extension}")
+            self.bot.load_extension(f"cogs.{extension}")
+        except Exception as err:
+            logger.exception("Extension reload failed")
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to reload {extension}", Colour=3).add_field(name="Error", value=err))
+        else:
+            logger.info(f"Loaded Cog {extension}")
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Done", content=f"reloaded {extension}", Colour=1))
     #----------------------------------------#
 
     @sudo.command(name="unload")
     @commands.is_owner()
     async def unload(self, ctx, extension):
         """unloads a cog"""
-        self.bot.unload_extension(f"cogs.{extension}")
-        logger.info(f"unloaded Cog {extension}")
-        await ctx.send(embed=discord.Embed(title="Done", description=f"unloaded {extension}", colour=0x00eb04))
-    #----------------------------------------#
-
-    @sudo.command(name="eval")
-    async def eval_fn(self, ctx, *, cmd):
-        """Evaluates input.
-        Input is interpreted as newline seperated statements.
-        If the last statement is an expression, that is the return value.
-        Usable globals:
-          - `bot`: the bot instance
-          - `discord`: the discord module
-          - `commands`: the discord.ext.commands module
-          - `ctx`: the invokation context
-          - `__import__`: the builtin `__import__` function
-        Such that `>eval 1 + 1` gives `2` as the result.
-        The following invokation will cause the bot to send the text '9'
-        to the channel of invokation and return '3' as the result of evaluating
-        >eval ```
-        a = 1 + 2
-        b = a * 2
-        await ctx.send(a + b)
-        a
-        ```
-        """
-        fn_name = "_eval_expr"
-
-        cmd = cmd.strip("` ")
-
-        # add a layer of indentation
-        cmd = "\n".join(f"    {i}" for i in cmd.splitlines())
-
-        # wrap in async def body
-        body = f"async def {fn_name}():\n{cmd}"
-
-        parsed = ast.parse(body)
-        body = parsed.body[0].body
-
-        insert_returns(body)
-
-        env = {
-            'bot': ctx.bot,
-            'discord': discord,
-            'commands': commands,
-            'ctx': ctx,
-            '__import__': __import__
-        }
-        exec(compile(parsed, filename="<ast>", mode="exec"), env)
-
-        result = (await eval(f"{fn_name}()", env))
-        await ctx.send(result)
+        try:
+            self.bot.unload_extension(f"cogs.{extension}")
+        except Exception as err:
+            logger.exception("Extension unload failed")
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to unload {extension}", Colour=3).add_field(name="Error", value=err))
+        else:
+            logger.info(f"Loaded Cog {extension}")
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Done", content=f"unloaded {extension}", Colour=1))
     #----------------------------------------#
     """Sourced From RoboDanny"""
+
     def get_syntax_error(self, e):
         if e.text is None:
             return f'```py\n{e.__class__.__name__}: {e}\n```'
         return f'```py\n{e.text}{"^":>{e.offset}}\n{e.__class__.__name__}: {e}```'
+    #----------------------------------------#
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
@@ -128,6 +88,7 @@ class Sudo(commands.Cog):
 
         # remove `foo`
         return content.strip('` \n')
+    #----------------------------------------#
 
     @commands.command(pass_context=True, hidden=True)
     async def repl(self, ctx):
@@ -151,8 +112,8 @@ class Sudo(commands.Cog):
 
         def check(m):
             return m.author.id == ctx.author.id and \
-                   m.channel.id == ctx.channel.id and \
-                   m.content.startswith('`')
+                m.channel.id == ctx.channel.id and \
+                m.content.startswith('`')
 
         while True:
             try:
@@ -217,6 +178,55 @@ class Sudo(commands.Cog):
                 pass
             except discord.HTTPException as e:
                 await ctx.send(f'Unexpected error: `{e}`')
+    #----------------------------------------#
+
+    @commands.command(pass_context=True, hidden=True, name='eval')
+    async def _eval(self, ctx, *, body: str):
+        """Evaluates a code"""
+
+        env = {
+            'bot': self.bot,
+            'ctx': ctx,
+            'channel': ctx.channel,
+            'author': ctx.author,
+            'guild': ctx.guild,
+            'message': ctx.message,
+            '_': self._last_result
+        }
+
+        env.update(globals())
+
+        body = self.cleanup_code(body)
+        stdout = io.StringIO()
+
+        to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
+
+        try:
+            exec(to_compile, env)
+        except Exception as e:
+            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+
+        func = env['func']
+        try:
+            with redirect_stdout(stdout):
+                ret = await func()
+        except Exception as e:
+            value = stdout.getvalue()
+            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+        else:
+            value = stdout.getvalue()
+            try:
+                await ctx.message.add_reaction('\u2705')
+            except:
+                pass
+
+            if ret is None:
+                if value:
+                    await ctx.send(f'```py\n{value}\n```')
+            else:
+                self._last_result = ret
+                await ctx.send(f'```py\n{value}{ret}\n```')
+
     # command not needed
     # @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")
     # @commands.is_owner()

@@ -6,7 +6,7 @@ class DBContext(commands.Context):
         super().__init__(**kwargs)
         self.reddit_client = self.bot.reddit_client
         self.db = self.bot.conn
-        self.cur = self.db.cur
+        self.cur = self.bot.cur
 
     def is_target(self, user: discord.User or discord.Member) -> bool:
         """

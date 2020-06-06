@@ -32,7 +32,7 @@ __status__ = "Development"
 import logging
 import os
 import psycopg2
-# import sys
+import sys
 import traceback
 import json
 
@@ -42,12 +42,14 @@ from discord.ext import commands
 import praw
 
 #-----------module-imports-----------#
-from cogs.Utilty.Context import DBContext # Pylint import error here, reason unknown
+# Pylint import error here, reason unknown
+from cogs.Utilty.Context import DBContext
 #from utility import ErrorHandler, rank_query, update, lvlup
 #----------------------------------------#
 logging.basicConfig(
-        format='%(name)s:%(levelname)s: %(message)s', level=logging.INFO)
+    format='%(name)s:%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class Config:
     "Class to hold all Bot vars"
@@ -71,7 +73,8 @@ class Config:
             except Exception:
                 logger.error(
                     "secret.json not found | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
-                quit()  # Sorry python lords, I couldn't do it gracefully without this.
+                # Sorry python lords, I couldn't do it gracefully without this.
+                sys.exit()
             else:
                 try:
                     self.creds = self.data['credentials']
@@ -80,11 +83,11 @@ class Config:
                     self.reddit = self.data['reddit']
                     self.rid = self.reddit['id']
                     self.rsecret = self.reddit['secret']
-                    self.config = self.data["config"] # TODO: REMOVE THIS  
+                    self.config = self.data["config"]  # TODO: REMOVE THIS
                 except KeyError:
                     logger.exception(
                         "secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
-                    quit()
+                    sys.exit()
                 except Exception:
                     logger.exception("An unexpected error occured")
                 else:
@@ -107,6 +110,8 @@ class Config:
             logger.exception("Psycopg2 error occured!")
         logger.info("Config Object initialised")
 #----------------------------------------#
+
+
 def _prefix_callable(bot, msg):
     user_id = bot.user.id
     base = ['<@!{}> '.format(user_id), '<@{}> '.format(user_id)]
@@ -117,6 +122,8 @@ def _prefix_callable(bot, msg):
         base.extend(bot.prefixes.get(msg.guild.id, ['$', '.']))
     return base
 #----------------------------------------#
+
+
 class Bot(commands.Bot):
     #----------------------------------------#
     def __init__(self, ConfigObj):
@@ -130,8 +137,8 @@ class Bot(commands.Bot):
         self.cur = self.config.cur
         self.conn = self.config.conn
         self.reddit_client = praw.Reddit(client_id=self.rid,
-                                  client_secret=self.rsecret,
-                                  user_agent="Small-post-seacrcher")
+                                         client_secret=self.rsecret,
+                                         user_agent="Small-post-seacrcher")
         super().__init__(command_prefix=_prefix_callable,
                          description="Assassinations's discord bot")
         self.cur.execute('SELECT * FROM prefix')
@@ -169,7 +176,8 @@ class Bot(commands.Bot):
         elif isinstance(error, commands.CommandInvokeError):
             logger.error(f'In {ctx.command.qualified_name}:')
             traceback.print_tb(error.original.__traceback__)
-            logger.error(f'{error.original.__class__.__name__}: {error.original}')
+            logger.error(
+                f'{error.original.__class__.__name__}: {error.original}')
     #----------------------------------------#
 
     async def on_ready(self):
@@ -194,7 +202,8 @@ class Bot(commands.Bot):
 
     async def set_guild_prefixes(self, guild, prefixes):
         if not prefixes:
-            self.cur.execute(f'UPDATE prefix SET prefix={None} WHERE id={guild.id}')
+            self.cur.execute(
+                f'UPDATE prefix SET prefix={None} WHERE id={guild.id}')
             self.conn.commit()
             self.prefixes[guild.id] = prefixes
             return True  # useful for set prefix command
@@ -202,11 +211,12 @@ class Bot(commands.Bot):
             return False
         else:
             self.cur.execute('UPDATE prefix SET prefix=? WHERE id=?',
-                      (','.join(sorted(set(prefixes))), str(guild.id)))
+                             (','.join(sorted(set(prefixes))), str(guild.id)))
             self.conn.commit()
             self.prefixes[guild.id] = sorted(set(prefixes))
             return True
     #----------------------------------------#
+
     async def get_context(self, message, *, cls=DBContext):
         # when you override this method, you pass your new Context
         # subclass to the super() method, which tells the bot to
@@ -214,7 +224,7 @@ class Bot(commands.Bot):
         return await super().get_context(message, cls=cls)
     # Quick embed
 
-    async def Qembed(self, ctx, Colour=None, title: str = None, content: str = None, NameValuePairs: list = None):
+    def Qembed(self, ctx, Colour=None, title: str = None, content: str = None, NameValuePairs: list = None):
         """
         A method to quickly create embeds
 
@@ -260,7 +270,6 @@ class Bot(commands.Bot):
     def run(self):
         logger.info("Logging in...")
         super().run(self.token, reconnect=True)
-
 
 #--------------------------------------------------------------------------------#
 if __name__ == '__main__':

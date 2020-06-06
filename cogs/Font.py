@@ -1,17 +1,14 @@
 """A cog to change font of a string"""
 import re
 
-
-
 from discord.ext import commands
- 
 
-smallcaps_alphabet = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ1234567890"
+Smallcaps_alphabet = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ1234567890"
 
-uppercase_fraktur = "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ"
-lowercase_fraktur = "𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷1234567890"
+Uppercase_fraktur = "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ"
+Lowercase_fraktur = "𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷1234567890"
 
-uppercase_boldfraktur = "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅"
+Uppercase_boldfraktur = "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅"
 lowercase_boldfraktur = "𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟1234567890"
 
 
@@ -23,8 +20,7 @@ bold_fancy_lowercase = "𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷
 bold_fancy_uppercase = "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩"
 
 fancy_lowercase = "𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟢"
-fancy_uppercase ="𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵"
-
+fancy_uppercase = "𝒜𝐵𝒞𝒟𝐸𝐹𝒢𝐻𝐼𝒥𝒦𝐿𝑀𝒩𝒪𝒫𝒬𝑅𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵"
 
 
 alphabet = dict(zip("abcdefghijklmnopqrstuvwxyz1234567890", range(0, 36)))
@@ -60,6 +56,7 @@ def aesthetics(string):
                 returnthis += letter
     return returnthis
 
+
 def double_font(string):
     returnthis = ""
     for word in string:
@@ -74,19 +71,21 @@ def double_font(string):
                 returnthis += letter
     return returnthis
 
+
 def fraktur(string):
     returnthis = ""
     for word in string:
         for letter in word:
             if letter in alphabet:
-                returnthis += lowercase_fraktur[alphabet[letter]]
+                returnthis += Lowercase_fraktur[alphabet[letter]]
             elif letter in uppercase_alphabet:
-                returnthis += uppercase_fraktur[uppercase_alphabet[letter]]
+                returnthis += Uppercase_fraktur[uppercase_alphabet[letter]]
             elif letter == space:
                 returnthis += " "
             else:
                 returnthis += letter
     return returnthis
+
 
 def bold_fraktur(string):
     returnthis = ""
@@ -95,12 +94,13 @@ def bold_fraktur(string):
             if letter in alphabet:
                 returnthis += lowercase_boldfraktur[alphabet[letter]]
             elif letter in uppercase_alphabet:
-                returnthis += uppercase_boldfraktur[uppercase_alphabet[letter]]
+                returnthis += Uppercase_boldfraktur[uppercase_alphabet[letter]]
             elif letter == space:
                 returnthis += " "
             else:
                 returnthis += letter
     return returnthis
+
 
 def fancy(string):
     returnthis = ""
@@ -115,6 +115,7 @@ def fancy(string):
             else:
                 returnthis += letter
     return returnthis
+
 
 def bold_fancy(string):
     returnthis = ""
@@ -136,15 +137,16 @@ def smallcaps(string):
     for word in string:
         for letter in word:
             if letter in alphabet:
-                returnthis += smallcaps_alphabet[alphabet[letter]]
+                returnthis += Smallcaps_alphabet[alphabet[letter]]
             else:
                 returnthis += letter
     return returnthis
 
+
 class Font(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(name='aesthetics', aliases=['ae'])
     async def _aesthetics(self, ctx, *, sentence: str):
         await ctx.send(aesthetics(sentence))
@@ -172,6 +174,7 @@ class Font(commands.Cog):
     @commands.command(name='smallcaps', aliases=['sc'])
     async def _smallcaps(self, ctx, *, sentence: str):
         await ctx.send(smallcaps(sentence))
-        
+
+
 def setup(bot):
     bot.add_cog(Font(bot))
