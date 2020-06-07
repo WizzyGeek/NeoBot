@@ -18,7 +18,7 @@ class Meme(commands.Cog):
             if not post.stickied and not post.is_self and post.title not in self.meme_done and not post.over_18:
                 valid.append(post)
         else:
-            if valid is not None:
+            if len(valid) > 0:
                 meme = random.choice(valid)
             else:
                 meme = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
@@ -46,7 +46,7 @@ class Meme(commands.Cog):
             if not post.stickied and post.is_self and post.title not in self.joke_done and not post.over_18:
                 valid.append(post)
         else:
-            if valid is not None:
+            if len(valid) > 0:
                 joke = random.choice(valid)
             else:
                 joke = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
