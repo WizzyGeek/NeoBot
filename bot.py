@@ -24,8 +24,8 @@ __authour__ = "TEEN BOOM"
 __copyright__ = "Copyright (C) 2020  TEEN BOOM"
 __credits__ = ["TEEN BOOM", "Anvit Dadape"]
 
-__version__ = "2.2.0.76"
-__email__ = "ojasscodingG@gmail.com"
+__version__ = "2.2.1.1"
+__email__ = "ojasscoding@gmail.com"
 __license__ = "GNU GPL3"
 __status__ = "Development"
 #-----------standard-imports-----------#

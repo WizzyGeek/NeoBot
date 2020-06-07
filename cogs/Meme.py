@@ -15,15 +15,16 @@ class Meme(commands.Cog):
         """Fetch post with images or any post if none are available"""
         valid = []
         for post in self.bot.reddit_client.subreddit(random.choice(SRs)).hot(limit=25):
-            if not post.stickied and not post.is_self and post.title not in self.meme_done:
+            if not post.stickied and not post.is_self and post.title not in self.meme_done and not post.over_18:
                 valid.append(post)
         else:
             if valid is not None:
                 meme = random.choice(valid)
             else:
                 meme = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
-        embed = discord.Embed(title=meme.title, timestamp=ctx.message.created_at, colour=ctx.author.colour).set_image(url=meme.url)
-        await ctx.send(embed=embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url))
+        embed = discord.Embed(title=meme.title, timestamp=ctx.message.created_at, colour=ctx.author.colour, url=meme.shortlink).set_image(url=meme.url)
+        embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=embed)
         self.meme_done.append(meme.title)
         del valid
 
@@ -42,7 +43,7 @@ class Meme(commands.Cog):
     async def fetch_joke(self, ctx, SRs):
         valid = []
         for post in self.bot.reddit_client.subreddit(random.choice(SRs)).hot(limit=25):
-            if not post.stickied and post.is_self and post.title not in self.joke_done:
+            if not post.stickied and post.is_self and post.title not in self.joke_done and not post.over_18:
                 valid.append(post)
         else:
             if valid is not None:
@@ -50,7 +51,7 @@ class Meme(commands.Cog):
             else:
                 joke = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
 
-        embed = discord.Embed(title=joke.title + "\u200b", timestamp=ctx.message.created_at, colour=ctx.author.colour).set_image(url=joke.url)
+        embed = discord.Embed(title=joke.title + "\u200b", timestamp=ctx.message.created_at, colour=ctx.author.colour, description=joke.selftext, url=joke.shortlink).set_image(url=joke.url)
         await ctx.send(embed=embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url))
         self.joke_done.append(joke.title)
         del valid
