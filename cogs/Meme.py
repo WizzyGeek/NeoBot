@@ -21,7 +21,7 @@ class Meme(commands.Cog):
             if len(valid) > 0:
                 meme = random.choice(valid)
             else:
-                meme = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
+                meme = random.choice(list(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25)))
         embed = discord.Embed(title=meme.title, timestamp=ctx.message.created_at, colour=ctx.author.colour, url=meme.shortlink).set_image(url=meme.url)
         embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url)
         await ctx.send(embed=embed)
@@ -49,7 +49,7 @@ class Meme(commands.Cog):
             if len(valid) > 0:
                 joke = random.choice(valid)
             else:
-                joke = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
+                joke = random.choice(list(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25)))
 
         embed = discord.Embed(title=joke.title + "\u200b", timestamp=ctx.message.created_at, colour=ctx.author.colour, description=joke.selftext, url=joke.shortlink).set_image(url=joke.url)
         await ctx.send(embed=embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url))
