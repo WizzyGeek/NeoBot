@@ -31,13 +31,13 @@ class Meme(commands.Cog):
     async def meme(self, ctx):
         """posts a meme"""
         SRs = ["memes", "dankmemes", "terriblefacebookmemes", "memeeconomy"]
-        self.fetch_meme(ctx, SRs)
+        await self.fetch_meme(ctx, SRs)
 
     @commands.command(mame="comic")
     async def comic(self, ctx):
         
         SRs = ["fffffffuuuuuuuuuuuu", "comics"]
-        self.fetch_meme(ctx, SRs)
+        await self.fetch_meme(ctx, SRs)
 
     async def fetch_joke(self, ctx, SRs):
         valid = []
@@ -58,12 +58,12 @@ class Meme(commands.Cog):
     @commands.command(name="joke")
     async def joke(self, ctx):
         SRs = ["jokes"]
-        self.fetch_joke(ctx, SRs)
+        await self.fetch_joke(ctx, SRs)
     
     @commands.command(name="dadjoke")
     async def dadjoke(self, ctx):
         SRs = ["dadjokes"]
-        self.fetch_joke(ctx, SRs)
+        await self.fetch_joke(ctx, SRs)
 
     @tasks.loop(minutes=60.0)
     async def memory_optimizer(self):
