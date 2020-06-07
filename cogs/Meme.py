@@ -19,10 +19,10 @@ class Meme(commands.Cog):
                 valid.append(post)
         else:
             if valid is not None:
-                meme = random.choice([valid])
+                meme = random.choice(valid)
             else:
                 meme = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
-        embed = discord.Embed(title=meme.title, timestamp=ctx.message.created_at, colour=ctx.author.colour).set_image(url=str(meme.url))
+        embed = discord.Embed(title=meme.title, timestamp=ctx.message.created_at, colour=ctx.author.colour).set_image(url=meme.url)
         await ctx.send(embed=embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url))
         self.meme_done.append(meme.title)
         del valid
@@ -46,11 +46,11 @@ class Meme(commands.Cog):
                 valid.append(post)
         else:
             if valid is not None:
-                joke = random.choice([valid])
+                joke = random.choice(valid)
             else:
                 joke = random.choice(self.bot.reddit_client.subreddit(random.choice(SRs)).rising(limit=25))
 
-        embed = discord.Embed(title=str(joke.title) + "\u200b", timestamp=ctx.message.created_at, colour=ctx.author.colour).set_image(url=str(joke.url))
+        embed = discord.Embed(title=joke.title + "\u200b", timestamp=ctx.message.created_at, colour=ctx.author.colour).set_image(url=joke.url)
         await ctx.send(embed=embed.set_footer(text=ctx.author, icon_url=ctx.author.avatar_url))
         self.joke_done.append(joke.title)
         del valid
