@@ -199,10 +199,10 @@ class Fun(commands.Cog):
                '● My reply is no.',
                '● My sources say no.',
                '● Outlook not so good.',
-               '● Very doubtful.',
+               '● Very doubtful.'
                ]
-        await ctx.send(embed=self.bot.Qembed(ctx, content=f"{random.choice(ans)}"))
-)
+        await ctx.send(embed=self.bot.Qembed(ctx, content=random.choice(ans)))
+
     #----------------------------------------#
     
 
