@@ -201,14 +201,15 @@ class Fun(commands.Cog):
                '● Outlook not so good.',
                '● Very doubtful.',
                ]
-        await ctx.send(embed=self.bot.Qembed(ctx, content=f"{random.choice(ans)})")
+        await ctx.send(embed=self.bot.Qembed(ctx, content=f"{random.choice(ans)}"))
+)
     #----------------------------------------#
     
 
-    @commands.command(pass_context=True, aliases=['pick'])
+    @commands.command(aliases=['pick'])
     async def choose(self, ctx, *, choices: commands.clean_content):
         """Choose randomly from the options you give. [p]choose this | that"""
-        await ctx.send('I choose: ``{}``'.format(random.choice(choices.split("|"))))
+        await ctx.send("I choose: ``{}``".format(random.choice(choices.split("|"))))
     #----------------------------------------#
 
     @commands.command(pass_context=True, aliases=['lmgtfy', 'google'])
