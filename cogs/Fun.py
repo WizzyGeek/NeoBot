@@ -201,14 +201,14 @@ class Fun(commands.Cog):
                '● Outlook not so good.',
                '● Very doubtful.',
                ]
-        await ctx.send(f"{random.choice(ans)}")
+        await ctx.send(embed=self.bot.Qembed(ctx, content=f"{random.choice(ans)})")
     #----------------------------------------#
     
 
     @commands.command(pass_context=True, aliases=['pick'])
     async def choose(self, ctx, *, choices: commands.clean_content):
         """Choose randomly from the options you give. [p]choose this | that"""
-        await ctx.send(self.bot.bot_prefix + 'I choose: ``{}``'.format(random.choice(choices.split("|"))))
+        await ctx.send('I choose: ``{}``'.format(random.choice(choices.split("|"))))
     #----------------------------------------#
 
     @commands.command(pass_context=True, aliases=['lmgtfy', 'google'])
@@ -247,7 +247,7 @@ class Fun(commands.Cog):
         if faces < 9:
             for i in range(1, dice):
                 embed.add_field(
-                    name=f"Die {i}", value=f'{self.regionals[random.randint(1, faces)]}')
+                    name=f"Die {i}", value=f'{self.regionals[str(random.randint(1, faces))]}')
         else:
             for i in range(1, dice):
                 embed.add_field(name=f"Die {i}", value=str(
@@ -265,6 +265,7 @@ class Fun(commands.Cog):
                 result += self.text_flip[char]
             else:
                 result += char
+        await ctx.message.delete()
         return await ctx.send(content=result[::-1])  # slice reverses the string
     #----------------------------------------#
 
