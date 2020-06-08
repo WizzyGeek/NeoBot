@@ -248,9 +248,9 @@ class moderation(commands.Cog):
             await ctx.send(embed=discord.Embed(description="**Aww Snap! something went wrong**\nI have informed my devlopers", colour=ctx.author.colour))
             logger.exception("info command failed: %s", error)
 
-    @commands.command(name="userinfo", aliases=["uinfo"])
+    @commands.command(name="userinfo", aliases=["uinfo"], no_pm=True)
     # @commands.has_permissions(ban_members=True)
-    async def userinfo(self, ctx, usr, no_pm=True):
+    async def userinfo(self, ctx, usr: discord.Member):
         user = await Search(ctx=ctx, user=usr).get()
         roles = [role.mention for role in user.roles]
         embed = discord.Embed(
