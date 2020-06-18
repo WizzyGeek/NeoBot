@@ -19,7 +19,11 @@ from discord.ext import commands
 class Chat(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
+    
+    def teardown(self, bot):
+        """"This Func should get called at unload"""
+        pass
+    
     @commands.command(aliases=['c', 'ch'])
     async def chat(self, ctx, *, you):
         reply = str(self.grab_reply(you))

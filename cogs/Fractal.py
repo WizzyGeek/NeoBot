@@ -1,9 +1,12 @@
+import asyncio
+import concurrent.futures
+import os
 import pathlib
 from collections import OrderedDict
-import os
 
 import discord
 from discord.ext import commands, tasks
+
 from fractal import Point, exec_command
 
 Point.__str__ = lambda self: "x".join(map(str, self))
@@ -34,18 +37,23 @@ class Fractal(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.loop = asyncio.get_event_loop()
+        self.excecutor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
 
     async def send_frac(self, ctx, Model):
         """send a Model"""
         name = f"{filename(Model)}.png"
-        Model["output"] = pathlib.Path(__file__).parent.absolute() / "img" / name
+        Model["output"] = pathlib.Path(
+            __file__).parent.absolute() / "img" / name
 
         if Model["output"].is_file():
             pass
         else:
-            exec_command(Model)
-
-        embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join([str(stat) for stat in Model.items()]))
+            fractal_gen = self.loop.run_in_executor(
+                self.executor, exec_command, Model)
+            await asyncio.wait(fractal_gen)
+        embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join(
+            [str(stat) for stat in Model.items()]))
         await ctx.send(embed=embed, file=discord.File(Model["output"]))
 
     @commands.group(name="fractal", no_pm=True)
@@ -55,7 +63,7 @@ class Fractal(commands.Cog):
         pass
 
     @fractal.command(name="mandelbrot")
-    async def mandelbrot(self, ctx, sizeX:int=500, sizeY:int=300, depth:int=100, zoom:float=1.2, centerX:float=-1.5, centerY:float=0):
+    async def mandelbrot(self, ctx, sizeX: int = 500, sizeY: int = 300, depth: int = 100, zoom: float = 1.2, centerX: float = -1.5, centerY: float = 0):
         """Generate a mandelbrot model and send it"""
         if sizeX > 800 or sizeY > 800 or depth > 512:
             return await ctx.send(embed=self.bot.Qembed(ctx, title="Argument too big!", content="Max first 3 args are \n `fractal julia 800 800 512`"))
@@ -70,7 +78,6 @@ class Fractal(commands.Cog):
             }
             async with ctx.typing():
                 await self.send_frac(ctx, Model)
-
 
     @fractal.command(name="julia")
     async def julia(self, ctx, sizeX: int = 500, sizeY: int = 300, depth: int = 100, zoom: float = 1.2, centerX: float = -0.456, centerY: float = 0.67):
@@ -107,8 +114,10 @@ class Fractal(commands.Cog):
         path = pathlib.Path(__file__).parent.absolute() / "img"
         files = os.listdir(path)
         if len(files) > 2:
-            file_names = [f for f in files if os.path.isfile(os.path.join(path, f))]
-            png_file_names = [f for f in file_names if f.endswith(".png") and f not in ["mandelbrot-size=500x300-depth=100-zoom=1.2-center=-1.5x0-show=False.png", "julia-size=500x300-depth=100-zoom=1.2--0.456+0.67j-show=False.png"]]
+            file_names = [f for f in files if os.path.isfile(
+                os.path.join(path, f))]
+            png_file_names = [f for f in file_names if f.endswith(".png") and f not in [
+                "mandelbrot-size=500x300-depth=100-zoom=1.2-center=-1.5x0-show=False.png", "julia-size=500x300-depth=100-zoom=1.2--0.456+0.67j-show=False.png"]]
             for file in png_file_names:
                 os.remove(file)
         else:

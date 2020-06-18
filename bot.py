@@ -24,7 +24,7 @@ __authour__ = "TEEN BOOM"
 __copyright__ = "Copyright (C) 2020  TEEN BOOM"
 __credits__ = ["TEEN BOOM", "Anvit Dadape"]
 
-__version__ = "2.2.1.5"
+__version__ = "2.2.2a0"
 __email__ = "ojasscoding@gmail.com"
 __license__ = "GNU GPL3"
 __status__ = "Development"
@@ -147,14 +147,6 @@ class Bot(commands.Bot):
         self.prefixes = {int(id): prefixes.split(',')
                          for (id, prefixes) in pre.items()}
         self.DeleteTime = 10.0  # The time to wait before deleting message.
-        # I am too lazy so here's the embeds
-        self.GreenEmbed = discord.Embed(colour=discord.Colour.green())
-        self.TealEmbed = discord.Embed(colour=discord.Colour.teal())
-        self.BlueEmbed = discord.Embed(colour=discord.Colour.blue())
-        self.BlurpleEmbed = discord.Embed(colour=discord.Colour.blurple())
-        self.RedEmbed = discord.Embed(colour=discord.Colour.red())
-        self.DarkRedEmbed = discord.Embed(colour=discord.Colour.dark_red())
-        self.GoldEmbed = discord.Embed(colour=discord.Colour.gold())
         for filename in os.listdir('./cogs'):
             # dump the file in the folder and Voila!
             if filename.endswith('.py') and filename != '__init__.py':

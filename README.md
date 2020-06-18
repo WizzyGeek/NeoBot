@@ -70,10 +70,8 @@ you need to set the value for config variables, token and reddit (reccomended) o
 The buildpacks and addons will be added automatically.
 
 ## TODO
-- [ ] Fix the help command
-- [ ] Allow ppl to search songs
-- [ ] Allow ppl to play live songs without errors
-- [ ] Queueing songs
+- [x] Fix the help command
+- [ ] Switch to lavalink
 - [ ] Fix all legacy code
 - [ ] Fix all code
 - [ ] Rewrite the bot

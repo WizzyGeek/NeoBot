@@ -49,8 +49,7 @@ class Sudo(commands.Cog):
     async def reload(self, ctx, *, extension):
         """reloads a cog"""
         try:
-            self.bot.unload_extension(f"cogs.{extension}")
-            self.bot.load_extension(f"cogs.{extension}")
+            self.bot.reload_extension(f"cogs.{extension}")
         except Exception as err:
             logger.exception("Extension reload failed")
             await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to reload {extension}", Colour=3).add_field(name="Error", value=err))
