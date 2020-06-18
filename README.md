@@ -68,3 +68,13 @@ Directly set attributes in Bot Class.
 #### For heroku 
 you need to set the value for config variables, token and reddit (reccomended) or use a `secret.json` file.
 The buildpacks and addons will be added automatically.
+
+## TODO
+- [ ] Fix the help command
+- [ ] Allow ppl to search songs
+- [ ] Allow ppl to play live songs without errors
+- [ ] Queueing songs
+- [ ] Fix all legacy code
+- [ ] Fix all code
+- [ ] Rewrite the bot
+- [ ] Use asyncpg
