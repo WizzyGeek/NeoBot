@@ -19,7 +19,7 @@ Simple, Modular and Multifuctional
 Out of these 3 files 1(`requirements.txt`) does not need to be edited.
 `lavalink.json` - contains the structure of your lavalink nodes.
 
-##### secret.json
+#### secret.json
 self-hosting requires you to create a file named `secret.json`
 with the following structure 
 ```json
@@ -39,8 +39,8 @@ with the following structure
     }
 }
 ```
-##### lavalink.json
-For music functionality create a file named `lavalink.json` if you have setup a ![Lavalink server](https://github.com/Frederikam/Lavalink/releases/) with the following structure:
+#### lavalink.json
+For music functionality edit the file named `lavalink.json` if you have setup a ![Lavalink server](https://github.com/Frederikam/Lavalink/releases/) with the following structure:
 ```json
 {
     "MAIN": {
@@ -54,10 +54,17 @@ For music functionality create a file named `lavalink.json` if you have setup a 
 }
 ```
 heartbeat is required if your vps closes idle connections.
+#### music-legacy
+If you wish to not use Lavalink then remane `music.pysc` -> `music.py` & delete `Music.py`, uninstall wavelink `python3 -m pip uninstall wavelink`
+and download FFmpeg binary for your platform and install opuslib if you do not use discord.py on windows
+##### For heroku music-legacy
+simply add the build packs
+- https://github.com/xrisk/heroku-opus.git
+- https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git
 
 ### Credentials : method 1
 Requires `secret.json`
-Apart from this you will need to install all dependencies. With ffmpeg binary and libopus
+Apart from this you will need to install all dependencies.
 
 ### method 2 
 
@@ -97,6 +104,9 @@ Directly set attributes in Bot Class.
 #### For heroku 
 you need to set the value for config variables, token and reddit (reccomended) or use a `secret.json` file.
 The buildpacks and addons will be added automatically.
+
+## Contribution
+You are welcome to contribute to the bot!
 
 ## TODO
 - [x] Fix the help command
