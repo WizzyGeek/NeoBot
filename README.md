@@ -11,14 +11,23 @@ Simple, Modular and Multifuctional
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TEEN-BOOM/korosensei.git)
 ## Hosting 
 
-### Credentials : method 1
-self-hosting rquires you to create a file named `secret.json`
+### Requirements
+`requirements.txt`
+`lavalink.json`
+`secret.json` - optional
+
+Out of these 3 files 1(`requirements.txt`) does not need to be edited.
+`lavalink.json` - contains the structure of your lavalink nodes.
+
+##### secret.json
+self-hosting requires you to create a file named `secret.json`
 with the following structure 
 ```json
 {
     "credentials":{
         "token": "<token>",
-        "DATABASE_URL": "URL"
+        "DATABASE_URL": "URL",
+        "wavepass": "pass"
     },
     "config": {
         "welchannel": 1234567890,
@@ -30,11 +39,31 @@ with the following structure
     }
 }
 ```
+##### lavalink.json
+For music functionality create a file named `lavalink.json` if you have setup a ![Lavalink server](https://github.com/Frederikam/Lavalink/releases/) with the following structure:
+```json
+{
+    "MAIN": {
+        "host": "lavaserver.host.com",
+        "port": 80,
+        "rest_uri": "http://lavaserver.host.com",
+        "identifier": "MAIN",
+        "region": "europe",
+        "heartbeat": 40.0
+        }
+}
+```
+heartbeat is required if your vps closes idle connections.
+
+### Credentials : method 1
+Requires `secret.json`
 Apart from this you will need to install all dependencies. With ffmpeg binary and libopus
 
 ### method 2 
+
 Set enviroment variables, this is done during setup for heroku.
 Also you will need to change `config` dict at line 60 in bot.py (Will be moved to database in future)
+
 ### method 3 (Not reccomended with hardcoding)
 Creating a config object with similar attributes
 example:
@@ -71,8 +100,8 @@ The buildpacks and addons will be added automatically.
 
 ## TODO
 - [x] Fix the help command
-- [ ] Switch to lavalink
-- [ ] Fix all legacy code
-- [ ] Fix all code
+- [x] Switch to lavalink
+- [x] Fix all legacy code (90%)
+- [ ] Fix all code (40%)
 - [ ] Rewrite the bot
 - [ ] Use asyncpg

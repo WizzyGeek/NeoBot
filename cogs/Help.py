@@ -1,3 +1,4 @@
+"""Help Command."""
 import discord
 import asyncio
 import itertools
@@ -6,13 +7,14 @@ from discord.ext.commands import Paginator as CommandPaginator
 
 
 class CannotPaginate(Exception):
-    """Exception to signify that content cannot be paginated"""
+    """Exception to signify that content cannot be paginated."""
+    
     pass
 
 
 class Pages:
-    """Implements a paginator that queries the user for the
-    pagination interface.
+    """Implements a paginator that queries the user for the pagination interface.
+    
     Pages are 1-index based, not 0-index based.
     If the user does not reply within 2 minutes then the pagination
     interface exits automatically.
@@ -37,6 +39,7 @@ class Pages:
     """
 
     def __init__(self, ctx, *, entries, per_page=12, show_entry_count=True):
+        """Olive oil, salt, peppa."""
         self.bot = ctx.bot
         self.entries = entries
         self.message = ctx.message
@@ -84,17 +87,21 @@ class Pages:
                     'Bot does not have Read Message History permission.')
 
     def get_page(self, page):
+        """Get the requested page."""
         base = (page - 1) * self.per_page
         return self.entries[base:base + self.per_page]
 
-    def get_content(self, entries, page, *, first=False):
+    def get_content(self, entries, page, *, first=False) -> None:
+        """Its RAW."""
         return None
 
     def get_embed(self, entries, page, *, first=False):
+        """Get the embed for the requested page."""
         self.prepare_embed(entries, page, first=first)
         return self.embed
 
     def prepare_embed(self, entries, page, *, first=False):
+        """Modify self.embed."""
         p = []
         for index, entry in enumerate(entries, 1 + ((page - 1) * self.per_page)):
             p.append(f'{index}. {entry}')
@@ -115,6 +122,7 @@ class Pages:
         self.embed.description = '\n'.join(p)
 
     async def show_page(self, page, *, first=False):
+        """Show the requested page."""
         self.current_page = page
         entries = self.get_page(page)
         content = self.get_content(entries, page, first=first)
@@ -137,32 +145,34 @@ class Pages:
 
             await self.message.add_reaction(reaction)
 
-    async def checked_show_page(self, page):
+    async def checked_show_page(self, page) -> None:
+        """Verify the page's existence."""
         if page != 0 and page <= self.maximum_pages:
             await self.show_page(page)
 
     async def first_page(self):
-        """goes to the first page"""
+        """Go to the first page."""
         await self.show_page(1)
 
     async def last_page(self):
-        """goes to the last page"""
+        """Go to the last page."""
         await self.show_page(self.maximum_pages)
 
     async def next_page(self):
-        """goes to the next page"""
+        """Go to the next page."""
         await self.checked_show_page(self.current_page + 1)
 
     async def previous_page(self):
-        """goes to the previous page"""
+        """Go to the previous page."""
         await self.checked_show_page(self.current_page - 1)
 
     async def show_current_page(self):
+        """Will show the Page."""
         if self.paginating:
             await self.show_page(self.current_page)
 
     async def numbered_page(self):
-        """lets you type a page number to go to"""
+        """Type a page number to go to."""
         to_delete = []
         to_delete.append(await self.channel.send('What page do you want to go to?'))
 
@@ -191,7 +201,7 @@ class Pages:
             pass
 
     async def show_help(self):
-        """shows this message"""
+        """Will show this message."""
         messages = ['Welcome to the interactive paginator!\n']
         messages.append('This interactively allows you to see pages of text by navigating with '
                         'reactions. They are as follows:\n')
@@ -213,11 +223,12 @@ class Pages:
         self.bot.loop.create_task(go_back_to_current_page())
 
     async def stop_pages(self):
-        """stops the interactive pagination session"""
+        """Stop the interactive pagination session."""
         await self.message.delete()
         self.paginating = False
 
     def react_check(self, payload):
+        """Check User reaction."""
         if payload.user_id != self.author.id:
             return False
 
@@ -261,7 +272,10 @@ class Pages:
 
 
 class HelpPaginator(Pages):
+    """Paginate the help command."""
+    
     def __init__(self, help_command, ctx, entries, *, per_page=4):
+        """Salt, peppa."""
         super().__init__(ctx, entries=entries, per_page=per_page)
         self.reaction_emojis.append(
             ('\N{WHITE QUESTION MARK ORNAMENT}', self.show_bot_help))
@@ -270,12 +284,14 @@ class HelpPaginator(Pages):
         self.prefix = help_command.clean_prefix
 
     def get_bot_page(self, page):
+        """Populate the help command."""
         cog, description, commands = self.entries[page - 1]
         self.title = f'{cog} Commands'
         self.description = description
         return commands
 
     def prepare_embed(self, entries, page, *, first=False):
+        """Prepare new embed for other page."""
         self.embed.clear_fields()
         self.embed.description = self.description
         self.embed.title = self.title
@@ -292,8 +308,7 @@ class HelpPaginator(Pages):
                 name=f'Page {page}/{self.maximum_pages} ({self.total} commands)')
 
     async def show_help(self):
-        """shows this message"""
-
+        """Will show this message."""
         self.embed.title = 'Paginator help'
         self.embed.description = 'Hello! Welcome to the help page.'
 
@@ -314,8 +329,7 @@ class HelpPaginator(Pages):
         self.bot.loop.create_task(go_back_to_current_page())
 
     async def show_bot_help(self):
-        """shows how to use the bot"""
-
+        """Show how to use the bot."""
         self.embed.title = 'Using the bot'
         self.embed.description = 'Hello! Welcome to the help page.'
         self.embed.clear_fields()
@@ -347,15 +361,17 @@ class HelpPaginator(Pages):
 
 
 class PaginatedHelpCommand(commands.HelpCommand):
-    """Paginated Help command by danny"""
+    """Paginated Help command by danny."""
 
     def __init__(self):
+        """Saute the veggies for 3 second."""
         super().__init__(command_attrs={
             'cooldown': commands.Cooldown(1, 3.0, commands.BucketType.member),
             'help': 'Shows help about the bot, a command, or a category'
         })
 
     async def on_help_command_error(self, ctx, error):
+        """Handle the errors."""
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send(str(error.original))
         elif isinstance(error, commands.errors.CommandOnCooldown):
@@ -364,7 +380,8 @@ class PaginatedHelpCommand(commands.HelpCommand):
                                       content=f"""This command has a 5 second cooldown for
                                                   each user. Try again in `{error.retry_after} seconds`"""))
 
-    def get_command_signature(self, command):
+    def get_command_signature(self, command) -> str:
+        """Get command usage format."""
         parent = command.full_parent_name
         if len(command.aliases) > 0:
             aliases = '|'.join(command.aliases)
@@ -377,6 +394,7 @@ class PaginatedHelpCommand(commands.HelpCommand):
         return f'{alias} {command.signature}'
 
     async def send_bot_help(self, mapping):
+        """Send help as an response to command."""
         def key(c):
             return c.cog_name or '\u200bNo Category'
 
@@ -406,19 +424,19 @@ class PaginatedHelpCommand(commands.HelpCommand):
         pages.get_page = pages.get_bot_page
         pages.is_bot = True
         pages.total = total
-        await self.context.release()
         await pages.paginate()
 
     async def send_cog_help(self, cog):
+        """Help on cog."""
         entries = await self.filter_commands(cog.get_commands(), sort=True)
         pages = HelpPaginator(self, self.context, entries)
         pages.title = f'{cog.qualified_name} Commands'
         pages.description = cog.description
 
-        await self.context.release()
         await pages.paginate()
 
     def common_command_formatting(self, page_or_embed, command):
+        """Command help formatting."""
         page_or_embed.title = self.get_command_signature(command)
         if command.description:
             page_or_embed.description = f'{command.description}\n\n{command.help}'
@@ -426,12 +444,14 @@ class PaginatedHelpCommand(commands.HelpCommand):
             page_or_embed.description = command.help or 'No help found...'
 
     async def send_command_help(self, command):
+        """Send help for a specific command."""
         # No pagination necessary for a single command.
         embed = discord.Embed(colour=discord.Colour.blurple())
         self.common_command_formatting(embed, command)
         await self.context.send(embed=embed)
 
     async def send_group_help(self, group):
+        """Send help on group of commmands."""
         subcommands = group.commands
         if len(subcommands) == 0:
             return await self.send_command_help(group)
@@ -439,19 +459,20 @@ class PaginatedHelpCommand(commands.HelpCommand):
         entries = await self.filter_commands(subcommands, sort=True)
         pages = HelpPaginator(self, self.context, entries)
         self.common_command_formatting(pages, group)
-
-        await self.context.release()
         await pages.paginate()
 
 
 class Help(commands.Cog):
-    """The Bot's Help Cog"""
+    """The Bot's Help Cog."""
 
     def __init__(self, bot):
+        """Stuff the Cog with the help command and garnish."""
         self.bot = bot
         self.old_help_command = bot.help_command
         bot.help_command = PaginatedHelpCommand()
         bot.help_command.cog = self
 
-def setup(bot):
+
+def setup(bot: commands.Bot) -> None:
+    """Into pan goes the cog."""
     bot.add_cog(Help(bot))

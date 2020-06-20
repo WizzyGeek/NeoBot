@@ -2,6 +2,7 @@
 
 import logging
 import sys
+from typing import Union, Optional
 
 import discord
 from discord.ext import commands
@@ -10,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class Search:
-    """
-    Class to search for a discord user by id or user tag
+    """Class to search for a discord user by id or user tag.
+    
     example :
         user = await Search(bot, user=userid).get()
         user = await Search(bot, ctx=ctx, user="example#0000").get()
@@ -24,11 +25,11 @@ class Search:
             user not found ctx.guild.members or user is invalid
     """
 
-    def __init__(self, ctx, user=None):
+    def __init__(self, ctx: commands.Context, user: Union[discord.Member, discord.User, str, int]=None):
         self.user = user
         self.ctx = ctx
 
-    async def get(self):
+    async def get(self) -> Optional[Union[discord.Member, discord.User]]:
         if self.user is None and self.ctx is None:
             return None
         elif self.user is None and self.ctx is not None:
@@ -63,7 +64,7 @@ class moderation(commands.Cog):
     A moderation cog in discord.py-rewrite
     """
 
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.log = bot.get_channel(bot.log)
         self.prefixes = bot.prefixes
@@ -71,7 +72,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="warn")
     @commands.has_permissions(kick_members=True)
-    async def warn(self, ctx, usr: discord.Member, *, reason: str = "No reason"):
+    async def warn(self, ctx, usr: Union[discord.Member, str, int], *, reason: str = "No reason"):
         """Warns a discord user and logs it to self.log
 
         Arguments:
@@ -99,7 +100,7 @@ class moderation(commands.Cog):
                 name="An error occured!", value=f"I was not able to find {usr}")
             await ctx.send(embed=embed, delete_after=self.DeleteTime + 5.0)
 
-    async def unbann(self, ctx, user, reason):
+    async def unbann(self, ctx: commands.Context, user: discord.Member, reason: str) -> None:
             await ctx.guild.unban(user)
             embed = discord.Embed(title="Member Unbanned", colour=0xffa500)
             embed.add_field(
@@ -114,7 +115,7 @@ class moderation(commands.Cog):
 
     @commands.command(name="unban", aliases=["removeban"], description="A command to unban single user using dicriminator and name eg: $unban example#0000")
     @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, member: int, *, reason: str = "None Given"):
+    async def unban(self, ctx: commands.Context, member: int, *, reason: str = "None Given"):
         """Unban a banned user
 
         Arguments:
@@ -148,7 +149,7 @@ class moderation(commands.Cog):
                       aliases=["purge", "clean", "delete", "del"],
                       description="deletes amount of specified messages, default is 5 eg: \'$clear 10\' or \'$purge 10\' or \'$delete 10\' or \'$del 10\'")
     @commands.has_permissions(manage_messages=True)
-    async def clear(self, ctx, amount=5):
+    async def clear(self, ctx: commands.Context, amount: int=5):
         """
         Purges the specified amount of messages 
         """
@@ -161,7 +162,7 @@ class moderation(commands.Cog):
             await self.log.send(
                 embed=discord.Embed(title=f"Deleted {amount} messages", description=f"{amount} messages deleted in {str(ctx.channel)}", colour=0x39ff14))
 
-    async def log_embed(self, ctx, user: discord.Member or discord.User, embed: discord.Embed, reason):
+    async def log_embed(self, ctx: commands.Context, user: discord.Member, embed: discord.Embed, reason: str) -> None:
         """Refactered code for log message info"""
         embed.add_field(
             name="Member", value=f"{user.name} with id {user.id}", inline=True)
@@ -173,7 +174,7 @@ class moderation(commands.Cog):
 
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, usr: discord.Member, *, reason: str = "No reason specified"):
+    async def kick(self, ctx: commands.Context, usr: Union[discord.Member, str, int], *, reason: str = "No reason specified") -> None:
         """kicks a user from the guild"""
         user = await Search(ctx=ctx, user=usr).get()
         if not ctx.is_target(user) and ctx.is_above(user):
@@ -190,7 +191,7 @@ class moderation(commands.Cog):
             await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."))
 
     @kick.error
-    async def kick_error(self, ctx, error):
+    async def kick_error(self, ctx: commands.Context, error: discord.ext.commands.CommandError) -> None:
         """Error Handlerish for kick command"""
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("**Sorry, I couldn't find this user**", delete_after=self.DeleteTime)
@@ -207,7 +208,7 @@ class moderation(commands.Cog):
                       aliases=["banish"],
                       description="bans a member usage: \"$ban @example#0000 spam\" reason (i.e spam) is optional and default \"Not given\" will be used.")
     @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, usr: discord.Member or discord.User, *, reason: str = "Not given"):
+    async def ban(self, ctx, usr: Union[discord.Member, str, int], *, reason: str = "Not given"):
         """Bans a user"""
         user = await Search(ctx=ctx, user=usr).get()
         if not ctx.is_target(user) and ctx.is_above(user):
@@ -223,7 +224,7 @@ class moderation(commands.Cog):
             await ctx.send(embed=self.bot.Qembed(ctx, content=f"{user.name} seems to be above you."))
 
     @ban.error
-    async def ban_error(self, ctx, error):
+    async def ban_error(self, ctx:commands.Context, error: discord.ext.commands.CommandError) -> None:
         """Ban Error handler"""
         if isinstance(error, commands.errors.MissingRequiredArgument):
             await ctx.send("**Sorry, I couldn't find this user**", delete_after=self.DeleteTime)
@@ -238,7 +239,7 @@ class moderation(commands.Cog):
 
     @clear.error
     @unban.error
-    async def permit_error(self, ctx, error):
+    async def permit_error(self, ctx: commands.Context, error: discord.ext.commands.CommandError) -> None:
         """Purge, unban error"""
         if isinstance(error, commands.errors.MissingPermissions):
             await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!", delete_after=self.bot.DeleteTime)
@@ -250,7 +251,8 @@ class moderation(commands.Cog):
 
     @commands.command(name="userinfo", aliases=["uinfo"], no_pm=True)
     # @commands.has_permissions(ban_members=True)
-    async def userinfo(self, ctx, usr: discord.Member):
+    async def userinfo(self, ctx: commands.context, usr: Union[discord.Member, str, int]) -> None:
+        """Get info on an user"""
         user = await Search(ctx=ctx, user=usr).get()
         roles = [role.mention for role in user.roles]
         embed = discord.Embed(
@@ -276,7 +278,8 @@ class moderation(commands.Cog):
 
     @commands.command(name="serverinfo", aliases=["si", "guildinfo", "ginfo", "gi"], no_pm=True)
     # @commands.has_permissions(administrator=True)
-    async def guildinfo(self, ctx):
+    async def guildinfo(self, ctx: commands.Context) -> None:
+        """Gets the guild info"""
         embed = discord.Embed(title="{}'s info".format(
             ctx.message.guild.name), description="Information on the guild", color=0xcc0000)
         embed.add_field(name="guild Name",

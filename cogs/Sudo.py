@@ -1,3 +1,4 @@
+"""The Cog For managing the bot."""
 import ast
 import asyncio
 import logging
@@ -14,16 +15,19 @@ logger = logging.getLogger(__name__)
 
 
 class Sudo(commands.Cog):
+    """Cog for maintaining and updating the bot."""
     
     def __init__(self, bot):
+        """Season it with some salt."""
         self.bot = bot
         self.sessions = set()
         self._last_result = None
     #----------------------------------------#
 
     @commands.group()
-    @commands.has_permissions(administrator=True)
-    async def sudo(self, ctx):
+    @commands.has_permissions(administrator=True) # REASON : [If you are admin in that server then you may
+    async def sudo(self, ctx: commands.Context) -> None:    # use owner commands there since you may try to
+        """Log what they do."""                             # exploit this cog in any server]
         logger.info(
             f"elevated privilage use detected, USER : {ctx.author.name}")
         return None
@@ -31,8 +35,8 @@ class Sudo(commands.Cog):
 
     @sudo.command(name="load")
     @commands.is_owner()
-    async def load(self, ctx, extension):
-        """loads a cog"""
+    async def load(self, ctx: commands.Context, extension: str) -> None:
+        """Load a cog."""
         # To Test if .pysc can be loaded
         try:
             self.bot.load_extension(f"cogs.{extension}")
@@ -46,8 +50,8 @@ class Sudo(commands.Cog):
 
     @sudo.command(name="reload")
     @commands.is_owner()
-    async def reload(self, ctx, *, extension):
-        """reloads a cog"""
+    async def reload(self, ctx: commands.Context, extension: str) -> None:
+        """Reload a cog."""
         try:
             self.bot.reload_extension(f"cogs.{extension}")
         except Exception as err:
@@ -60,8 +64,8 @@ class Sudo(commands.Cog):
 
     @sudo.command(name="unload")
     @commands.is_owner()
-    async def unload(self, ctx, extension):
-        """unloads a cog"""
+    async def unload(self, ctx: commands.Context, extension: str) -> None:
+        """Unload a cog."""
         try:
             self.bot.unload_extension(f"cogs.{extension}")
         except Exception as err:
@@ -73,7 +77,8 @@ class Sudo(commands.Cog):
     #----------------------------------------#
     """Sourced From RoboDanny"""
 
-    def get_syntax_error(self, e):
+    def get_syntax_error(self, e: Exception):
+        """Capture the text from an error."""
         if e.text is None:
             return f'```py\n{e.__class__.__name__}: {e}\n```'
         return f'```py\n{e.text}{"^":>{e.offset}}\n{e.__class__.__name__}: {e}```'
@@ -91,7 +96,7 @@ class Sudo(commands.Cog):
 
     @sudo.command(pass_context=True, hidden=True)
     async def repl(self, ctx):
-        """Launches an interactive REPL session."""
+        """Launch an interactive REPL session."""
         variables = {
             'ctx': ctx,
             'bot': self.bot,
@@ -180,8 +185,7 @@ class Sudo(commands.Cog):
     #----------------------------------------#
     @sudo.command(pass_context=True, hidden=True, name='eval')
     async def _eval(self, ctx, *, body: str):
-        """Evaluates a code"""
-
+        """Evaluate a code."""
         env = {
             'bot': self.bot,
             'ctx': ctx,
@@ -236,5 +240,6 @@ class Sudo(commands.Cog):
     #--------------------------------------------------------------------------------#
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
+    """Into pan goes the cog."""
     bot.add_cog(Sudo(bot))

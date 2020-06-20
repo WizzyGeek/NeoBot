@@ -1,4 +1,4 @@
-"""A cog to change font of a string"""
+"""A cog to change font of a string."""
 import re
 
 from discord.ext import commands
@@ -149,32 +149,40 @@ class Font(commands.Cog):
 
     @commands.command(name='aesthetics', aliases=['ae'])
     async def _aesthetics(self, ctx, *, sentence: str):
+        """Change text to aesthetic."""
         await ctx.send(aesthetics(sentence))
 
     @commands.command(name='fraktur')
     async def _fraktur(self, ctx, *, sentence: str):
+        """Change text to fraktur."""
         await ctx.send(fraktur(sentence))
 
     @commands.command(name='boldfaktur')
     async def _boldfaktur(self, ctx, *, sentence: str):
+        """Change text to fraktur but bold."""
         await ctx.send(bold_fraktur(sentence))
 
     @commands.command(name='fancy', aliases=['ff'])
     async def _fancy(self, ctx, *, sentence: str):
+        """Change text to fancy."""
         await ctx.send(fancy(sentence))
 
     @commands.command(name='boldfancy', aliases=['bf'])
     async def _bold_fancy(self, ctx, *, sentence: str):
+        """Change text to fancy but bold."""
         await ctx.send(bold_fancy(sentence))
 
     @commands.command(name='double', aliases=['ds'])
     async def _doublestruck(self, ctx, *, sentence: str):
+        """Change text to double."""
         await ctx.send(double_font(sentence))
 
     @commands.command(name='smallcaps', aliases=['sc'])
     async def _smallcaps(self, ctx, *, sentence: str):
+        """Change text to smallcaps."""
         await ctx.send(smallcaps(sentence))
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
+    """Into pan goes the cog."""
     bot.add_cog(Font(bot))

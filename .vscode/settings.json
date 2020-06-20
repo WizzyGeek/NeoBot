@@ -36,5 +36,15 @@
             "URI": "`www.startpage.$#$/do/search?query="
         }
     ],
-    "websearch.default_engine": "Google"
+    "websearch.default_engine": "Google",
+    "python.linting.pycodestyleEnabled": false,
+    "python.linting.pydocstyleEnabled": false,
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": false,
+    "python.testing.promptToConfigure": false,
+    "python.linting.pylamaEnabled": false
 }

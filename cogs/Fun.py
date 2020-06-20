@@ -137,7 +137,7 @@ class Fun(commands.Cog):
         text_flip[char] = alt_char_list[idx]
         text_flip[alt_char_list[idx]] = char
     #----------------------------------------#
-    # used in [p]react, checks if it's possible to react with the duper string or not
+    # used in react, checks if it's possible to react with the duper string or not
 
     @staticmethod
     def has_dupe(duper):
@@ -145,7 +145,7 @@ class Fun(commands.Cog):
         collect_my_duper = list(filter(lambda x: x != '⃣', duper))
         return len(set(collect_my_duper)) != len(collect_my_duper)
     #----------------------------------------#
-    # used in [p]react, replaces e.g. 'ng' with '🆖'
+    # used in react, replaces e.g. 'ng' with '🆖'
 
     @staticmethod
     def replace_combos(react_me):
@@ -154,7 +154,7 @@ class Fun(commands.Cog):
                 react_me = react_me.replace(combo[0], combo[1], 1)
         return react_me
     #----------------------------------------#
-    # used in [p]react, replaces e.g. 'aaaa' with '🇦🅰🍙🔼'
+    # used in react, replaces e.g. 'aaaa' with '🇦🅰🍙🔼'
 
     @staticmethod
     def replace_letters(react_me):
@@ -208,13 +208,13 @@ class Fun(commands.Cog):
 
     @commands.command(aliases=['pick'])
     async def choose(self, ctx, *, choices: commands.clean_content):
-        """Choose randomly from the options you give. [p]choose this | that"""
+        """Choose randomly from the options you give. choose this | that"""
         await ctx.send("I choose: ``{}``".format(random.choice(choices.split("|"))))
     #----------------------------------------#
 
     @commands.command(pass_context=True, aliases=['lmgtfy', 'google'])
     async def l2g(self, ctx, *, query: commands.clean_content):
-        """Creates a lmgtfy link. Ex: [p]l2g how do i become cool."""
+        """Creates a lmgtfy link. Ex: l2g how do i become cool."""
         await ctx.send(f'http://lmgtfy.com/?q={query.replace(" ", "+")}')
 
     @l2g.error
@@ -242,7 +242,7 @@ class Fun(commands.Cog):
 
     @commands.command(pass_context=True)
     async def dice(self, ctx, dice=1, faces=6):
-        """Roll dice. Optionally input # of dice and # of sides. Ex: [p]dice 5 12"""
+        """Roll dice. Optionally input # of dice and # of sides. Ex: dice 5 12"""
         embed = discord.Embed(title="**Dice  rolled..**")
         dice += 1
         if faces < 9:
@@ -288,7 +288,7 @@ class Fun(commands.Cog):
 
     @commands.command(pass_context=True)
     async def space(self, ctx, spaces=1, *, msg : commands.clean_content):
-        """Add n spaces between each letter. Ex: [p]space 2 thicc"""
+        """Add n spaces between each letter. Ex: space 2 thicc"""
         await ctx.message.delete()
         spaced_message = spaces.join(list(msg))
         await ctx.send(spaced_message)
@@ -300,5 +300,6 @@ class Fun(commands.Cog):
                      delete_after=10.0)
     #----------------------------------------#
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
+    """Cog setup function."""
     bot.add_cog(Fun(bot))

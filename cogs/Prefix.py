@@ -11,6 +11,7 @@ class Prefix(commands.Cog):
 
     @commands.command(name="prefix")
     async def prefix(self, ctx, *, prefix=None):
+        """Change the prefix or view all prefixes of the bot."""
         main_prefix = self.prefixes[ctx.guild.id][0]
         if prefix is None:
             await ctx.send(f"The prefix is {main_prefix}")
@@ -26,5 +27,6 @@ class Prefix(commands.Cog):
                     delete_after=(self.DeleteTime + 3.0))
 
 
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
+    """Cog setup function."""
     bot.add_cog(Prefix(bot))

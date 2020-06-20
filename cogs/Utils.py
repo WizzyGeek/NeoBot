@@ -11,14 +11,14 @@ class utility(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def ping(self, ctx):
+    async def ping(self, ctx: commands.Context) -> None:
         """
         used to check if the bot is alive
         """
         await ctx.send(embed=self.bot.Qembed(ctx, title="pong!", content="Bot latency is {0:.2f}ms".format(self.bot.latency * 1000)))
 
     @commands.command(no_pm=True)
-    async def poll(self, ctx, *, question: str):
+    async def poll(self, ctx: commands.Context, *, question: str) -> None:
         """
         Quick and easy yes/no poll, for multiple answers, see !quickpoll
         """
@@ -33,7 +33,7 @@ class utility(commands.Cog):
         await msg.add_reaction(no_thumb)
 
     @commands.command(no_pm=True)
-    async def quickpoll(self, ctx, *, questions_and_choices: str):
+    async def quickpoll(self, ctx: commands.Context, *, questions_and_choices: str):
         """
         delimit questions and answers by either | or , 
         supports up to 10 choices
@@ -74,5 +74,6 @@ class utility(commands.Cog):
         for choice in choices:
             await poll.add_reaction(choice[0])
             
-def setup(bot):
+def setup(bot: commands.Bot) -> None:
+    """Cog setup function."""
     bot.add_cog(utility(bot))

@@ -1,0 +1,10 @@
+{
+    "MAIN": {
+        "host": "rad-lavaserver.herokuapp.com",
+        "port": 80,
+        "rest_uri": "http://rad-lavaserver.herokuapp.com",
+        "identifier": "MAIN",
+        "region": "us_central",
+        "heartbeat": 40.0 
+        }
+}

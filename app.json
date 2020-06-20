@@ -18,6 +18,10 @@
         "reddit_secret": {
             "description": "The reddit script client secret",
             "value": "<secret>"
+        },
+        "wavepass": {
+            "description": "The password to your lavalink server",
+            "value": "[pass]"
         }
     },
     "addons": [

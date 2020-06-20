@@ -19,7 +19,7 @@
 # ffmpeg
 #
 # Approximate Enviroment Size : 146 MiB
-"""Korosensei. A discord Bot"""
+"""Korosensei. A discord Bot."""
 __authour__ = "TEEN BOOM"
 __copyright__ = "Copyright (C) 2020  TEEN BOOM"
 __credits__ = ["TEEN BOOM", "Anvit Dadape"]
@@ -28,35 +28,53 @@ __version__ = "2.2.2a0"
 __email__ = "ojasscoding@gmail.com"
 __license__ = "GNU GPL3"
 __status__ = "Development"
+import json
 #-----------standard-imports-----------#
 import logging
 import os
-import psycopg2
 import sys
 import traceback
-import json
+import typing
+from typing import Iterable, List, Tuple, Union
 
 #-----------3rd-party-imports-----------#
 import discord
-from discord.ext import commands
 import praw
+import psycopg2
+import wavelink
+from discord.ext import commands
 
 #-----------module-imports-----------#
-# Pylint import error here, reason unknown
 from cogs.Utilty.Context import DBContext
-#from utility import ErrorHandler, rank_query, update, lvlup
+
 #----------------------------------------#
 logging.basicConfig(
     format='%(name)s:%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class Config:
-    "Class to hold all Bot vars"
+class Config: # REASON: [Make it accessible on hover in ide.]
+    """Collect all the required info.
+        
+            Requires a `secret.json` or envirment variables 
+            and `lavalink.json` (optional) in the root directory.
 
-    def __init__(self):
+        Args:
+            MusicState (bool, optional):  Set the MusicState to false if Lavalink server is not available. Defaults to True.
+    """
+    
+    def __init__(self, MusicState: bool = True):
+        """Collect all the required info.
+        
+            Requires a `secret.json` or envirment variables 
+            and `lavalink.json` (optional) in the root directory.
+
+        Args:
+            MusicState (bool, optional):  Set the MusicState to false if Lavalink server is not available. Defaults to True.
+        """
+        self.MusicState = MusicState
         try:
-            self.token = str(os.environ['token'])  # Redunant
+            self.token = str(os.environ['token'])  # Redunant but gives me peace of mind.
             self.dburl = str(os.environ['DATABASE_URL'])
             self.rid = str(os.environ['reddit_id'])
             self.rsecret = str(os.environ['reddit_secret'])
@@ -64,22 +82,27 @@ class Config:
                 "welchannel": 583703372725747713,
                 "log": 709339678863786084
             }
+            self.wavepass = str(os.environ['wavepass'])
         except Exception:
             logger.warning(
                 "Enviroment Variables don't contain credentials, seeking secret.json")
             try:
                 with open("secret.json", "r") as reader:
                     self.data = json.loads(reader.read())
-            except Exception:
+            except FileNotFoundError:
                 logger.error(
                     "secret.json not found | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
                 # Sorry python lords, I couldn't do it gracefully without this.
+                sys.exit()
+            except Exception:
+                logger.exception("An unexpected error occured")
                 sys.exit()
             else:
                 try:
                     self.creds = self.data['credentials']
                     self.token = self.creds['token']
                     self.dburl = self.creds['DATABASE_URL']
+                    self.wavepass = self.creds['wavepass']
                     self.reddit = self.data['reddit']
                     self.rid = self.reddit['id']
                     self.rsecret = self.reddit['secret']
@@ -109,10 +132,36 @@ class Config:
         except:
             logger.exception("Psycopg2 error occured!")
         logger.info("Config Object initialised")
+        
+    @property
+    def linkcreds(self) -> Union[dict, Exception, None]:
+        """Fetch the lavalink credentials.
+        
+            A `lavalink.json` file is required in the root directory.
+            
+
+        Returns:
+            Union[dict, Exception, None]: 
+                Return None if MusicState is None, return error if an unexpected error occurs and return the dict if no errors were caught
+        """        
+        if self.MusicState:
+            try:
+                with open("lavalink.json", "r") as reader:
+                    return json.loads(reader.read())
+            except FileNotFoundError:
+                logger.warning(
+                    "lavalink.json not found continuing without music extension | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
+            except Exception as err:
+                logger.exception("An unexpected error occured")
+                return err
+        else:
+            return None
+
+        
 #----------------------------------------#
 
 
-def _prefix_callable(bot, msg):
+def _prefix_callable(bot: commands.Bot, msg) -> List[str]:
     user_id = bot.user.id
     base = ['<@!{}> '.format(user_id), '<@{}> '.format(user_id)]
     if msg.guild is None:
@@ -125,13 +174,39 @@ def _prefix_callable(bot, msg):
 
 
 class Bot(commands.Bot):
-    #----------------------------------------#
-    def __init__(self, ConfigObj):
+    """
+    Bot class with helper functions.
+    
+        Inherits all attributes from commands.Bot
+        The attributes are:
+        config
+        token
+        dburl (database url)
+        rid (reddit id)
+        rsecret (reddit secret)
+        wavepass (Lavalink server's password)
+        log (The Guilds log channel soon to be changed)
+        cur (The DB cursor)
+        conn (The DB Connection)
+        reddit_client
+        Qembed
+    """    
+
+    def __init__(self, ConfigObj: Config):
+        """Intialise the bot.
+        
+            Require a config object with info and credentials.
+
+        Args:
+            ConfigObj ([Config]):
+                Object holding all info and credentials the bot requires
+        """        
         self.config = ConfigObj
-        # shortcuts
+        # TODO: [Shorten code and remove unnecessary attrs]
         self.token = self.config.token
         self.dburl = self.config.dburl
         self.rid = self.config.rid
+        self.wavepass = self.config.wavepass
         self.rsecret = self.config.rsecret
         self.log = self.config.config["log"]
         self.cur = self.config.cur
@@ -146,9 +221,10 @@ class Bot(commands.Bot):
         pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
         self.prefixes = {int(id): prefixes.split(',')
                          for (id, prefixes) in pre.items()}
-        self.DeleteTime = 10.0  # The time to wait before deleting message.
+        self.DeleteTime = 10.0  # DESC: The time to wait before deleting message.
+        self.wavelink = wavelink.Client(bot=self)
         for filename in os.listdir('./cogs'):
-            # dump the file in the folder and Voila!
+            # REASON: [dump the file in the folder and Voila!]
             if filename.endswith('.py') and filename != '__init__.py':
                 try:
                     self.load_extension(f'cogs.{filename[:-3]}')
@@ -160,7 +236,13 @@ class Bot(commands.Bot):
             logger.info("Initialised cogs and vars, running bot")
     #----------------------------------------#
 
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: commands.Context, error: discord.ext.commands.CommandError) -> None:
+        """Event for all command errors.
+
+        Args:
+            ctx (commands.Context): The context
+            error (discord.ext.commands.CommandError): The discord error
+        """
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send('This command cannot be used in private messages.')
         elif isinstance(error, commands.DisabledCommand):
@@ -172,34 +254,61 @@ class Bot(commands.Bot):
                 f'{error.original.__class__.__name__}: {error.original}')
     #----------------------------------------#
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
+        """Bot event triggerred when the connection to discord has been established."""        
         await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
             f"Bot:{self.user}, Status = Online, Intialisation successful!")
         for server in self.guilds:
             self.cur.execute(
-                f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING")
+                f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
             self.conn.commit()
     #----------------------------------------#
 
-    def get_guild_prefixes(self, guild, *, local_inject=_prefix_callable):
+    def get_guild_prefixes(self, guild: discord.Guild, *, local_inject=_prefix_callable) -> List[str]:
+        """Return a list with guild prefixes.
+
+        Args:
+            guild (discord.Guild): The discord Guild
+            local_inject (optional): A callable object returning the prefixes. Defaults to _prefix_callable.
+
+        Returns:
+            List[str]: [description]
+        """        
         proxy_msg = discord.Object(id=None)
         proxy_msg.guild = guild
         return local_inject(self, proxy_msg)
     #----------------------------------------#
 
-    def get_raw_guild_prefixes(self, guild_id):
+    def get_raw_guild_prefixes(self, guild_id: int) -> List[str]:
+        """Get default guild prefix.
+
+        Args:
+            guild_id (int): The id of the discord Guild.
+
+        Returns:
+            List[str]: List containing guild's prefixes
+        """                 
         return self.prefixes.get(guild_id, ['$', '.'])
     #----------------------------------------#
 
-    async def set_guild_prefixes(self, guild, prefixes):
+    async def set_guild_prefixes(self, guild: discord.Guild, prefixes: List[str]) -> bool:
+        """Set the guild prefix.
+
+        Args:
+            guild (discord.Guild): Any discord guild that the bot is a member of.
+            prefixes (List[str]): List of prefixes that will be set as prefixes
+
+        Returns:
+            bool: True when succesful, False if not
+        """        
         if not prefixes:
             self.cur.execute(
                 f'UPDATE prefix SET prefix={None} WHERE id={guild.id}')
             self.conn.commit()
             self.prefixes[guild.id] = prefixes
             return True  # useful for set prefix command
-        elif len(prefixes) > 10:
+        elif len(prefixes) > 13:
             return False
         else:
             self.cur.execute('UPDATE prefix SET prefix=? WHERE id=?',
@@ -209,19 +318,34 @@ class Bot(commands.Bot):
             return True
     #----------------------------------------#
 
-    async def get_context(self, message, *, cls=DBContext):
-        # when you override this method, you pass your new Context
-        # subclass to the super() method, which tells the bot to
-        # use the new MyContext class
+    async def get_context(self, message: discord.Message, *, cls: commands.Context = DBContext) -> DBContext:
+        """Load DBContext object by default.
+
+        Args:
+            message (discord.Message): A discord message object.
+            cls (commands.Context, optional): The Context class. Defaults to DBContext.
+
+        Returns:
+            DBContext: The over-ridden context object that this project uses.
+        """        
         return await super().get_context(message, cls=cls)
     # Quick embed
 
-    def Qembed(self, ctx, Colour=None, title: str = None, content: str = None, NameValuePairs: list = None):
-        """
-        A method to quickly create embeds
+    def Qembed(self, ctx: commands.Context, Colour:Union[int, str, Iterable[Union[str, int]]]=None, title: str = None, content: str = None, NameValuePairs: Iterable[Iterable[str]] = None) -> discord.Embed:
+        """Quickly create embeds.
 
-        embed = self.bot.Qembed(ctx, title="test", content = "passed", NameValuePairs = [("this is the first name", "this is the 1st value"),("this is the 2nd name", "this is the 2nd value")] )
-        """
+        Args:
+            ctx (commands.Context): Context object
+            Colour (Union[int, str, Iterable[Union[str, int]]], optional): 
+                The colour defualts to author's supports 1 : green, 2 : yellow, 3 : red,
+                it supports any colour for that matter. Defaults to None.
+            title (str, optional): The title. Defaults to None.
+            content (str, optional): the description. Defaults to None.
+            NameValuePairs (Iterable[Iterable[str]], optional): 2d iterables with dimension of (2, max(n, 25)). Defaults to None.
+
+        Returns:
+            discord.Embed: [description]
+        """           
         if title is None:
             title = discord.Embed.Empty
         if content is None:
@@ -247,7 +371,12 @@ class Bot(commands.Bot):
 
     #----------------------------------------#
 
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member) -> None:
+        """Greet a user in my server.
+
+        Args:
+            member (discord.Member): Discord member object.
+        """        
         if member.guild.id == 583689248117489675:  # Change this to enable welcoming also change these strings!
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.')
@@ -260,12 +389,13 @@ class Bot(commands.Bot):
     #----------------------------------------#
 
     def run(self):
+        """Run the bot."""
         logger.info("Logging in...")
         super().run(self.token, reconnect=True)
 
 #--------------------------------------------------------------------------------#
 if __name__ == '__main__':
-    Config = Config()
-    korosensei = Bot(Config)
+    ConfigObj = Config()
+    korosensei = Bot(ConfigObj)
     korosensei.run()
 #------------------------------------------------------------------------------------------------------------------------#

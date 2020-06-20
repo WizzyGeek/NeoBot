@@ -1,5 +1,6 @@
-git+https://github.com/TEEN-BOOM/fractal.git
 discord.py
+git+https://github.com/TEEN-BOOM/fractal.git
+git+https://github.com/Rapptz/discord-ext-menus.git
 pandas
 Pillow
 psycopg2
@@ -19,5 +20,6 @@ python-dateutil
 pytz
 six
 websockets
+wavelink>=0.9.2
 requests
 youtube_dl
