@@ -103,5 +103,5 @@ The buildpacks and addons will be added automatically.
 - [x] Switch to lavalink
 - [x] Fix all legacy code (90%)
 - [ ] Fix all code (40%)
-- [ ] Rewrite the bot
-- [ ] Use asyncpg
+- [ ] Rewrite the bot (10%)
+- [ ] Use asyncpg (0%)
