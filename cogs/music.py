@@ -146,7 +146,8 @@ class Player(wavelink.Player):
         embed = discord.Embed(
             title=f'Music Controller | {channel.name}', colour=0xebb145)
         embed.description = f'Now Playing\n**`{track.title}`**\n\n'
-        embed.set_thumbnail(url=track.thumb)
+        if track.thumb:
+            embed.set_thumbnail(url=track.thumb)
 
         embed.add_field(name='Duration', value=str(
             datetime.timedelta(milliseconds=int(track.length))))
@@ -518,6 +519,38 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not player.is_playing:
             await player.do_next()
+            
+    @commands.command()
+    async def sc(self, ctx: commands.Context, *, query: str):
+        """Play or queue a song with the given query from sound cloud"""
+        player: Player = self.bot.wavelink.get_player(
+            guild_id=ctx.guild.id, cls=Player, context=ctx)
+
+        if not player.is_connected:
+            await ctx.invoke(self.connect)
+
+        query = query.strip('<>')
+        if not URL_REG.match(query):
+            query = f'scsearch::{query}'
+
+        tracks = await self.bot.wavelink.get_tracks(query)
+        if not tracks:
+            return await ctx.send('No songs were found with that query. Please try again.', delete_after=15)
+
+        if isinstance(tracks, wavelink.TrackPlaylist):
+            for track in tracks.tracks:
+                track = Track(track.id, track.info, requester=ctx.author)
+                await player.queue.put(track)
+
+            await ctx.send(f'```ini\nAdded the playlist {tracks.data["playlistInfo"]["name"]}'
+                           f' with {len(tracks.tracks)} songs to the queue.\n```', delete_after=15)
+        else:
+            track = Track(tracks[0].id, tracks[0].info, requester=ctx.author)
+            await ctx.send(f'```ini\nAdded {track.title} to the Queue\n```', delete_after=15)
+            await player.queue.put(track)
+
+        if not player.is_playing:
+            await player.do_next()
 
     @commands.command()
     async def pause(self, ctx: commands.Context):
@@ -703,7 +736,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     @commands.command(aliases=['eq'])
     async def equalizer(self, ctx: commands.Context, *, equalizer: str):
-        """Change the players equalizer."""
+        """Change the players equalizer. Can be one of flat, boost, metal, piano"""
         player: Player = self.bot.wavelink.get_player(
             guild_id=ctx.guild.id, cls=Player, context=ctx)
 

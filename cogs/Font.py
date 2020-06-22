@@ -177,7 +177,7 @@ class Font(commands.Cog):
         """Change text to double."""
         await ctx.send(double_font(sentence))
 
-    @commands.command(name='smallcaps', aliases=['sc'])
+    @commands.command(name='smallcaps', aliases=['scap'])
     async def _smallcaps(self, ctx, *, sentence: str):
         """Change text to smallcaps."""
         await ctx.send(smallcaps(sentence))

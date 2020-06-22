@@ -1,10 +1,10 @@
 {
-    "MAIN": {
-        "host": "rad-lavaserver.herokuapp.com",
+    "CKD": {
+        "host": "ckd-lavaserver.herokuapp.com",
         "port": 80,
-        "rest_uri": "http://rad-lavaserver.herokuapp.com",
-        "identifier": "MAIN",
+        "rest_uri": "http://ckd-lavaserver.herokuapp.com",
+        "identifier": "CKD",
         "region": "us_central",
         "heartbeat": 40.0 
-        }
+    }
 }
