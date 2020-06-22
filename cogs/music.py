@@ -32,7 +32,17 @@ class IncorrectChannelError(commands.CommandError):
     
     pass
 
-
+class key:
+    def __init__(self, key: str, show = True):
+        self.key = key
+        self.show = show
+    
+    def __repr__(self) -> str:
+        if self.show:
+            return self.key
+        else:
+            return super().__repr__()
+        
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
@@ -337,7 +347,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         nodes = self.bot.config.linkcreds
 
         for n in nodes.values():
-            await self.bot.wavelink.initiate_node(password=self.bot.wavepass, **n)
+            await self.bot.wavelink.initiate_node(password=self.bot.wavepass, resume_session=True, **n)
 
     @wavelink.WavelinkMixin.listener()
     async def on_node_ready(self, node: wavelink.Node) -> None:
