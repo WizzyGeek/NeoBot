@@ -12,7 +12,7 @@ from discord.ext import commands
 class Board(list):
 	__slots__ = frozenset({'width', 'height'})
 
-	def __init__(self, width, height, player1_name=None, player2_name=None):
+	def __init__(self, width, height):
 		self.width = width
 		self.height = height
 		for x in range(width):
@@ -86,13 +86,13 @@ class Connect4Game:
 		u'\U0001f7e6'
 	)
 
-	def __init__(self, player1_name=None, player2_name=None):
+	def __init__(self, x, y, player1_name=None, player2_name=None):
 		if player1_name is not None and player2_name is not None:
 			self.names = (player1_name, player2_name)
 		else:
 			self.names = ('Player 1', 'Player 2')
 
-		self.board = Board(7, 6)
+		self.board = Board(x, y)
 		self.turn_count = 0
 		self._whomst_forfeited = 0
 
@@ -106,7 +106,7 @@ class Connect4Game:
 
 	def _get_forfeit_status(self):
 		if self._whomst_forfeited:
-			status = '{} won ({} forfeited)\n'
+			status = '{} won \nAs {} forfeited.\n'
 
 			return status.format(
 				self.other_player_name(),
@@ -114,6 +114,20 @@ class Connect4Game:
 			)
 
 		raise ValueError('nobody has forfeited')
+
+	def build_embed(self):
+		win_status = self.whomst_won()
+		status = self._get_status()
+		instructions = ''
+
+		if win_status == self.NO_WINNER:
+			instructions = self._get_instructions()
+		elif win_status == self.FORFEIT:
+			status = self._get_forfeit_status()
+
+		empty = "\n"
+
+		return discord.Embed(title=status, description=f"{empty.join(self._format_row(y) for y in range(self.board.height))}{empty}{instructions}")
 
 	def __str__(self):
 		win_status = self.whomst_won()
@@ -135,7 +149,7 @@ class Connect4Game:
 		win_status = self.whomst_won()
 
 		if win_status == self.NO_WINNER:
-			status = (self.whomst_turn_name() + "'s turn"
+			status = (self.whomst_turn_name() + "'s turn | "
 				+ self.PIECES[self.whomst_turn()])
 		elif win_status == self.TIE:
 			status = "It's a tie!"
@@ -210,18 +224,23 @@ class Connect4(commands.Cog):
 		self.bot = bot
 
 	@commands.command(name="c4", aliases=["connect4", "con4"])
-	async def c4(self, ctx, *, player2: discord.Member):
+	async def c4(self, ctx, player2: discord.Member, x:int=7, y:int=6):
 		"""
 		Play connect4 with another player
 		"""
+		if 0 < x > 9 or 0 < y > 9:
+			await ctx.send("Board can\'t be bigger than 9x9")
+
 		player1 = ctx.message.author
 
 		game = Connect4Game(
+			x,
+			y,
 			player1.display_name,
-			player2.display_name
+			player2.display_name,
 		)
 
-		message = await ctx.send(str(game))
+		message = await ctx.send(embed=game.build_embed())
 
 		for digit in self.DIGITS:
 			await message.add_reaction(digit)
@@ -260,13 +279,13 @@ class Connect4(commands.Cog):
 			except ValueError:
 				pass # the column may be full
 
-			await message.edit(content=str(game))
+			await message.edit(embed=game.build_embed())
 
 		await self.end_game(game, message)
 
 	@classmethod
 	async def end_game(cls, game, message):
-		await message.edit(content=str(game))
+		await message.edit(embed=game.build_embed())
 		await cls.clear_reactions(message)
 
 	@staticmethod
