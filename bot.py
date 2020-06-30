@@ -32,6 +32,7 @@ import json
 #-----------standard-imports-----------#
 import logging
 import os
+import platform
 import sys
 import traceback
 import typing
@@ -48,6 +49,17 @@ from discord.ext import commands
 from cogs.Utilty.Context import DBContext
 
 #----------------------------------------#
+try:
+    import uvloop
+except ImportError:
+    pass
+else:
+    import asyncio
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+if platform.system() == 'Windows':
+    asyncio.set_event_loop(asyncio.ProactorEventLoop())
+
 logging.basicConfig(
     format='%(name)s:%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -127,12 +139,18 @@ class Config: # REASON: [Make it accessible on hover in ide.]
         #----------------------------------------#
         try:
             self.cur.execute(
-                "CREATE TABLE IF NOT EXISTS prefix(id BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
+                "CREATE TABLE IF NOT EXISTS prefix(gid BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
             self.conn.commit()
         except:
             logger.exception("Psycopg2 error occured!")
+        try:
+            self.cur.execute("ALTER TABLE  prefix RENAME COLUMN id TO gid")
+            self.conn.commit()
+        except:
+            self.cur.execute("ROLLBACK")
+            self.conn.commit()
         logger.info("Config Object initialised")
-        
+
     @property
     def linkcreds(self) -> Union[dict, Exception, None]:
         """Fetch the lavalink credentials.
@@ -201,6 +219,7 @@ class Bot(commands.Bot):
             ConfigObj ([Config]):
                 Object holding all info and credentials the bot requires
         """        
+        self.not_beta = False
         self.config = ConfigObj
         # TODO: [Shorten code and remove unnecessary attrs]
         self.token = self.config.token
@@ -208,7 +227,7 @@ class Bot(commands.Bot):
         self.rid = self.config.rid
         self.wavepass = self.config.wavepass
         self.rsecret = self.config.rsecret
-        self.log = self.config.config["log"]
+        self.log = int(self.config.config["log"])
         self.cur = self.config.cur
         self.conn = self.config.conn
         self.reddit_client = praw.Reddit(client_id=self.rid,
@@ -218,7 +237,7 @@ class Bot(commands.Bot):
                          description="Assassinations's discord bot")
         self.cur.execute('SELECT * FROM prefix')
         prefix_rows = self.cur.fetchall()
-        pre = {entry[0]: entry[1] or '!,?' for entry in prefix_rows}
+        pre = {entry[0]: entry[1] or '$,.' for entry in prefix_rows}
         self.prefixes = {int(id): prefixes.split(',')
                          for (id, prefixes) in pre.items()}
         self.DeleteTime = 10.0  # DESC: The time to wait before deleting message.
@@ -255,14 +274,18 @@ class Bot(commands.Bot):
     #----------------------------------------#
 
     async def on_ready(self) -> None:
-        """Bot event triggerred when the connection to discord has been established."""        
-        await self.change_presence(activity=discord.Activity(name='My students :-)', type=discord.ActivityType.watching, status=discord.Status.idle))
+        """Bot event triggerred when the connection to discord has been established."""
+        act = 'other bot and you.'
+        if self.not_beta:
+            act = 'My students :-)'
+        await self.change_presence(activity=discord.Activity(name=act, type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
             f"Bot:{self.user}, Status = Online, Intialisation successful!")
         for server in self.guilds:
             self.cur.execute(
-                f"INSERT INTO prefix (id, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
+                f"INSERT INTO prefix (gid, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
             self.conn.commit()
+        self.log = self.get_channel(self.log)
     #----------------------------------------#
 
     def get_guild_prefixes(self, guild: discord.Guild, *, local_inject=_prefix_callable) -> List[str]:
@@ -311,8 +334,7 @@ class Bot(commands.Bot):
         elif len(prefixes) > 13:
             return False
         else:
-            self.cur.execute('UPDATE prefix SET prefix=? WHERE id=?',
-                             (','.join(sorted(set(prefixes))), str(guild.id)))
+            self.cur.execute(f"UPDATE prefix SET prefix='{','.join(set(prefixes))}' WHERE gid={guild.id}")
             self.conn.commit()
             self.prefixes[guild.id] = sorted(set(prefixes))
             return True
@@ -377,7 +399,7 @@ class Bot(commands.Bot):
         Args:
             member (discord.Member): Discord member object.
         """        
-        if member.guild.id == 583689248117489675:  # Change this to enable welcoming also change these strings!
+        if member.guild.id == 583689248117489675 and self.not_beta:  # Change this to enable welcoming also change these strings!
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f'Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.')
             channel = self.get_channel(self.config.config["welchannel"])

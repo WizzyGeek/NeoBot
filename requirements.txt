@@ -22,4 +22,4 @@ six
 websockets
 git+https://github.com/TEEN-BOOM/Wavelink.git
 requests
-youtube_dl
+uvloop

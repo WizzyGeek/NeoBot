@@ -142,7 +142,7 @@ class Player(wavelink.Player):
 
         channel = self.bot.get_channel(int(self.channel_id))
         qsize = self.queue.qsize()
-
+        status_dict = {True: "Playing", False: "Paused"}
         embed = discord.Embed(
             title=f'Music Controller | {channel.name}', colour=0xebb145)
         embed.description = f'Now Playing\n**`{track.title}`**\n\n'
@@ -151,6 +151,8 @@ class Player(wavelink.Player):
 
         embed.add_field(name='Duration', value=str(
             datetime.timedelta(milliseconds=int(track.length))))
+        status = status_dict[self.is_playing]
+        embed.add_field(name='Status', value=status)
         embed.add_field(name='Queue Length', value=str(qsize))
         embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
         embed.add_field(name='Requested By', value=track.requester.mention)
@@ -190,7 +192,7 @@ class InteractiveController(menus.Menu):
 
     def __init__(self, *, embed: discord.Embed, player: Player):
         """Make menu a player."""
-        super().__init__(timeout=None)
+        super().__init__(timeout=None, clear_reactions_after=True, )
 
         self.embed = embed
         self.player = player
@@ -221,6 +223,10 @@ class InteractiveController(menus.Menu):
     async def send_initial_message(self, ctx: commands.Context, channel: discord.TextChannel) -> discord.Message:
         """Send the menu."""
         return await channel.send(embed=self.embed)
+
+    async def update(self, payload):
+        await super().update(payload)
+        return await self.message.remove_reaction(payload.emoji, payload.member)
 
     @menus.button(emoji='\u25B6')
     async def resume_command(self, payload: discord.RawReactionActionEvent):
@@ -519,38 +525,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not player.is_playing:
             await player.do_next()
-            
-    @commands.command()
-    async def sc(self, ctx: commands.Context, *, query: str):
-        """Play or queue a song with the given query from sound cloud"""
-        player: Player = self.bot.wavelink.get_player(
-            guild_id=ctx.guild.id, cls=Player, context=ctx)
-
-        if not player.is_connected:
-            await ctx.invoke(self.connect)
-
-        query = query.strip('<>')
-        if not URL_REG.match(query):
-            query = f'scsearch::{query}'
-
-        tracks = await self.bot.wavelink.get_tracks(query)
-        if not tracks:
-            return await ctx.send('No songs were found with that query. Please try again.', delete_after=15)
-
-        if isinstance(tracks, wavelink.TrackPlaylist):
-            for track in tracks.tracks:
-                track = Track(track.id, track.info, requester=ctx.author)
-                await player.queue.put(track)
-
-            await ctx.send(f'```ini\nAdded the playlist {tracks.data["playlistInfo"]["name"]}'
-                           f' with {len(tracks.tracks)} songs to the queue.\n```', delete_after=15)
-        else:
-            track = Track(tracks[0].id, tracks[0].info, requester=ctx.author)
-            await ctx.send(f'```ini\nAdded {track.title} to the Queue\n```', delete_after=15)
-            await player.queue.put(track)
-
-        if not player.is_playing:
-            await player.do_next()
 
     @commands.command()
     async def pause(self, ctx: commands.Context):
@@ -564,8 +538,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if self.is_privileged(ctx):
             await ctx.send('An admin or DJ has paused the player.', delete_after=10)
             player.pause_votes.clear()
-
-            return await player.set_pause(True)
+            await player.set_pause(True)
+            await player.invoke_controller()
+            return
 
         required = self.required(ctx)
         player.pause_votes.add(ctx.author)
@@ -574,6 +549,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send('Vote to pause passed. Pausing player.', delete_after=10)
             player.pause_votes.clear()
             await player.set_pause(True)
+            await player.invoke_controller()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to pause the player.', delete_after=15)
 
@@ -589,8 +565,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if self.is_privileged(ctx):
             await ctx.send('An admin or DJ has resumed the player.', delete_after=10)
             player.resume_votes.clear()
-
-            return await player.set_pause(False)
+            await player.set_pause(False)
+            await player.invoke_controller() 
+            return
 
         required = self.required(ctx)
         player.resume_votes.add(ctx.author)
@@ -599,6 +576,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send('Vote to resume passed. Resuming player.', delete_after=10)
             player.resume_votes.clear()
             await player.set_pause(False)
+            await player.invoke_controller()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to resume the player.', delete_after=15)
 
@@ -656,7 +634,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send(f'{ctx.author.mention} has voted to stop the player.', delete_after=15)
 
     @commands.command(aliases=['v', 'vol'])
-    async def volume(self, ctx: commands.Context, *, vol: int):
+    async def volume(self, ctx: commands.Context, *, vol: float):
         """Change the players volume, between 1 and 100."""
         player: Player = self.bot.wavelink.get_player(
             guild_id=ctx.guild.id, cls=Player, context=ctx)
@@ -670,8 +648,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not 0 < vol < 101:
             return await ctx.send('Please enter a value between 1 and 100.')
 
+        vol = math.round(vol)
         await player.set_volume(vol)
         await ctx.send(f'Set the volume to **{vol}**%', delete_after=7)
+        await player.invoke_controller()
 
     @commands.command(aliases=['mix'])
     async def shuffle(self, ctx: commands.Context):
@@ -716,6 +696,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send('Maximum volume reached', delete_after=7)
 
         await player.set_volume(vol)
+        await player.invoke_controller()
 
     @commands.command(hidden=True)
     async def vol_down(self, ctx: commands.Context):
@@ -733,6 +714,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send('Player is currently muted', delete_after=10)
 
         await player.set_volume(vol)
+        await player.invoke_controller()
 
     @commands.command(aliases=['eq'])
     async def equalizer(self, ctx: commands.Context, *, equalizer: str):

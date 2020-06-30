@@ -89,3 +89,12 @@ class DBContext(commands.Context):
         else:
             for target in user:
                 target.send(*args, **kwargs)
+
+    async def send(self, content=None, **kwargs):
+        """Convert all messages outbound from the bot to QuickEmbeds."""
+        if content is not None and kwargs.pop("embed", None) is None:
+            embed = embed = discord.Embed(description=content, colour=0x4e5d94)
+            await super().send(embed=embed, **kwargs)
+        else:
+            await super().send(content=content, **kwargs)
+            

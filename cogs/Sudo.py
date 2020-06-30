@@ -75,6 +75,12 @@ class Sudo(commands.Cog):
             logger.info(f"Loaded Cog {extension}")
             await ctx.send(embed=self.bot.Qembed(ctx, title="Done", content=f"unloaded {extension}", Colour=1))
     #----------------------------------------#
+    @commands.is_owner()
+    @commands.command()
+    async def extensions(self, ctx: commands.Context):
+        """All active bot extensions."""
+        embed = self.bot.Qembed(ctx, title="Extensions", content="\n".join([f"`{n.split('.')[1]}`" for n in self.bot._BotBase__extensions]))
+        await ctx.send(embed=embed)
     """Sourced From RoboDanny"""
 
     def get_syntax_error(self, e: Exception):

@@ -5,6 +5,6 @@
         "rest_uri": "http://ckd-lavaserver.herokuapp.com",
         "identifier": "CKD",
         "region": "us_central",
-        "heartbeat": 40.0 
+        "heartbeat": 40.0
     }
 }

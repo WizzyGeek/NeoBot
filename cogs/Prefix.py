@@ -14,13 +14,21 @@ class Prefix(commands.Cog):
         """Change the prefix or view all prefixes of the bot."""
         main_prefix = self.prefixes[ctx.guild.id][0]
         if prefix is None:
-            await ctx.send(f"The prefix is {main_prefix}")
+            await ctx.send(
+                embed=self.bot.Qembed(
+                    ctx,
+                    title=f"Main prefix - {main_prefix}",
+                    content=f"All prefixes are: \n{n.join(fmt.format(X[0], X[1]) for X in enumerate(self.prefixes[ctx.guild.id], start=1))}"))
         else:
-            result = await self.bot.set_guild_prefixes(ctx.guild, prefix.split(","))
+            prefixes = prefix.split(",")
+            for p in prefixes:
+                p = p.lstrip()
+            result = await self.bot.set_guild_prefixes(ctx.guild, prefixes)
             if result is True:
                 main_prefix = self.prefixes[ctx.guild.id][0]
-                n = ",\n"
-                await ctx.send(embed=self.bot.Qembed(title=f"Prefix - {main_prefix}", content=f"All prefixes are: \n{n.join(self.prefixes[ctx.guild.id][1:])}"))
+                n = "\n"
+                fmt = "{0}. `{1}`"
+                await ctx.send(embed=self.bot.Qembed(ctx, title=f"Main prefix - {main_prefix}", content=f"All prefixes are: \n{n.join(fmt.format(X[0], X[1]) for X in enumerate(self.prefixes[ctx.guild.id], start=1))}"))
             else:
                 await ctx.send(
                     "Please ensure that all prefixes are seperated with `,`\n Also you can't have more than 10 prefixes",
