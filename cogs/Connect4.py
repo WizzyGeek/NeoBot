@@ -229,9 +229,13 @@ class Connect4(commands.Cog):
 		Play connect4 with another player
 		"""
 		if 0 < x > 9 or 0 < y > 9:
-			await ctx.send("Board can\'t be bigger than 9x9")
+			return await ctx.send("Board can\'t be bigger than 9x9")
+		if player2.bot:
+			return await ctx.send("You can\'t play with Bots!")
+		if player2 == ctx.author:
+			return await ctx.send("You can't play with yourself,\nthere is no fun in that.")
 
-		player1 = ctx.message.author
+		player1 = ctx.author
 
 		game = Connect4Game(
 			x,

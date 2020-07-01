@@ -1,5 +1,5 @@
 import shlex
-
+import discord
 from discord.ext import commands
 
 async def to_keycap(c):
@@ -68,12 +68,19 @@ class utility(commands.Cog):
 
         fmt = '{0}\n\n{1}'
         answer = '\n'.join('%s| %s' % t for t in choices)
-        embed = self.bot.Qembed(
+        embed: discord.Embed = self.bot.Qembed(
             ctx, title="Poll", content=fmt.format(question.replace("@", "@\u200b"), answer.replace("@", "@\u200b")))
         poll = await ctx.send(embed=embed)
         for choice in choices:
             await poll.add_reaction(choice[0])
-            
+
+    @commands.command()
+    async def avatar(self, ctx: commands.Context, user: discord.Member = None):
+        if user is None:
+            user: discord.Member = ctx.author
+        embed: discord.Embed = discord.Embed(title=f"{user.name}\'s Avatar'", colour=ctx.author.colour).set_image(url = str(user.avatar_url)).timestamp
+        return await ctx.send(embed=embed)
+
 def setup(bot: commands.Bot) -> None:
     """Cog setup function."""
     bot.add_cog(utility(bot))

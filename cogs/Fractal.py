@@ -8,7 +8,7 @@ from collections import OrderedDict
 import discord
 from discord.ext import commands, tasks
 
-from fractal import Point, generate_fractal, img2output
+from fractal import Point, exec_command
 
 Point.__str__ = lambda self: "x".join(map(str, self))
 
@@ -32,13 +32,6 @@ def comp(x, y):
     else:
         return complex(f"{x}{y}j")
 
-async def generate(model):
-    keys = inspect.getargspec(generate_fractal).args
-    data = dict((k, v) for k, v in model.items() if k in keys)
-    img2output(generate_fractal(**data), output=model["output"], show=False)
-    return None
-
-
 class Fractal(commands.Cog):
     """generate Fractals and send them on discord"""
 
@@ -50,18 +43,16 @@ class Fractal(commands.Cog):
     async def send_frac(self, ctx, Model):
         """send a Model"""
         name = f"{filename(Model)}.png"
-        Model["output"] = pathlib.Path(
-            __file__).parent.absolute() / "img" / name
+        Model["output"] = pathlib.Path(__file__).parent.absolute() / "img" / name
 
         if Model["output"].is_file():
             pass
         else:
-            # fractal_gen = self.loop.run_in_executor(self.executor, exec_command, Model)
-            # await asyncio.gather(fractal_gen)
-            await generate(Model)
+            fractal = self.loop.run_in_executor(self.executor, lambda: exec_command(Model))
+            await asyncio.gather(fractal)
 
-        embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join([str(stat) for stat in Model.items() if stat != "output"]))
-        await ctx.send(embed=embed, file=discord.File(Model["output"]))
+        embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join([str(stat) for stat in Model.items() if stat[0] != "output"]))
+        return await ctx.send(embed=embed, file=discord.File(Model["output"]))
 
     @commands.group(name="fractal", no_pm=True)
     @commands.cooldown(1, 30, commands.BucketType.guild)

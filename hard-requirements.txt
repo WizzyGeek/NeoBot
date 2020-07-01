@@ -22,6 +22,3 @@ pytz
 six
 websockets
 requests
-# ![OPTIONAL: DEPENDENCIES]
-uvloop
-timber

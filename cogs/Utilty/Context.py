@@ -4,7 +4,7 @@ from typing import List, Union, Iterable, Optional
 import discord
 from discord.ext import commands
 
-def CompareWithIterable(value, expr, iter: Iterable) -> Optional[bool]:
+def CompareWithIterable(value, expr, iter: Iterable):
     """Compare an iterable with a single object to see if every element of iterable satifies expression."""
     for element in iter:
         if not expr(value, element):
@@ -77,7 +77,7 @@ class DBContext(commands.Context):
         """DM all targets of a command.
 
         Args:
-            user (Union[discord.Member, List[discord.Member]], optional): The member(s) to DM. Defaults to self.target.
+            user Optional(Union[discord.Member, List[discord.Member]]): The member(s) to DM. Defaults to self.target.
 
         Returns:
             [None]
@@ -85,16 +85,18 @@ class DBContext(commands.Context):
         if user is None:
             user = self.target
         if not isinstance(user, Iterable):
-            return await user.send(*args, **kwargs)  # make it iterable
+            return await user.send(*args, **kwargs)
         else:
             for target in user:
                 target.send(*args, **kwargs)
 
-    async def send(self, content=None, **kwargs):
-        """Convert all messages outbound from the bot to QuickEmbeds."""
+    async def send(self, content=None, **kwargs) -> discord.Message:
+        """Convert all messages outbound from the bot to Blurple Embed."""
         if content is not None and kwargs.pop("embed", None) is None:
-            embed = embed = discord.Embed(description=content, colour=0x4e5d94)
-            await super().send(embed=embed, **kwargs)
+            embed = embed = discord.Embed(description=content, colour=0x4e5d94) # Blurple | imports eat resources
+            return await super().send(embed=embed, **kwargs)
         else:
-            await super().send(content=content, **kwargs)
-            
+            return await super().send(content=content, **kwargs)
+
+    async def send_embed(self, *args, **kwargs) -> discord.Message:
+        return await self.send(embed=discord.Embed(*args, **kwargs))

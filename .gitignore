@@ -160,6 +160,7 @@ $RECYCLE.BIN/
 
 ## Secrets ##
 secret.json
+timber.json
 
 ## img ##
 *.png
