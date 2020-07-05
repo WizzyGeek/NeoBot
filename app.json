@@ -1,11 +1,11 @@
 {
-    "name": "Korosensei",
+    "name": "NeoBot",
     "description": "A Modular Discord Bot",
     "keywords":[
         "Python",
         "discord.py"
     ],
-    "repository": "https://github.com/TEEN-BOOM/korosensei.git",
+    "repository": "https://github.com/TEEN-BOOM/NeoBot.git",
     "env": {
         "token": {
             "description": "The bot's token",
@@ -21,7 +21,7 @@
         },
         "wavepass": {
             "description": "The password to your lavalink server",
-            "value": "[pass]"
+            "value": "<pass>"
         }
     },
     "addons": [

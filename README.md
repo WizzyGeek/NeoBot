@@ -1,4 +1,4 @@
-# ⦗![Open Source](https://opensource.org/files/osi_favicon.png)⦘Korosensei a discord bot
+# ⦗![Open Source](https://opensource.org/files/osi_favicon.png)⦘Neo a discord bot
 
 Simple, Modular and Multifuctional
 
@@ -75,6 +75,8 @@ Also you will need to change `config` dict at line 60 in bot.py (Will be moved t
 Creating a config object with similar attributes
 example:
 ```py
+from NeoBot import Config
+
 Class Credentials(Config):
     def __init__(self):
         self.token = "tokenhardcodedorloaded"
@@ -92,7 +94,7 @@ Class Credentials(Config):
 
 if __name__ == '__main__':
     ConfigObj = Credentials()
-    korosensei = Bot(ConfigObj)
+    Neo = Bot(ConfigObj)
     korosensei.run()
     ConfigObj2 = Config()
     SomeOtherBot = Bot(ConfigObj2) # You can run multiple bots using different bot and config objects
@@ -112,6 +114,6 @@ You are welcome to contribute to the bot!
 - [x] Fix the help command
 - [x] Switch to lavalink
 - [x] Fix all legacy code (90%)
-- [ ] Fix all code (40%)
-- [ ] Rewrite the bot (10%)
-- [ ] Use asyncpg (0%)
+- [ ] Fix all code (60%)
+- [ ] Rewrite the bot (20%)
+- [ ] ~~Use asyncpg~~ Make it easier to switch. (10%)

@@ -120,8 +120,3 @@ class Economy(commands.Cog):
     @commands.command()
     async def balance(self, ctx: commands.Context, user: discord.Member, *, conn):
         raise NotImplemented
-
-import os
-import pathlib
-h = os.listdir(pathlib.Path(__file__).parent.absolute())
-print(list(map(lambda x: x.absolute(), h)))
