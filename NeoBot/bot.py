@@ -116,7 +116,7 @@ class Neo(commands.Bot):
         """
         super().__init__(command_prefix=_prefix_callable, description="Assassination\'s discord bot")
         # For testing...
-        self.is_beta: bool = True
+        self.is_beta: bool = False
 
         self.DeleteTime: float = 10.0  # DESC: The time to wait before deleting message.
         self.config: Config = ConfigObj
