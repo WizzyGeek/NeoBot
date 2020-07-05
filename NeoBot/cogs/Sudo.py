@@ -30,18 +30,22 @@ class Sudo(commands.Cog):
     #----------------------------------------#
     async def _load_extension(self, extension: str):
         cog_dir: pathlib.Path = self.bot.cog_dir
-        if extension is self.bot.packaged_cogs:
+        if extension in self.bot.packaged_cogs:
             path = cog_dir / extension / "__init__.py"
         else:
-            path = cog_dir / extension
+            path = cog_dir / f"{extension}.py"
         try:
+            if extension in self.bot._BotBase__extensions:
+                return
             spec = importlib.util.spec_from_file_location(extension, path)
-            self.bot._load_from_module_spec(spec, extension)
+            if spec is not None:
+                self.bot._load_from_module_spec(spec, extension)
+            else:
+                raise commands.ExtensionNotFound(extension)
         except Exception as err:
-            logger.info(f"Failed to load Cog | ⚙ | {extension} at {path}")
-            raise err
+            logger.info(f"Failed to load Cog | ⚙ | {extension} at {path}", exc_info=True)
         else:
-            logger.info(f"Loaded Cog | ⚙ | {extension} at {path}")
+            logger.info(f"Loaded Cog - | ⚙ | {extension} at {path}")
             return
 
     async def _reload_extension(self, extension: str):
@@ -49,10 +53,10 @@ class Sudo(commands.Cog):
             self.bot.unload_extension(extension)
         except Exception as err:
             logger.info(f"Failed to unload Cog | ⚙ | {extension}")
-            raise err
         else:
             logger.info(f"Unloaded Cog | ⚙ | {extension}")
-            await self._load_extension(self, extension)
+        finally:
+            await self._load_extension(extension)
 
     @commands.group()
     @commands.has_permissions(administrator=True) # REASON : [If you are admin in that server then you may
@@ -78,20 +82,20 @@ class Sudo(commands.Cog):
 
     @sudo.command(name="reload")
     @commands.is_owner()
-    async def reload(self, ctx: commands.Context, extension: str) -> None:
+    async def reload(self, ctx: commands.Context, *, extension: str) -> None:
         """Reload a cog."""
         if extension.lower() in ("all", "*"):
-            extensions = self.bot._BotBase__extensions
+            extensions = [str(n) for n in self.bot._BotBase__extensions]
         else:
-            extensions = extension.split(",")
+            extensions = extension.replace(" ", "").split(",")
         res: List[str] = []
         for ext in extensions:
             try:
-                self._reload_extension(ext)
+                await self._reload_extension(ext)
             except Exception as err:
-                res[ext] = f"`{ext}` | Failed | {err}"
+                res.append(f"`{ext}` | Failed | {err}")
             else:
-                res[ext] = f"`{ext}` | Reloaded"
+                res.append(f"`{ext}` | Reloaded")
         else:
             await ctx.send(embed=self.bot.Qembed(ctx, title="Reloaded", content="\n".join([n for n in res])))
     #----------------------------------------#

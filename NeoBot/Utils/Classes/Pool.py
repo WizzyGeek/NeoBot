@@ -5,6 +5,25 @@ from psycopg2 import extensions as _ext
 from psycopg2.pool import PoolError
 
 from .DbObjects import Cursor, Connection
+from ..errors import ConnectionAlreadyAcquiredError
+
+class ConnectionContext:
+    def __init__(self, pool):
+        self.pool = pool
+        self._conn = None
+        self.acquired: bool = False
+
+    def __enter__(self):
+        if self.conn is not None or self.acquired:
+            raise ConnectionAlreadyAcquiredError("Connection already acquired.")
+        else:
+            self._conn = self.pool._getconn()
+            return self._conn
+    
+    def __exit__(self, *exc):
+        self.pool._putconn(self._conn)
+        self._conn = None
+        self.acquired = True
 
 class ConnectionPool:
     """A faster pool without bloat for discord bots."""
@@ -26,7 +45,7 @@ class ConnectionPool:
         self._pool.append(conn)
         return conn
 
-    def getconn(self):
+    def _getconn(self):
         """Get a free connection."""
         if self.closed:
             raise PoolError("connection pool is closed")
@@ -40,7 +59,7 @@ class ConnectionPool:
                 raise PoolError("connection pool exhausted")
             return self.connect()
 
-    def putconn(self, conn, close=False):
+    def _putconn(self, conn, close=False):
         """Put away a connection."""
         if self.closed:
             raise PoolError("connection pool is closed")
@@ -60,9 +79,8 @@ class ConnectionPool:
                 else:
                     # regular idle connection
                     self._pool.append(conn)
-            # If the connection is closed, we just discard it.
-            else:
-                conn.close()
+        else:
+            conn.close()
 
     def close(self):
         """Close """
@@ -96,3 +114,6 @@ class ConnectionPool:
             count += 0
         else:
             return None
+
+    def acquire(self):
+        return ConnectionContext(self)

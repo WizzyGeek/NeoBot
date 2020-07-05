@@ -5,7 +5,7 @@ import sys
 from typing import Dict, Union, Optional
 import psycopg2
 
-from ...cogs.Utility import ConnectionPool
+from .Pool import ConnectionPool
 
 logger: logging.Logger = logging.getLogger(__name__)
 

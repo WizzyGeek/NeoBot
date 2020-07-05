@@ -1,3 +1,5 @@
+# ![NeoBot](https://user-images.githubusercontent.com/51919967/86535024-01884d00-befb-11ea-8e27-577e6344413b.png)
+
 # ⦗![Open Source](https://opensource.org/files/osi_favicon.png)⦘Neo a discord bot
 
 Simple, Modular and Multifuctional
@@ -12,12 +14,11 @@ Simple, Modular and Multifuctional
 ## Hosting 
 
 ### Requirements
-`requirements.txt`
-`lavalink.json`
-`secret.json` - optional
-
-Out of these 3 files 1(`requirements.txt`) does not need to be edited.
-`lavalink.json` - contains the structure of your lavalink nodes.
+ - `requirements.txt` | All recommended dependencies with timber and uvloop | `python3 -m pip install -r requirements.txt`
+ - `hard-requirements.txt` | Minimum required dependencies | `python3 -m pip install -r hard-requirements.txt`
+`lavalink.json` or use [music-legacy.pysc](https://github.com/TEEN-BOOM/NeoBot/blob/master/NeoBot/cogs/SC/music-legacy.pysc)
+`secret.json` or set enviroment variables
+`timber.json` - optional
 
 #### secret.json
 self-hosting requires you to create a file named `secret.json`
@@ -40,7 +41,7 @@ with the following structure
 }
 ```
 #### lavalink.json
-For music functionality edit the file named `lavalink.json` if you have setup a ![Lavalink server](https://github.com/Frederikam/Lavalink/releases/) with the following structure:
+For music functionality edit the file named `lavalink.json` if you have setup a [Lavalink server](https://github.com/Frederikam/Lavalink/releases/) with the following structure:
 ```json
 {
     "MAIN": {
@@ -57,14 +58,13 @@ heartbeat is required if your vps closes idle connections.
 #### music-legacy
 If you wish to not use Lavalink then remane `music.pysc` -> `music.py` & delete `Music.py`, uninstall wavelink `python3 -m pip uninstall wavelink`
 and download FFmpeg binary for your platform and install opuslib if you do not use discord.py on windows
-##### For heroku music-legacy
-simply add the build packs
+##### music-legacy for heroku
+Add the build packs, after following above steps.
 - https://github.com/xrisk/heroku-opus.git
 - https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git
 
 ### Credentials : method 1
 Requires `secret.json`
-Apart from this you will need to install all dependencies.
 
 ### method 2 
 
@@ -75,7 +75,7 @@ Also you will need to change `config` dict at line 60 in bot.py (Will be moved t
 Creating a config object with similar attributes
 example:
 ```py
-from NeoBot import Config
+from NeoBot import Config, 
 
 Class Credentials(Config):
     def __init__(self):
@@ -94,14 +94,14 @@ Class Credentials(Config):
 
 if __name__ == '__main__':
     ConfigObj = Credentials()
-    Neo = Bot(ConfigObj)
+    Neo = Neo(ConfigObj)
     korosensei.run()
     ConfigObj2 = Config()
-    SomeOtherBot = Bot(ConfigObj2) # You can run multiple bots using different bot and config objects
+    SomeOtherBot = Neo(ConfigObj2) # You can run multiple bots using different bot and config objects
     SomeotherBot.run()
 ```
-### method 4 (Depreceated)
-Directly set attributes in Bot Class. 
+### method 4
+Directly set attributes in Bot Class.
 
 #### For heroku 
 you need to set the value for config variables, token and reddit (reccomended) or use a `secret.json` file.

@@ -41,9 +41,7 @@ import wavelink
 from discord.ext import commands
 
 #-----------module-imports-----------#
-from .Utils import Config
-from .cogs.Utility import DBContext
-from .Utils import _prefix_callable
+from .Utils import Config, DBContext, _prefix_callable
 #----------------------------------------#
 try:
     import uvloop

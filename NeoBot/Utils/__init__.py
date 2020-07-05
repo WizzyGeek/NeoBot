@@ -1,7 +1,8 @@
-from .Classes import Config
-from typing import List
+from .Classes import Config, DBContext, Cursor, Connection, ConnectionPool
+from typing import List as _List
+from .errors import ConnectionAlreadyAcquiredError
 
-def _prefix_callable(bot, msg) -> List[str]:
+def _prefix_callable(bot, msg) -> _List[str]:
     user_id: int = bot.user.id
     base: List[str] = ["<@!{}> ".format(user_id), "<@{}> ".format(user_id)]
     if msg.guild is None:
