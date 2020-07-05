@@ -1,21 +1,10 @@
 """Reddit fetching basic answering cog."""
-import pprint
 import random
 from difflib import SequenceMatcher
-
-# import sys
-# from pathlib import Path
-
-# file = Path(__file__).resolve() # i appreciate pep 8 but this is ugly, switch to setup.py in future
-# parent, root = file.parent, file.parents[1]
-# sys.path.append(str(root))
+from typing import List
 
 import praw
 from discord.ext import commands
-
-# ignore error here this is not the top level script
-# from bot import Bot
-
 
 class Chat(commands.Cog):
     """Chat Cog."""
@@ -23,15 +12,11 @@ class Chat(commands.Cog):
     def __init__(self, bot: commands.Bot):
         """Salt and pepper."""
         self.bot = bot
-    
-    def teardown(self, bot: commands.Bot):
-        """Call at unload."""
-        pass
-    
+
     @commands.command(aliases=['c', 'ch'])
     async def chat(self, ctx: commands.Context, *, you: str) -> None:
         """Chat function."""
-        reply = str(self.grab_reply(you))
+        reply: str = str(self.grab_reply(you))
         await ctx.send(reply)
         #logger.info("Chat command requested!")
     #----------------------------------------#
@@ -44,8 +29,8 @@ class Chat(commands.Cog):
 
     def grab_reply(self, question):
         """Grab the reply from reddit."""
-        reddit = self.bot.reddit_client
-        x = 0
+        reddit: praw.Reddit = self.bot.reddit_client
+        x: int = 0
         submission_ids = []
         for results in reddit.subreddit('all').search(question):
             id = results.id
@@ -58,10 +43,10 @@ class Chat(commands.Cog):
                 break
         if len(submission_ids) == 0:
             return "I have no idea"
-        submission = reddit.submission(
-            id=submission_ids[random.randint(0, len(submission_ids)-1)])
-        comment_list = []
-        x = 0
+        submission: praw.reddit.Submission = reddit.submission(
+            id = submission_ids[random.randint(0, len(submission_ids)-1)])
+        comment_list: List[str] = []
+        x: int = 0
         for top_level_comment in submission.comments:
             body = top_level_comment.body
             comment_list.append(body)

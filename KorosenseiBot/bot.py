@@ -20,19 +20,14 @@
 #
 # Approximate Enviroment Size : 146 MiB
 """Korosensei. A discord Bot."""
-__authour__ = "TEEN BOOM"
-__copyright__ = "Copyright (C) 2020  TEEN BOOM"
-__credits__ = ["TEEN BOOM", "Anvit Dadape"]
-
-__version__ = "2.2.2a0"
-__email__ = "ojasscoding@gmail.com"
-__license__ = "GNU GPL3"
-__status__ = "Development"
 import json
 #-----------standard-imports-----------#
+import importlib
 import logging
 import os
+import pathlib
 import platform
+import signal
 import sys
 import traceback
 import typing
@@ -46,17 +41,9 @@ import wavelink
 from discord.ext import commands
 
 #-----------module-imports-----------#
-from cogs.Utilty.Context import DBContext
-
+from .cogs.Utility import DBContext
+from .cogs.Utility import ConnectionPool
 #----------------------------------------#
-try:
-    Bin: int = int(os.environ["Beta"])
-    if Bin == 0:
-        Beta: bool = False
-    else:
-        Beta: bool = True
-except KeyError:
-   Beta: bool = False 
 try:
     import uvloop
 except ImportError:
@@ -68,10 +55,7 @@ else:
 if platform.system() == "Windows":
     asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-if Beta:
-    logging.basicConfig(format="BETA | %(name)s:%(levelname)s: %(message)s", level=logging.INFO)
-else:
-    logging.basicConfig(format="STABLE | %(name)s:%(levelname)s: %(message)s", level=logging.INFO)
+logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
 
 try:
@@ -81,7 +65,7 @@ except ImportError:
 else:
     try:
         with open("timber.json", "r") as reader:
-            data = json.load(reader)
+            data: Dict[str, str] = json.load(reader)
     except FileNotFoundError:
         try:
             key: str = str(os.environ["KEY"])
@@ -164,27 +148,6 @@ class Config: # REASON: [Make it accessible on hover in ide.]
                 else:
                     logger.info("Credentials initialised")
         #----------------------------------------#
-        try:
-            self.conn = psycopg2.connect(self.dburl)
-        except NameError:
-            logger.exception("unexpected error occured!")
-        except Exception:
-            logger.exception("Cannot connect to postgre database")
-        self.cur = self.conn.cursor()
-        # logger.debug(f"Initialised config variables : {self.__dict__}") # Dangerous enable in secure condition only
-        #----------------------------------------#
-        try:
-            self.cur.execute(
-                "CREATE TABLE IF NOT EXISTS prefix(gid BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
-            self.conn.commit()
-        except:
-            logger.exception("Psycopg2 error occured!")
-        try:
-            self.cur.execute("ALTER TABLE  prefix RENAME COLUMN id TO gid")
-            self.conn.commit()
-        except:
-            self.cur.execute("ROLLBACK")
-            self.conn.commit()
         logger.info("Config Object initialised")
 
     @property
@@ -210,6 +173,29 @@ class Config: # REASON: [Make it accessible on hover in ide.]
                 return err
         else:
             return None
+
+    def DB(self) -> bool:
+        """Initialize the DB connevtion"""
+        try:
+            self.conn = psycopg2.connect(self.dburl)
+        except NameError:
+            logger.exception("unexpected error occured!")
+            return False
+        except Exception:
+            logger.exception("Cannot connect to postgre database")
+            return False
+        self.cur = self.conn.cursor()
+        self.table_query()
+        return True
+        # logger.debug(f"Initialised config variables : {self.__dict__}") # Dangerous enable in secure condition only
+    
+    def table_query(self):
+        try:
+            self.cur.execute(
+                "CREATE TABLE IF NOT EXISTS prefix(gid BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
+            self.conn.commit()
+        except:
+            logger.exception("Psycopg2 error occured!")
 
         
 #----------------------------------------#
@@ -254,9 +240,14 @@ class Bot(commands.Bot):
         Args:
             ConfigObj ([Config]):
                 Object holding all info and credentials the bot requires
-        """        
-        self.not_beta: bool = not Beta
+        """
+        super().__init__(command_prefix=_prefix_callable, description="Assassination\'s discord bot")
+        # For testing...
+        self.is_beta: bool = True
+
+        self.DeleteTime: float = 10.0  # DESC: The time to wait before deleting message.
         self.config: Config = ConfigObj
+        self.config.DB()
         # TODO: [Shorten code and remove unnecessary attrs]
         self.token = self.config.token
         self.dburl = self.config.dburl
@@ -266,29 +257,46 @@ class Bot(commands.Bot):
         self.log = int(self.config.config["log"])
         self.cur = self.config.cur
         self.conn = self.config.conn
-        self.reddit_client: praw.Reddit = praw.Reddit(client_id=self.rid,
-                                         client_secret=self.rsecret,
-                                         user_agent="Small-post-seacrcher")
-        super().__init__(command_prefix=_prefix_callable,
-                         description="Assassination\'s discord bot")
-        self.cur.execute("SELECT * FROM prefix")
-        prefix_rows = self.cur.fetchall()
-        pre = {entry[0]: entry[1] or "$,." for entry in prefix_rows}
-        self.prefixes: Dict[int, List[str]] = {int(id): prefixes.split(",")
-                         for (id, prefixes) in pre.items()}
-        self.DeleteTime: float = 10.0  # DESC: The time to wait before deleting message.
+
         self.wavelink: wavelink.Client = wavelink.Client(bot=self)
-        for filename in os.listdir("./cogs"):
+        self.reddit_client: praw.Reddit = praw.Reddit(client_id=self.rid, client_secret=self.rsecret, user_agent="Small-post-seacrcher")
+
+        self.cur.execute("SELECT * FROM prefix")
+        self.prefixes: Dict[int, List[str]] = {int(id): prefixes.split(",") for (id, prefixes) in {entry[0]: entry[1] or "$,." for entry in self.cur.fetchall()}.items()}
+
+        packaged_cogs = ["Connect4"]
+
+        self.cog_dir = pathlib.Path(__file__).parent.absolute() / "cogs"
+        for module in self.cog_dir.glob('*.py'):
             # REASON: [dump the file in the folder and Voila!]
-            if filename.endswith(".py") and filename != "__init__.py":
+            if module.name != "__init__.py":
                 try:
-                    self.load_extension(f"cogs.{filename[:-3]}")
+                    name = module.stem
+                    spec = importlib.util.spec_from_file_location(name, module)
+                    self._load_from_module_spec(spec, name)
+                    # self.load_extension(f"KorosenseiBot.cogs.{module[:-3]}")
                 except:
-                    logger.exception(f"failed to initialise cog: {filename}")
+                    logger.exception(f"Failed to initialise Cog | ⚙ | {name} at {module}")
                 else:
-                    logger.info(f"Initialized cog: {filename}")
+                    logger.info(f"Initialized Cog | ⚙ | {name} at {module}")
+
+        for package in list(map(lambda x: self.cog_dir.joinpath(pathlib.Path(x) / "__init__.py").absolute(), packaged_cogs)):
+            try:
+                name = package.parent.name
+                spec = importlib.util.spec_from_file_location(name, package)
+                self._load_from_module_spec(spec, name)
+                # self.load_extension(package)
+            except:
+                logger.exception(f"Failed to initialise cog: {name} at {package}")
+            else:
+                logger.info(f"Initialized Cog | ⚙ | {name} at {package}")
         else:
-            logger.info("Initialised cogs and vars, running bot")
+            logger.info("Initialised Cogs | Running Bot ...")
+    #----------------------------------------#
+    async def _initialize(self) -> None:
+        """Callled when bot is ready"""
+        self.log = self.get_channel(self.log)
+        self.loop.create_task(self._add_exit_handler())
     #----------------------------------------#
 
     async def on_command_error(self, ctx: commands.Context, error: discord.ext.commands.CommandError) -> None:
@@ -312,16 +320,16 @@ class Bot(commands.Bot):
     async def on_ready(self) -> None:
         """Bot event triggerred when the connection to discord has been established."""
         act = "other Bots and you. 😃"
-        if self.not_beta:
+        if not self.is_beta:
             act = "My students 😃"
         await self.change_presence(activity=discord.Activity(name=act, type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
-            f"Bot: {self.user}, Beta: {not self.not_beta} | Intialisation successful!")
-        for server in self.guilds:
+            f"Bot: {self.user}, Beta: {not self.is_beta} | Intialisation successful!")
+        for server in self.guilds: # Blocking at large scale
             self.cur.execute(
                 f"INSERT INTO prefix (gid, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
             self.conn.commit()
-        self.log = self.get_channel(self.log)
+        await self._initialize()
     #----------------------------------------#
 
     def get_guild_prefixes(self, guild: discord.Guild, *, local_inject=_prefix_callable) -> List[str]:
@@ -387,8 +395,8 @@ class Bot(commands.Bot):
             DBContext: The over-ridden context object that this project uses.
         """        
         return await super().get_context(message, cls=cls)
-    # Quick embed
 
+    # Quick embed
     def Qembed(self, ctx: commands.Context, Colour:Union[int, str, Iterable[Union[str, int]]]=None, title: str = None, content: str = None, NameValuePairs: Iterable[Iterable[str]] = None) -> discord.Embed:
         """Quickly create embeds.
 
@@ -435,11 +443,11 @@ class Bot(commands.Bot):
         Args:
             member (discord.Member): Discord member object.
         """        
-        if member.guild.id == 583689248117489675 and self.not_beta:  # Change this to enable welcoming also change these strings!
+        if member.guild.id == 583689248117489675 and not self.is_beta:  # Change this to enable welcoming also change these strings!
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f"Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.")
             channel = self.get_channel(self.config.config["welchannel"])
-            embed = discord.Embed(
+            embed: discord.Embed = discord.Embed(
                 title="Welcome!", description=f"welcome to the server {member.mention}! everyone please make them feel welcomed!")
             await channel.send(embed=embed, content=None)
         else:
@@ -451,6 +459,50 @@ class Bot(commands.Bot):
         logger.info("Logging in...")
         super().run(self.token, reconnect=True)
         self.conn.close()
+
+    async def _close_(self) -> None:
+        async def inner(client):
+            Nodes = list(client.nodes.values())
+            if Nodes: # Check if there are any.
+                for node in Nodes:
+                    await node.destroy()
+            await client.session.close()
+            logger.info(f"Closed session and destroyed Nodes.")
+            return True
+
+        try:
+            # For discord's run method.
+            self.loop.stop()
+            # Let other tasks run.
+            await asyncio.sleep(0)
+        except asyncio.CancelledError:
+            await inner(self)
+
+    async def _add_exit_handler(self) -> None:
+        def wraper(*args): # signum and frame not needed
+            self.loop.create_task(self._close_())
+        try:
+            await self.wait_until_ready()
+            self.loop.add_signal_handler(signal.SIGINT, wraper)
+            self.loop.add_signal_handler(signal.SIGTERM, wraper)
+        except NotImplementedError:
+            try:
+                # We really want to close the websockets.
+                # Windows doesn't support loop.add_signal_handler
+                signal.signal(signal.SIGINT, wraper)
+                signal.signal(signal.SIGTERM, wraper)
+            except Exception:
+                logger.warning("Failed to add wavelink exit handler.", exc_info=True)
+                return
+            else:
+                logger.debug("Added wavelink signal handler.")
+                return
+        except Exception:
+            logger.warning("Failed to add wavelink exit handler.", exc_info=True)
+            return
+        else:
+            logger.debug("Added wavelink loop signal handler.")
+            return
 
 #--------------------------------------------------------------------------------#
 if __name__ == "__main__":

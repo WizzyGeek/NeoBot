@@ -5,7 +5,6 @@ from discord.ext import commands
 async def to_keycap(c):
     return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
 
-
 class utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -22,13 +21,13 @@ class utility(commands.Cog):
         """
         Quick and easy yes/no poll, for multiple answers, see !quickpoll
         """
-        msg = await ctx.send(embed = self.bot.Qembed(ctx, title="Poll", content=question))
+        msg: discord.Message = await ctx.send(embed = self.bot.Qembed(ctx, title="Poll", content=question))
         try:
             await ctx.message.delete()
         except:
             pass
-        yes_thumb = "👍"
-        no_thumb = "👎"
+        yes_thumb: str = "👍"
+        no_thumb: str = "👎"
         await msg.add_reaction(yes_thumb)
         await msg.add_reaction(no_thumb)
 

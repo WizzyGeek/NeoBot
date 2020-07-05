@@ -1,0 +1,127 @@
+from typing import Union, Iterator
+
+import discord
+from discord.ext import commands
+
+empty = ""
+space = " "
+
+
+
+def data(Object):
+    return Object.__data__()
+class Entity:
+    """An economy object."""
+    __slots__ = ("id", "EntityType")
+    USER = 0
+    COUNTRY = 1
+    def __init__(self, id: str, EntityType: int):
+        self.id = id
+        if EntityType in (self.USER, self.COUNTRY):
+            self.EntityType = EntityType
+        else:
+            raise ValueError(f"Undefined Type {EntityType}")
+        
+    def __iter__(self):
+        data = vars(self)
+        for dat in data.items():
+            yield dat
+    
+    def __str__(self) -> str:
+        return self.__repr__()        
+
+    def __repr__(self) -> str:
+        return str(list(self))
+
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
+    def __data__(self):
+        return self.__dict__
+
+class Money:
+    """Money."""
+    def __init__(self, MoneyPrinted: float, GoldDeposited: int, symbol: str, name: str) -> None:
+        self.MoneyPrinted = MoneyPrinted
+        self.GoldDeposited = GoldDeposited
+        self.value = self.GoldDeposited / self.MoneyPrinted
+        self.name = name
+        self.symbol = symbol
+        
+    def __str__(self) -> str:
+        return self.__repr__(self)
+    
+    def __repr__(self) -> str:
+        return repr(vars(self))
+    
+    def __iter__(self) -> Iterator[Union[float, int, str]]:
+        for data in __dict__.values():
+            yield data
+
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
+class Country(Entity):
+    """A country object"""
+
+    __slots__ = ("id", "EntityType", "name", "currency", "tax")
+
+    def __init__(self, name: str, currency: Money, tax: float):
+        self.name = name
+        self.currency = currency
+        self.tax = tax/100
+        Entity.__init__(self, f"c:{name.replace(space, empty).lower()}", Entity.COUNTRY)
+
+class Balance:
+    def __init__(self, user, balance: float, gold: float):
+        self.user = user
+        self.bal = balance
+        self.gold = gold
+    
+    def increment_money(self, amount):
+        self.bal += amount
+
+    def __data__(self):
+        return {"bal": self.bal, "gold": self.gold}
+
+class User(Entity):
+    """Part of the economy."""
+
+    __slots__ = ("id", "EntityType", "name", "country", "main_currency", "bal")
+
+    def __init__(self, user: Union[discord.User, discord.Member], country: Country = None, bal: float = 0.0):
+        self.name = user.name
+        self.country = country
+        self.main_currency = country.currency
+        self.bal = bal
+        Entity.__init__(id = str(user.id), EntityType = Entity.USER)
+
+class DBInterface:
+    def __init__(self, bot):
+        self.bot = bot
+        self.conn =  bot.conn
+        self.cur = bot.cur
+
+    def table_query(self):
+        try:
+            self.cur.execute(
+                "CREATE TABLE IF NOT EXISTS economy(userid BIGINT NOT NULL UNIQUE, country TEXT, )")
+            self.conn.commit()
+        except:
+            logger.exception("An error occured")
+
+class Economy(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    async def get_balance(self, user: discord.Member):
+        raise NotImplemented
+
+    @commands.command()
+    async def balance(self, ctx: commands.Context, user: discord.Member, *, conn):
+        raise NotImplemented
+
+import os
+import pathlib
+h = os.listdir(pathlib.Path(__file__).parent.absolute())
+print(list(map(lambda x: x.absolute(), h)))
