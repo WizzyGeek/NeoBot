@@ -1,6 +1,6 @@
-from KorosenseiBot import Bot, Config
+from NeoBot import Neo, Config
 
 if __name__ == "__main__":
     ConfigObj: Config = Config()
-    korosensei: Bot = Bot(ConfigObj)
-    korosensei.run()
+    NeoBot: Neo = Neo(ConfigObj)
+    NeoBot.run()

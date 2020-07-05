@@ -1,5 +1,5 @@
-from KorosenseiBot import Bot
+from NeoBot import Neo
 from .C4 import Connect4
 
-def setup(bot: Bot):
+def setup(bot: Neo):
 	bot.add_cog(Connect4(bot))

@@ -1,28 +1,58 @@
 """The Cog For managing the bot."""
 import ast
 import asyncio
-import logging
-import io
+import importlib
 import inspect
-from contextlib import redirect_stdout
-import traceback
+import io
+import logging
+import pathlib
 import textwrap
+import traceback
+from typing import List
+from contextlib import redirect_stdout
 
 import discord
 from discord.ext import commands
+
+from NeoBot import Neo
 
 logger = logging.getLogger(__name__)
 
 
 class Sudo(commands.Cog):
     """Cog for maintaining and updating the bot."""
-    
-    def __init__(self, bot):
+
+    def __init__(self, bot: Neo):
         """Season it with some salt."""
-        self.bot = bot
+        self.bot: Neo = bot
         self.sessions = set()
         self._last_result = None
     #----------------------------------------#
+    async def _load_extension(self, extension: str):
+        cog_dir: pathlib.Path = self.bot.cog_dir
+        if extension is self.bot.packaged_cogs:
+            path = cog_dir / extension / "__init__.py"
+        else:
+            path = cog_dir / extension
+        try:
+            spec = importlib.util.spec_from_file_location(extension, path)
+            self.bot._load_from_module_spec(spec, extension)
+        except Exception as err:
+            logger.info(f"Failed to load Cog | ⚙ | {extension} at {path}")
+            raise err
+        else:
+            logger.info(f"Loaded Cog | ⚙ | {extension} at {path}")
+            return
+
+    async def _reload_extension(self, extension: str):
+        try:
+            self.bot.unload_extension(extension)
+        except Exception as err:
+            logger.info(f"Failed to unload Cog | ⚙ | {extension}")
+            raise err
+        else:
+            logger.info(f"Unloaded Cog | ⚙ | {extension}")
+            await self._load_extension(self, extension)
 
     @commands.group()
     @commands.has_permissions(administrator=True) # REASON : [If you are admin in that server then you may
@@ -39,12 +69,10 @@ class Sudo(commands.Cog):
         """Load a cog."""
         # To Test if .pysc can be loaded
         try:
-            self.bot.load_extension(f"cogs.{extension}")
+            res = await self._load_extension(extension)
         except Exception as err:
-            logger.exception("Extension load failed")
             await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to load {extension}", Colour=3).add_field(name="Error", value=err))
         else:
-            logger.info(f"Loaded Cog {extension}")
             await ctx.send(embed=self.bot.Qembed(ctx, title="Done", content=f"loaded {extension}", Colour=1))
     #----------------------------------------#
 
@@ -52,14 +80,20 @@ class Sudo(commands.Cog):
     @commands.is_owner()
     async def reload(self, ctx: commands.Context, extension: str) -> None:
         """Reload a cog."""
-        try:
-            self.bot.reload_extension(f"cogs.{extension}")
-        except Exception as err:
-            logger.exception("Extension reload failed")
-            await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to reload {extension}", Colour=3).add_field(name="Error", value=err))
+        if extension.lower() in ("all", "*"):
+            extensions = self.bot._BotBase__extensions
         else:
-            logger.info(f"Loaded Cog {extension}")
-            await ctx.send(embed=self.bot.Qembed(ctx, title="Done", content=f"reloaded {extension}", Colour=1))
+            extensions = extension.split(",")
+        res: List[str] = []
+        for ext in extensions:
+            try:
+                self._reload_extension(ext)
+            except Exception as err:
+                res[ext] = f"`{ext}` | Failed | {err}"
+            else:
+                res[ext] = f"`{ext}` | Reloaded"
+        else:
+            await ctx.send(embed=self.bot.Qembed(ctx, title="Reloaded", content="\n".join([n for n in res])))
     #----------------------------------------#
 
     @sudo.command(name="unload")
@@ -67,7 +101,7 @@ class Sudo(commands.Cog):
     async def unload(self, ctx: commands.Context, extension: str) -> None:
         """Unload a cog."""
         try:
-            self.bot.unload_extension(f"cogs.{extension}")
+            self.bot.unload_extension(f"{extension}")
         except Exception as err:
             logger.exception("Extension unload failed")
             await ctx.send(embed=self.bot.Qembed(ctx, title="Failed", content=f"Failed to unload {extension}", Colour=3).add_field(name="Error", value=err))
@@ -79,10 +113,10 @@ class Sudo(commands.Cog):
     @commands.command()
     async def extensions(self, ctx: commands.Context):
         """All active bot extensions."""
-        embed = self.bot.Qembed(ctx, title="Extensions", content="\n".join([f"`{n.split('.')[1]}`" for n in self.bot._BotBase__extensions]))
+        embed = self.bot.Qembed(ctx, title="Extensions", content="\n".join([f"`{n}`" for n in self.bot._BotBase__extensions]))
         await ctx.send(embed=embed)
+    #----------------------------------------#
     """Sourced From RoboDanny"""
-
     def get_syntax_error(self, e: Exception):
         """Capture the text from an error."""
         if e.text is None:
@@ -246,6 +280,6 @@ class Sudo(commands.Cog):
     #--------------------------------------------------------------------------------#
 
 
-def setup(bot: commands.Bot) -> None:
+def setup(bot: Neo) -> None:
     """Into pan goes the cog."""
     bot.add_cog(Sudo(bot))

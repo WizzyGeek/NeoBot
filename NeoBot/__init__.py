@@ -1,4 +1,5 @@
-from .bot import Bot, Config
+from .bot import Neo
+from .Utils import Config
 
 __authour__ = "TEEN BOOM"
 __copyright__ = "Copyright (C) 2020  TEEN BOOM"
