@@ -7,7 +7,6 @@ __credits__ = ["TEEN BOOM", "Anvit Dadape"]
 __version__ = "2.2.4"
 __email__ = "ojasscoding@gmail.com"
 __license__ = "GNU GPL3"
-__status__ = "Development"
 
 from .bot import Neo
 from .Utils import Config

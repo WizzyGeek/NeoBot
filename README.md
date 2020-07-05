@@ -11,6 +11,15 @@ Simple, Modular and Multifuctional
 ![Discord](https://img.shields.io/discord/583689248117489675?logo=DISCORD&style=for-the-badge)<br>
 ![GitHub repo size](https://img.shields.io/github/repo-size/TEEN-BOOM/korosensei?style=for-the-badge)<br>
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TEEN-BOOM/korosensei.git)
+
+## Using this repo's Cogs
+
+Except `Prefix.py`, `Sudo.py`, `moderation.py` most cogs can be used in other discord.py bots without much changes.
+If you wish to use packaged cog as a single file (eg: Connect4), then look for a folder called `SC` in the cog which 
+contains a ".pysc" file, this file can be used as a cog after changing the suffix to ".py"
+Do not use files from `NeoBot.SC` since these are in development or they are obsolete or simply not in use,
+they are kept in the repo for further future development.
+
 ## Hosting 
 
 ### Requirements
