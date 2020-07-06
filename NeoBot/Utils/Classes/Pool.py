@@ -26,7 +26,10 @@ class ConnectionContext:
         self.acquired = True
 
 class ConnectionPool:
-    """A faster pool without bloat for discord bots."""
+    """A faster pool without bloat.
+    
+    Initialize seperate pools for different databases as
+    this pool doesn't support binding a connection to a key."""
     def __init__(self, minconn: int = 1, maxconn: int = 5, *args, **kwargs):
         self.minconn: int = minconn
         self.maxconn: int = maxconn
@@ -35,9 +38,9 @@ class ConnectionPool:
         self._args = args
         self._kwargs = kwargs
 
-        self._pool = deque()
-        for i in range(self.minconn):
-            self.connect()
+        self._pool = deque()          # REASON : [a pool is at base a list of connections.
+        for i in range(self.minconn): # deque has faster appends and pops which in theory,
+            self.connect()            # coupled with less checks(i.e keys), should speed up the pool.]
 
     def connect(self):
         """Create a new connection."""

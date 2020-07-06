@@ -44,6 +44,7 @@ class Sudo(commands.Cog):
                 raise commands.ExtensionNotFound(extension)
         except Exception as err:
             logger.info(f"Failed to load Cog | ⚙ | {extension} at {path}", exc_info=True)
+            raise err
         else:
             logger.info(f"Loaded Cog - | ⚙ | {extension} at {path}")
             return
@@ -272,6 +273,116 @@ class Sudo(commands.Cog):
             else:
                 self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
+
+    @commands.group(name="settings", aliases=["set", "setting"])
+    @commands.is_owner()
+    async def settings(self, ctx: commands.Context):
+        pass
+
+    @settings.command(name="name")
+    @commands.is_owner()
+    async def set_name(self, ctx: commands.Context, *, name: str):
+        """Sets the bot's name."""
+        name = name.strip()
+        if name != "":
+            await self.bot.user.edit(username=name)
+        else:
+            await self.bot.send_command_help(ctx)
+    
+    @settings.command(name="game")
+    @commands.is_owner()
+    @commands.guild_only()
+    async def set_game(self, ctx: commands.Context, *, game: str = None):
+        """Sets the bot's playing status
+        Leaving this empty will clear it."""
+        guild = ctx.message.guild
+
+        current_status = guild.me.status if guild is not None else None
+
+        if game:
+            await self.bot.change_presence(game=game,
+                                           status=current_status)
+            await ctx.send('Game set to "{}".'.format(game))
+        else:
+            await self.bot.change_presence(game=None, status=current_status)
+            await ctx.send('Cleared game status.')
+
+    @settings.command(name="nick")
+    @commands.is_owner()
+    async def set_nickname(self, ctx: commands.Context, *, nickname: str = ""):
+        """Sets the bot's nickname on the current server.
+        Leaving this empty will remove it."""
+        nickname = nickname.strip()
+        if nickname == "":
+            nickname = None
+        try:
+            await ctx.me.edit(nick=nickname)
+            await ctx.send("Done.")
+        except discord.Forbidden:
+            await ctx.send("I cannot do that, I lack the \"Change Nickname\" permission.")
+
+    @settings.command(name="status")
+    @commands.is_owner()
+    async def set_status(self, ctx: commands.Context, *, status: str = None):
+        """Sets the bot's status
+        Statuses:
+            online
+            idle
+            dnd
+            invisible"""
+        guild = ctx.message.guild
+        current_game = guild.me.game if guild is not None else None
+
+        if status is None:
+            await self.bot.change_presence(status=discord.Status.online, game=current_game)
+            await ctx.send("Status reset.")
+        else:
+            await self.bot.change_presence(status=status, game=current_game)
+            await ctx.send("Status set to {0}.".format(status))
+
+    @settings.command(name="stream")
+    @commands.is_owner()
+    async def set_stream(self, ctx: commands.Context, streamer: str = None, *, stream_title: str = None):
+        """Sets the bot's streaming status.
+        Leaving both streamer and stream_title empty will clear it."""
+        guild = ctx.message.guild
+
+        current_status = guild.me.status if guild is not None else None
+
+        if stream_title:
+            stream_title = stream_title.strip()
+            if "twitch.tv/" not in streamer:
+                streamer = "https://www.twitch.tv/" + streamer
+            game = discord.Game(type=1, url=streamer, name=stream_title)
+            await self.bot.change_presence(game=game, status=current_status)
+        elif streamer is not None:
+            await ctx.send("")
+            return
+        else:
+            await self.bot.change_presence(game=None, status=current_status)
+        await ctx.send("Done | ✅")
+ 
+    @settings.command(name="avatar")
+    @commands.is_owner()
+    async def set_avatar(self, ctx: commands.Context, url: str):
+        """Sets the bot's avatar."""
+        try:
+            async with session.get(url) as img:
+                image_data = await img.read()
+            await self.bot.user.edit(avatar=image_data)
+            await ctx.send("Done | ✅")
+            self.log.debug("Changed avatar.")
+        except discord.HTTPException as ex:
+            await ctx.send("**Failed |** :negative_squared_cross_mark:")
+            self.log.exception(ex)
+            traceback.print_exc()
+
+    @settings.command(name="description", aliases=["desc"])
+    @commands.is_owner()
+    async def set_description(self, ctx: commands.Context, *, description: str):
+        """Sets the bot's description."""
+        self.bot.description = inspect.cleandoc(description) if description else ''
+        await ctx.send("**Done | ✅**\nSet the description.")
 
     # command not needed
     # @sudo.command(name="restart", aliases=['reboot'],description="restarts the entire bot")

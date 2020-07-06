@@ -102,7 +102,7 @@ class Config: # REASON: [Make it accessible on hover in ide.]
             return None
 
     def DB(self) -> bool:
-        """Initialize the DB connevtion"""
+        """Initialize the DB connection"""
         try:
             self.conn = psycopg2.connect(self.dburl)
         except NameError:

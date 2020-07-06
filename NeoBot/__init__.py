@@ -2,7 +2,7 @@
 
 __authour__ = "TEEN BOOM"
 __copyright__ = "Copyright (C) 2020  TEEN BOOM"
-__credits__ = ["TEEN BOOM", "Anvit Dadape"]
+__credits__ = ["TEEN BOOM", "Anvit Dadape", "discord :: vladdd#0001"]
 
 __version__ = "2.2.4"
 __email__ = "ojasscoding@gmail.com"

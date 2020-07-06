@@ -57,6 +57,8 @@ if platform.system() == "Windows":
 logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
 
+gateway_logr: logging.Logger = logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+
 try:
     import timber
 except ImportError:
@@ -105,7 +107,7 @@ class Neo(commands.Bot):
         Qembed
     """    
 
-    def __init__(self, ConfigObj: Config):
+    def __init__(self, ConfigObj: Config, *, description: str = None, DeleteTime: float = 10.0, beta_indicator: str = "beta"):
         """Intialise the bot.
         
             Require a config object with info and credentials.
@@ -114,11 +116,12 @@ class Neo(commands.Bot):
             ConfigObj ([Config]):
                 Object holding all info and credentials the bot requires
         """
-        super().__init__(command_prefix=_prefix_callable, description="Assassination\'s discord bot")
+        self.beta_indicator: str = beta_indicator
+        super().__init__(command_prefix=_prefix_callable, description=description)
         # For testing...
         self.is_beta: bool = False
 
-        self.DeleteTime: float = 10.0  # DESC: The time to wait before deleting message.
+        self.DeleteTime: float = DeleteTime  # DESC: The time to wait before deleting message.
         self.config: Config = ConfigObj
         self.config.DB()
         # TODO: [Shorten code and remove unnecessary attrs]
@@ -169,7 +172,7 @@ class Neo(commands.Bot):
     async def _initialize(self) -> None:
         """Callled when bot is ready"""
         self.log = self.get_channel(self.log)
-        self.loop.create_task(self._add_exit_handler())
+        await self._add_exit_handler()
     #----------------------------------------#
 
     async def on_command_error(self, ctx: commands.Context, error: discord.ext.commands.CommandError) -> None:
@@ -192,12 +195,15 @@ class Neo(commands.Bot):
 
     async def on_ready(self) -> None:
         """Bot event triggerred when the connection to discord has been established."""
+        if self.beta_indicator in self.user.name.lower():
+            self.is_beta = True # Dont put 'b e t a' in your bot name if it's not beta.
+
         act = "other Bots and you. 😃"
         if not self.is_beta:
             act = "My students 😃"
         await self.change_presence(activity=discord.Activity(name=act, type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
-            f"Bot: {self.user}, Beta: {not self.is_beta} | Intialisation successful!")
+            f"Bot: {self.user} | Beta: {self.is_beta} | Intialisation successful!")
         for server in self.guilds: # Blocking at large scale
             self.cur.execute(
                 f"INSERT INTO prefix (gid, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
@@ -332,6 +338,7 @@ class Neo(commands.Bot):
         logger.info("Logging in...")
         super().run(self.token, reconnect=True)
         self.conn.close()
+    #----------------------------------------#
 
     async def _close_(self) -> None:
         async def inner(client):
@@ -340,16 +347,16 @@ class Neo(commands.Bot):
                 for node in Nodes:
                     await node.destroy()
             await client.session.close()
-            logger.info(f"Closed session and destroyed Nodes.")
+            logging.getLogger("wavelink.client").info(f"Closed session and destroyed Nodes.")
             return True
-
         try:
             # For discord's run method.
             self.loop.stop()
             # Let other tasks run.
-            await asyncio.sleep(0)
+            await inner(self.wavelink)
         except asyncio.CancelledError:
-            await inner(self)
+            await inner(self.wavelink)
+    #----------------------------------------#
 
     async def _add_exit_handler(self) -> None:
         def wraper(*args): # signum and frame not needed

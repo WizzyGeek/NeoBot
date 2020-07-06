@@ -4,7 +4,9 @@ import asyncio
 import itertools
 from discord.ext import commands
 from discord.ext.commands import Paginator as CommandPaginator
+import logging
 
+logger: logging.Logger = logging.getLogger(__name__)
 
 class CannotPaginate(Exception):
     """Exception to signify that content cannot be paginated."""
@@ -50,7 +52,7 @@ class Pages:
         if left_over:
             pages += 1
         self.maximum_pages = pages
-        self.embed = discord.Embed(colour=discord.Colour.blurple())
+        self.embed = discord.Embed(colour=discord.Colour.blue())
         self.paginating = len(entries) > per_page
         self.show_entry_count = show_entry_count
         self.reaction_emojis = [
@@ -300,8 +302,7 @@ class HelpPaginator(Pages):
 
         for entry in entries:
             signature = f'{entry.qualified_name} {entry.signature}'
-            self.embed.add_field(
-                name=signature, value=entry.short_doc or "No help given", inline=False)
+            self.embed.add_field(name=signature, value=entry.short_doc or "No help given", inline=False)
 
         if self.maximum_pages:
             self.embed.set_author(

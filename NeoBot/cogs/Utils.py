@@ -79,6 +79,10 @@ class utility(commands.Cog):
             user: discord.Member = ctx.author
         embed: discord.Embed = discord.Embed(title=f"{user.name}\'s Avatar'", colour=ctx.author.colour).set_image(url = str(user.avatar_url)).timestamp
         return await ctx.send(embed=embed)
+    
+    @commands.command()
+    async def about(self, ctx: commands.Context):
+        await ctx.send(str(self.bot.description))
 
 def setup(bot: commands.Bot) -> None:
     """Cog setup function."""

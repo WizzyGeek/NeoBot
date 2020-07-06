@@ -24,9 +24,9 @@ they are kept in the repo for further future development.
 
 ### Requirements
  - `requirements.txt` | All recommended dependencies with timber and uvloop | `python3 -m pip install -r requirements.txt`
- - `hard-requirements.txt` | Minimum required dependencies | `python3 -m pip install -r hard-requirements.txt`
-`lavalink.json` or use [music-legacy.pysc](https://github.com/TEEN-BOOM/NeoBot/blob/master/NeoBot/cogs/SC/music-legacy.pysc)
-`secret.json` or set enviroment variables
+ - `hard-requirements.txt` | Minimum required dependencies | `python3 -m pip install -r hard-requirements.txt`<br>
+`lavalink.json` or use [music-legacy.pysc](https://github.com/TEEN-BOOM/NeoBot/blob/master/NeoBot/cogs/SC/music-legacy.pysc)<br>
+`secret.json` or set enviroment variables<br>
 `timber.json` - optional
 
 #### secret.json
