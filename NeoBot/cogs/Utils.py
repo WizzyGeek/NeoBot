@@ -84,6 +84,14 @@ class utility(commands.Cog):
     async def about(self, ctx: commands.Context):
         await ctx.send(str(self.bot.description))
 
+    @commands.command(hidden=True)
+    async def credits(self, ctx: commands.Context):
+        await ctx.send(
+            embed=discord.Embed(
+                colour=discord.Colour.blue(),
+                title="Credits",
+                description="Anvit#4806\nvladdd#0001\n & Authors of other bots and dependecies."))
+
 def setup(bot: commands.Bot) -> None:
     """Cog setup function."""
     bot.add_cog(utility(bot))

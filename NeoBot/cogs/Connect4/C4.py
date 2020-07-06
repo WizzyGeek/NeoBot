@@ -1,4 +1,5 @@
 
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Connect4(commands.Cog):
 	CANCEL_GAME_EMOJI: str = '🚫'
 	DIGITS: List[str] = [str(digit) + '\N{combining enclosing keycap}' for digit in range(1, 8)]
-	VALID_REACTIONS: List[str] = [CANCEL_GAME_EMOJI] + DIGITS
+	VALID_REACTIONS: List[str] = DIGITS + [CANCEL_GAME_EMOJI]
 	GAME_TIMEOUT_THRESHOLD = 60
 
 	def __init__(self, bot):
@@ -41,7 +42,7 @@ class Connect4(commands.Cog):
 
 		message: discord.Message = await ctx.send(embed=game.build_embed())
 
-		for digit in self.DIGITS:
+		for digit in self.VALID_REACTIONS:
 			await message.add_reaction(digit)
 
 		def check(reaction, user) -> bool:
@@ -62,7 +63,7 @@ class Connect4(commands.Cog):
 				game.forfeit()
 				break
 
-			await asyncio.sleep(0.2)
+			await asyncio.sleep(0.1)
 			try:
 				await message.remove_reaction(reaction, user)
 			except discord.errors.Forbidden:

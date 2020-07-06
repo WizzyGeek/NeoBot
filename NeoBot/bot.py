@@ -38,8 +38,7 @@ import discord
 import praw
 import psycopg2
 import wavelink
-from discord.ext import commands
-
+from discord.ext import commands, tasks
 #-----------module-imports-----------#
 from .Utils import Config, DBContext, _prefix_callable
 #----------------------------------------#
@@ -107,7 +106,7 @@ class Neo(commands.Bot):
         Qembed
     """    
 
-    def __init__(self, ConfigObj: Config, *, description: str = None, DeleteTime: float = 10.0, beta_indicator: str = "beta"):
+    def __init__(self, ConfigObj: Config, *, description: str = None, DeleteTime: float = 10.0, beta_indicator: str = "beta", **options):
         """Intialise the bot.
         
             Require a config object with info and credentials.
@@ -117,7 +116,7 @@ class Neo(commands.Bot):
                 Object holding all info and credentials the bot requires
         """
         self.beta_indicator: str = beta_indicator
-        super().__init__(command_prefix=_prefix_callable, description=description)
+        super().__init__(command_prefix=_prefix_callable, description=description, **options)
         # For testing...
         self.is_beta: bool = False
 
@@ -198,9 +197,9 @@ class Neo(commands.Bot):
         if self.beta_indicator in self.user.name.lower():
             self.is_beta = True # Dont put 'b e t a' in your bot name if it's not beta.
 
-        act = "other Bots and you. 😃"
+        act = "other Bots and you"
         if not self.is_beta:
-            act = "My students 😃"
+            act = "my Development?"
         await self.change_presence(activity=discord.Activity(name=act, type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
             f"Bot: {self.user} | Beta: {self.is_beta} | Intialisation successful!")
@@ -332,6 +331,10 @@ class Neo(commands.Bot):
         else:
             return
     #----------------------------------------#
+    # @tasks.loop(minutes=5)
+    # async def status_loop(self):
+    #     act = next(self.status)
+    #     await self.change_presence(activity=act)
 
     def run(self) -> None:
         """Run the bot."""
@@ -383,10 +386,3 @@ class Neo(commands.Bot):
         else:
             logger.debug("Added wavelink loop signal handler.")
             return
-
-#--------------------------------------------------------------------------------#
-if __name__ == "__main__":
-    ConfigObj: Config = Config()
-    korosensei: Bot = Bot(ConfigObj)
-    korosensei.run()
-#------------------------------------------------------------------------------------------------------------------------#

@@ -1,5 +1,6 @@
 """A connect4 game using a board."""
 from typing import List
+from itertools import chain, groupby
 
 import discord
 
@@ -128,7 +129,7 @@ class Connect4Game:
 		return self.NO_WINNER
 
 	def other_player_name(self) -> str:
-		return self._get_player_name(self.whomst_turn() + 1)
+		return self._get_player_name(self.whomst_turn() - 1)
 
 	def whomst_turn_name(self) -> str:
 		return self._get_player_name(self.whomst_turn())
