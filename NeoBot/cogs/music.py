@@ -149,8 +149,11 @@ class Player(wavelink.Player):
         if track.thumb:
             embed.set_thumbnail(url=track.thumb)
 
-        embed.add_field(name='Duration', value=str(
-            datetime.timedelta(milliseconds=int(track.length))))
+        try:
+            duration = str(datetime.timedelta(milliseconds=int(track.length)))
+            embed.add_field(name='Duration', value=duration)
+        except OverflowError:
+            pass
         status = status_dict[self.is_playing]
         embed.add_field(name='Status', value=status)
         embed.add_field(name='Queue Length', value=str(qsize))
@@ -648,7 +651,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not 0 < vol < 101:
             return await ctx.send('Please enter a value between 1 and 100.')
 
-        vol = math.round(vol)
+        vol = round(vol)
         await player.set_volume(vol)
         await ctx.send(f'Set the volume to **{vol}**%', delete_after=7)
         await player.invoke_controller()
