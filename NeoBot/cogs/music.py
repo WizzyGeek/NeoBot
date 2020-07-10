@@ -229,7 +229,13 @@ class InteractiveController(menus.Menu):
 
     async def update(self, payload):
         await super().update(payload)
-        return await self.message.remove_reaction(payload.emoji, payload.member)
+        try:
+            await self.message.remove_reaction(payload.emoji, payload.member)
+        except discord.errors.NotFound:
+            pass
+        except Exception as err:
+            logger.info("A non-fatal error occured: %s", str(err))
+        return
 
     @menus.button(emoji='\u25B6')
     async def resume_command(self, payload: discord.RawReactionActionEvent):
