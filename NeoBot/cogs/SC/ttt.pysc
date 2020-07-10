@@ -7,7 +7,9 @@ from discord.ext import commands
 
 class Partial2DList:
     def __init__(self, DiemensionX: Optional[int] = 3, DiemensionY: Optional[int] = 3):
-        # Array Size = {[(32*4)*(DiemensionY + 1) + 16*DiemensionX*DiemensionY]} bits
+        # Array_Size:: [ 
+        #   {[(32*4)*(DiemensionY + 1) + 16*DiemensionX*DiemensionY]} bits 
+        # ]
         self._array = list(map(lambda _: [*map(lambda _: None, range(DiemensionX))], range(DiemensionY)))
         self.height = DiemensionY
         self.width = DiemensionX
@@ -36,12 +38,12 @@ class Partial2DList:
         
 
     def diagonal_slices(self):
-        # !IMP: Do not iterate over the slices! Instead implement another generator
+        # !IMP:: [Do not iterate over the slices! Instead implement another generator]
         if not self.height == self.width:
             raise NotImplemented("Can not slice diagonally a non-square Array.")
         Diagonals = (
-            [], # Top Right to Bottom left
-            []  # Bottom Right to Top left
+            [], # DESC:: [Top Right to Bottom left;
+            []  #         Bottom Right to Top left]
             )
         for Diagonal in Diagonals:
             for i in range(self.width):
@@ -79,9 +81,13 @@ class tttBoard:
         self.last_player = identifier
 
     def build_embed(self):
-        pass # TODO:: [Implement _FUNC_
-             #         This is Urgent]
-
+        board = self._board._array
+        Xmarker = self.ids[0]
+        Omarker = self.ids[1]
+        for i in board:
+            i = [x if x == Xmarker elif x == Ymarker for x in i]
+                
+                
 class Ttt(commands.Cog):
     def __init__(bot):
         self.bot = bot

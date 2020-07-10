@@ -130,7 +130,7 @@ class Player(wavelink.Player):
 
         else:
             embed = self.build_embed()
-            await self.controller.message.edit(content=None, embed=embed)
+            await self.controller.message.edit(embed=embed)
 
         self.updating = False
 
