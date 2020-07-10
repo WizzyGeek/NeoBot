@@ -300,11 +300,10 @@ class Sudo(commands.Cog):
         current_status = guild.me.status if guild is not None else None
 
         if game:
-            await self.bot.change_presence(game=game,
-                                           status=current_status)
-            await ctx.send('Game set to "{}".'.format(game))
+            await self.bot.change_presence(activity=discord.Game(game), status=current_status)
+            await ctx.send(f"Game set to {game}")
         else:
-            await self.bot.change_presence(game=None, status=current_status)
+            await self.bot.change_presence(activity=None, status=current_status)
             await ctx.send('Cleared game status.')
 
     @settings.command(name="nick")
@@ -353,13 +352,13 @@ class Sudo(commands.Cog):
             stream_title = stream_title.strip()
             if "twitch.tv/" not in streamer:
                 streamer = "https://www.twitch.tv/" + streamer
-            game = discord.Game(type=1, url=streamer, name=stream_title)
-            await self.bot.change_presence(game=game, status=current_status)
+            stream = discord.Streaming(url=streamer, name=stream_title)
+            await self.bot.change_presence(activity=stream, status=current_status)
         elif streamer is not None:
-            await ctx.send("")
+            await ctx.send("Specify a streamer!")
             return
         else:
-            await self.bot.change_presence(game=None, status=current_status)
+            await self.bot.change_presence(activity=None, status=current_status)
         await ctx.send("Done | ✅")
  
     @settings.command(name="avatar")
