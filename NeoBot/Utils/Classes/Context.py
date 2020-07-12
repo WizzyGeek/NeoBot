@@ -1,6 +1,7 @@
 """Custom context class for discord."""
 from typing import List, Union, Iterable, Optional
 
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -100,3 +101,9 @@ class DBContext(commands.Context):
 
     async def send_embed(self, *args, **kwargs) -> discord.Message:
         return await self.send(embed=discord.Embed(*args, **kwargs))
+
+    async def web_request(self, url) -> aiohttp.ClientResponse:
+        """Make a web request."""
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as r:
+                return r

@@ -117,13 +117,13 @@ class Neo(commands.Bot):
         """
         self.beta_indicator: str = beta_indicator
         super().__init__(command_prefix=_prefix_callable, description=description, **options)
-        # For testing...
+        # -- |For testing...|
         self.is_beta: bool = False
 
-        self.DeleteTime: float = DeleteTime  # DESC: The time to wait before deleting message.
+        self.DeleteTime: float = DeleteTime  # DESC:: [The time to wait before deleting message]
         self.config: Config = ConfigObj
         self.config.DB()
-        # TODO: [Shorten code and remove unnecessary attrs]
+        # TODO:: [Shorten code and remove unnecessary attrs]
         self.token = self.config.token
         self.dburl = self.config.dburl
         self.rid = self.config.rid
@@ -143,13 +143,12 @@ class Neo(commands.Bot):
 
         self.cog_dir: pathlib.Path = pathlib.Path(__file__).parent.absolute() / "cogs"
         for module in self.cog_dir.glob('*.py'):
-            # REASON: [dump the file in the folder and Voila!]
+            # REASON:: [dump the file in the folder and Voila!]
             if module.name != "__init__.py":
                 try:
                     name = module.stem
                     spec = importlib.util.spec_from_file_location(name, module)
                     self._load_from_module_spec(spec, name)
-                    # self.load_extension(f"KorosenseiBot.cogs.{module[:-3]}")
                 except:
                     logger.exception(f"Failed to initialise Cog | ⚙ | {name} at {module}")
                 else:
@@ -160,7 +159,6 @@ class Neo(commands.Bot):
                 name = package.parent.name
                 spec = importlib.util.spec_from_file_location(name, package)
                 self._load_from_module_spec(spec, name)
-                # self.load_extension(package)
             except:
                 logger.exception(f"Failed to initialise cog: {name} at {package}")
             else:
@@ -252,13 +250,13 @@ class Neo(commands.Bot):
                 f"UPDATE prefix SET prefix={None} WHERE id={guild.id}")
             self.conn.commit()
             self.prefixes[guild.id] = prefixes
-            return True  # useful for set prefix command
+            return True  # -- |useful for set prefix command|
         elif len(prefixes) > 13:
             return False
         else:
             self.cur.execute(f"UPDATE prefix SET prefix='{','.join(set(prefixes))}' WHERE gid={guild.id}")
             self.conn.commit()
-            self.prefixes[guild.id] = sorted(set(prefixes))
+            self.prefixes[guild.id] = list(set(prefixes))
             return True
     #----------------------------------------#
 

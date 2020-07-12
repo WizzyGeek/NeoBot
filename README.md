@@ -9,7 +9,7 @@ Simple, Modular and Multifuctional
 [![No Gluten](https://forthebadge.com/images/badges/gluten-free.svg)](https://image.shutterstock.com/image-vector/gluten-free-icon-vector-round-260nw-778351531.jpg)<br>
 [![Warranty](https://img.shields.io/badge/NO-WARRANTY!-ff0000?style=for-the-badge&logo=appveyor&labelColor=cc0000)]()<br>
 [![Discord](https://img.shields.io/discord/583689248117489675?logo=DISCORD&style=for-the-badge)](https://discord.gg/YgnxxEC)<br>
-![GitHub repo size](https://img.shields.io/github/repo-size/TEEN-BOOM/korosensei?style=for-the-badge)<br>
+![GitHub repo size](https://img.shields.io/github/repo-size/TEEN-BOOM/NeoBot?style=for-the-badge)<br>
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TEEN-BOOM/NeoBot.git)
 
 ## Using this repo's Cogs
@@ -92,19 +92,19 @@ Class Credentials(Config):
         self.dburl = "url"
         self.rid = "redditid"
         self.rsecret = "reddit_secret"
-        #self.config to be removed in future to set it from commands
+        # self.config to be removed in future to set it from commands
         self.config = {
             "welchannel": 23456789,
             "log": 23876556789
         }
-        #to move to asyncpg for leveling system
+        # to move to asyncpg for leveling system
         self.cur = psycopg2.connect(self.dburl)
         self.conn = self.conn.cursor()
 
 if __name__ == '__main__':
     ConfigObj = Credentials()
     Neo = Neo(ConfigObj)
-    korosensei.run()
+    Neo.run()
     ConfigObj2 = Config()
     SomeOtherBot = Neo(ConfigObj2) # You can run multiple bots using different bot and config objects
     SomeotherBot.run()
@@ -123,6 +123,6 @@ You are welcome to contribute to the bot!
 - [x] Fix the help command
 - [x] Switch to lavalink
 - [x] Fix all legacy code (90%)
-- [ ] Fix all code (60%)
-- [ ] Rewrite the bot (20%)
-- [ ] ~~Use asyncpg~~ Make it easier to switch. (10%)
+- [ ] Fix all code (70%)
+- [ ] Rewrite the bot (25%)
+- [ ] Use asyncpg ~~Make it easier to switch.~~(0%)

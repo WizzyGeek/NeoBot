@@ -38,7 +38,10 @@ class Fractal(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.loop = asyncio.get_event_loop()
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+        # DESC:: [multiProcessing is faster for Cpu based tasks,
+        #         Threading is better suited for io though our -
+        #         code is asyncronous so threading is useless]
+        self.executor = concurrent.futures.ProcessPoolExecutor(max_workers=3)
 
     async def send_frac(self, ctx, Model):
         """send a Model"""
