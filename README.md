@@ -122,7 +122,7 @@ You are welcome to contribute to the bot!
 ## TODO
 - [x] Fix the help command
 - [x] Switch to lavalink
-- [x] Fix all legacy code (90%)
+- [x] Fix all legacy code (95%)
 - [ ] Fix all code (70%)
 - [ ] Rewrite the bot (25%)
 - [ ] Use asyncpg ~~Make it easier to switch.~~(0%)
