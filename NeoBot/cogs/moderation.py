@@ -93,7 +93,7 @@ class moderation(commands.Cog):
             embed.add_field(
                 name="Reason", value="{}".format(reason), inline=False)
             embed.set_thumbnail(url=user.avatar_url)
-            await self.log.send(embed=embed)
+            await self.bot.log.send(embed=embed)
             await ctx.send(f"Warned {user.name}!", delete_after=self.DeleteTime)
         else:
             embed = self.bot.RedEmbed.add_field(
@@ -110,7 +110,7 @@ class moderation(commands.Cog):
             embed.add_field(
                 name="Reason", value="{}".format(reason), inline=False)
             embed.set_thumbnail(url=user.avatar_url)
-            await self.log.send(embed=embed)
+            await self.bot.log.send(embed=embed)
             return None
 
     @commands.command(name="unban", aliases=["removeban"], description="A command to unban single user using dicriminator and name eg: $unban example#0000")
@@ -159,7 +159,7 @@ class moderation(commands.Cog):
             await ctx.send("something ")
         else:
             await ctx.send(content=f"Deleted {amount} messages!", delete_after=self.DeleteTime)
-            await self.log.send(
+            await self.bot.log.send(
                 embed=discord.Embed(title=f"Deleted {amount} messages", description=f"{amount} messages deleted in {str(ctx.channel)}", colour=0x39ff14))
 
     async def log_embed(self, ctx: commands.Context, user: discord.Member, embed: discord.Embed, reason: str) -> None:
@@ -180,7 +180,7 @@ class moderation(commands.Cog):
         if not ctx.is_target(user) and ctx.is_above(user):
             embed = discord.Embed(title="Member Kicked", color=0x3C80E2)
             await self.log_embed(ctx, user, embed, reason)
-            await self.log.send(embed=embed)
+            await self.bot.log.send(embed=embed)
             await ctx.send(f"Kicked {user.name}", delete_after=self.DeleteTime)
             await ctx.author.send(f"You were  ")
             await ctx.guild.kick(user, reason=reason)
@@ -214,7 +214,7 @@ class moderation(commands.Cog):
         if not ctx.is_target(user) and ctx.is_above(user):
             embed = discord.Embed(title="Member Banned", color=0x3C80E2)
             await self.log_embed(ctx, user, embed, reason)
-            await self.log.send(embed=embed)
+            await self.bot.log.send(embed=embed)
             await ctx.send(f"Banned {user.name}", delete_after=self.DeleteTime)
             await ctx.guild.ban(user, reason=reason, delete_message_days=2)
             await ctx.message.delete()
