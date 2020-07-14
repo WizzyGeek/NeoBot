@@ -55,7 +55,6 @@ if platform.system() == "Windows":
 
 logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
-
 gateway_logr: logging.Logger = logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
 try:
@@ -71,7 +70,7 @@ else:
             key: str = str(os.environ["KEY"])
             source_id: str = str(os.environ["ID"])
         except KeyError:
-            logging.exception("Timber package installed but credentials not provided. Uninstall package if not needed.")
+            logging.info("Timber package installed but credentials not provided. Uninstall package if not needed.")
     else:
         key: str = data["key"]
         source_id: str = data["source"]
@@ -193,7 +192,7 @@ class Neo(commands.Bot):
     async def on_ready(self) -> None:
         """Bot event triggerred when the connection to discord has been established."""
         if self.beta_indicator in self.user.name.lower():
-            self.is_beta = True # Dont put 'b e t a' in your bot name if it's not beta.
+            self.is_beta = True # NOTE:: [Dont put 'b e t a' in your bot name if it's not beta.]
 
         act = "other Bots and you"
         if not self.is_beta:
@@ -201,7 +200,7 @@ class Neo(commands.Bot):
         await self.change_presence(activity=discord.Activity(name=act, type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
             f"Bot: {self.user} | Beta: {self.is_beta} | Intialisation successful!")
-        for server in self.guilds: # Blocking at large scale
+        for server in self.guilds: # NOTE:: [Blocking at large scale] | TODO:: [Switch to a asyncpg task]
             self.cur.execute(
                 f"INSERT INTO prefix (gid, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
             self.conn.commit()
@@ -218,7 +217,7 @@ class Neo(commands.Bot):
         Returns:
             List[str]: [description]
         """        
-        proxy_msg: discord.Object = discord.Object(id=None) # WET
+        proxy_msg: discord.Object = discord.Object(id=None) # -- WET
         proxy_msg.guild = guild
         return local_inject(self, proxy_msg)
     #----------------------------------------#
@@ -319,7 +318,7 @@ class Neo(commands.Bot):
         Args:
             member (discord.Member): Discord member object.
         """        
-        if member.guild.id == 583689248117489675 and not self.is_beta:  # Change this to enable welcoming also change these strings!
+        if member.guild.id == 583689248117489675 and not self.is_beta:  # NOTE:: [Change this to enable welcoming also change these strings!]
             logger.info(f"{member.name} intiated welcome process.")
             await member.send(f"Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.")
             channel = self.get_channel(self.config.config["welchannel"])
@@ -351,9 +350,9 @@ class Neo(commands.Bot):
             logging.getLogger("wavelink.client").info(f"Closed session and destroyed Nodes.")
             return True
         try:
-            # For discord's run method.
+            # REASON:: [For discord's run method.]
             self.loop.stop()
-            # Let other tasks run.
+            # REASON:: [Let other tasks run.]
             await inner(self.wavelink)
         except asyncio.CancelledError:
             await inner(self.wavelink)

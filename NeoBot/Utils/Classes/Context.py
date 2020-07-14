@@ -17,7 +17,11 @@ def CompareWithIterable(value, expr, iter: Iterable):
     
 
 class DBContext(commands.Context):
-    """The over-rided context class."""
+    """The over-rided context class.
+
+    **DO NOT SET THE TARGET BY ATTRIBUTE**
+    Use :meth:`set_target` instead.
+    """
 
     def __init__(self, **kwargs):
         """Salt and peppa."""
