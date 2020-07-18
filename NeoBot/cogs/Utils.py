@@ -109,7 +109,7 @@ class utility(commands.Cog):
                 VALUES($1, $2)
                 ON CONFLICT (gid)
                 DO UPDATE SET modlog = $2;
-                """, ctx.guild.id, chanel_id)
+                """, ctx.guild.id, channel_id)
         await ctx.send(f"Set the Mod Log channel to {channel.name}")
     
     @config.command(name="welcome", hidden=False)
@@ -124,7 +124,7 @@ class utility(commands.Cog):
                 VALUES($1, $2)
                 ON CONFLICT (gid)
                 DO UPDATE SET welchannel = $2;
-                """, ctx.guild.id, chanel_id)
+                """, ctx.guild.id, channel_id)
         await ctx.send(f"Set the welcome channel to {channel.name}")
 
 def setup(bot: commands.Bot) -> None:
