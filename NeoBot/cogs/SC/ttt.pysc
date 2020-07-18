@@ -84,10 +84,16 @@ class tttBoard:
         board = self._board._array
         Xmarker = self.ids[0]
         Omarker = self.ids[1]
+        # TODO:med: [Complete Cog and deploy]
         for i in board:
-            i = [x if x == Xmarker elif x == Ymarker for x in i]
-                
-                
+            for mark in i:
+                if i is None:
+                    pass
+                elif i == Xmarker:
+                    pass
+                else:
+                    pass
+
 class Ttt(commands.Cog):
     def __init__(bot):
         self.bot = bot
@@ -95,3 +101,6 @@ class Ttt(commands.Cog):
     @commands.command(name="ttt")
     async def _ttt(self, player2: discord.Member):
         pass
+
+def setup(bot):
+    pass

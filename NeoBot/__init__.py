@@ -4,7 +4,7 @@ __authour__ = "TEEN BOOM"
 __copyright__ = "Copyright (C) 2020  TEEN BOOM"
 __credits__ = ["TEEN BOOM", "Anvit Dadape", "Vlad Carstocea"]
 
-__version__ = "2.2.4"
+__version__ = "2.3.0"
 __email__ = "ojasscoding@gmail.com"
 __license__ = "GNU GPL3"
 

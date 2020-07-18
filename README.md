@@ -120,9 +120,7 @@ The buildpacks and addons will be added automatically.
 You are welcome to contribute to the bot!
 
 ## TODO
-- [x] Fix the help command
-- [x] Switch to lavalink
-- [x] Fix all legacy code (95%)
-- [ ] Fix all code (70%)
-- [ ] Rewrite the bot (25%)
-- [ ] Use asyncpg ~~Make it easier to switch.~~(0%)
+- [ ] Fix all code (90%)
+- [ ] Rewrite the bot (60%)
+- [ ] Use asyncpg (70%)
+- [ ] Remove psycopg2 (10%)

@@ -20,9 +20,10 @@
 #
 # Approximate Enviroment Size : 146 MiB
 """Korosensei. A discord Bot."""
-import json
 #-----------standard-imports-----------#
+import asyncio
 import importlib
+import json
 import logging
 import os
 import pathlib
@@ -31,7 +32,7 @@ import signal
 import sys
 import traceback
 import typing
-from typing import Iterable, List, Tuple, Union, Dict, Optional
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 #-----------3rd-party-imports-----------#
 import discord
@@ -39,8 +40,10 @@ import praw
 import psycopg2
 import wavelink
 from discord.ext import commands, tasks
+
 #-----------module-imports-----------#
-from .Utils import Config, DBContext, _prefix_callable
+from .Utils import Config, NeoContext, _prefix_callable
+
 #----------------------------------------#
 try:
     import uvloop
@@ -55,7 +58,7 @@ if platform.system() == "Windows":
 
 logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO)
 logger: logging.Logger = logging.getLogger(__name__)
-gateway_logr: logging.Logger = logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
 try:
     import timber
@@ -89,7 +92,7 @@ else:
 class Neo(commands.Bot):
     """
     Bot class with helper functions.
-    
+
         Inherits all attributes from commands.Bot
         The attributes are:
         config
@@ -103,7 +106,8 @@ class Neo(commands.Bot):
         conn (The DB Connection)
         reddit_client
         Qembed
-    """    
+        DbPool (asyncpg)
+    """
 
     def __init__(self, ConfigObj: Config, *, description: str = None, DeleteTime: float = 10.0, beta_indicator: str = "beta", **options):
         """Intialise the bot.
@@ -114,6 +118,23 @@ class Neo(commands.Bot):
             ConfigObj ([Config]):
                 Object holding all info and credentials the bot requires
         """
+        # FORMAT:: [f"{Entity} for {Reason}"]
+        # NOTE:: [To Append credits from setup functions]
+        self.credits: List[Union[Dict[str], str]] = [
+            {
+                "Entity": "TEEN-BOOM",
+                "Reason": "Authoring the project"
+            },
+            {
+                "Entity": "Anvit",
+                "Reason": "Testing the bot"
+            },
+            {
+                "Entity": "Vlad Carstocea",
+                "Reason": "Contribution"
+            }
+        ]
+        self._initialized = asyncio.Event()
         self.beta_indicator: str = beta_indicator
         super().__init__(command_prefix=_prefix_callable, description=description, **options)
         # -- |For testing...|
@@ -121,31 +142,43 @@ class Neo(commands.Bot):
 
         self.DeleteTime: float = DeleteTime  # DESC:: [The time to wait before deleting message]
         self.config: Config = ConfigObj
-        self.config.DB()
+        self.GuildInfo = {}
+        self.loop.create_task(self.__ainit__()) # -- Initialize the asyncpg pool when loop is started
+        self.config.DB()                        # -- Initialize psycopg2 connection
         # TODO:: [Shorten code and remove unnecessary attrs]
         self.token = self.config.token
         self.dburl = self.config.dburl
         self.rid = self.config.rid
         self.wavepass = self.config.wavepass
         self.rsecret = self.config.rsecret
-        self.log = int(self.config.config["log"])
         self.cur = self.config.cur
         self.conn = self.config.conn
 
         self.wavelink: wavelink.Client = wavelink.Client(bot=self)
         self.reddit_client: praw.Reddit = praw.Reddit(client_id=self.rid, client_secret=self.rsecret, user_agent="Small-post-seacrcher")
-
-        self.cur.execute("SELECT * FROM prefix")
-        self.prefixes: Dict[int, List[str]] = {int(id): prefixes.split(",") for (id, prefixes) in {entry[0]: entry[1] or "$,." for entry in self.cur.fetchall()}.items()}
-
+    #----------------------------------------#
+    async def __ainit__(self):
+        """Async Constructor."""
+        await self.config.__ainit__()
+        self.DbPool = self.config.pool
+        self.loop.create_task(self._load_config())
+        self.prefixes: Dict[int, List[str]] = {int(entry[0]): entry[1].split(",") or "$,." for entry in await self.DbPool.fetch("SELECT * FROM prefix")}
+        await self._load_internal_cogs()
+    #----------------------------------------#
+    async def _load_config(self):
+        guilds = await self.DbPool.fetch("SELECT * FROM server")
+        for guild in guilds:
+            print(guild)
+            self.GuildInfo[guild[0]] = guild[1:2]
+    #----------------------------------------#
+    async def _load_internal_cogs(self):
         self.packaged_cogs = ["Connect4"]
-
         self.cog_dir: pathlib.Path = pathlib.Path(__file__).parent.absolute() / "cogs"
         for module in self.cog_dir.glob('*.py'):
             # REASON:: [dump the file in the folder and Voila!]
             if module.name != "__init__.py":
                 try:
-                    name = module.stem
+                    name = module.stem 
                     spec = importlib.util.spec_from_file_location(name, module)
                     self._load_from_module_spec(spec, name)
                 except:
@@ -153,7 +186,7 @@ class Neo(commands.Bot):
                 else:
                     logger.info(f"Initialized Cog | ⚙ | {name} at {module}")
 
-        for package in list(map(lambda x: self.cog_dir.joinpath(pathlib.Path(x) / "__init__.py").absolute(), self.packaged_cogs)):
+        for package in map(lambda x: self.cog_dir.joinpath(pathlib.Path(x) / "__init__.py").absolute(), self.packaged_cogs):
             try:
                 name = package.parent.name
                 spec = importlib.util.spec_from_file_location(name, package)
@@ -164,11 +197,16 @@ class Neo(commands.Bot):
                 logger.info(f"Initialized Cog | ⚙ | {name} at {package}")
         else:
             logger.info("Initialised Cogs | Running Bot ...")
+        self._initialized.set()
     #----------------------------------------#
     async def _initialize(self) -> None:
         """Callled when bot is ready"""
-        self.log = self.get_channel(self.log)
         await self._add_exit_handler()
+        async with self.DbPool.acquire() as conn:
+            async with conn.transaction():
+                await conn.executemany(
+                    f"INSERT INTO prefix (gid, prefix) VALUES ($1, '$,.') ON CONFLICT DO NOTHING", map(lambda guild: [guild.id], self.guilds))
+        logger.info("Completed Bot Initialisation.")
     #----------------------------------------#
 
     async def on_command_error(self, ctx: commands.Context, error: discord.ext.commands.CommandError) -> None:
@@ -200,11 +238,7 @@ class Neo(commands.Bot):
         await self.change_presence(activity=discord.Activity(name=act, type=discord.ActivityType.watching, status=discord.Status.idle))
         logger.info(
             f"Bot: {self.user} | Beta: {self.is_beta} | Intialisation successful!")
-        for server in self.guilds: # NOTE:: [Blocking at large scale] | TODO:: [Switch to a asyncpg task]
-            self.cur.execute(
-                f"INSERT INTO prefix (gid, prefix) VALUES ({server.id}, '$,.') ON CONFLICT DO NOTHING") 
-            self.conn.commit()
-        await self._initialize()
+        self.loop.create_task(self._initialize())
     #----------------------------------------#
 
     def get_guild_prefixes(self, guild: discord.Guild, *, local_inject=_prefix_callable) -> List[str]:
@@ -259,15 +293,15 @@ class Neo(commands.Bot):
             return True
     #----------------------------------------#
 
-    async def get_context(self, message: discord.Message, *, cls: commands.Context = DBContext) -> DBContext:
-        """Load DBContext object by default.
+    async def get_context(self, message: discord.Message, *, cls: commands.Context = NeoContext) -> Union[NeoContext, commands.Context]:
+        """Load NeoContext object by default.
 
         Args:
             message (discord.Message): A discord message object.
-            cls (commands.Context, optional): The Context class. Defaults to DBContext.
+            cls (commands.Context, optional): The Context class. Defaults to NeoContext.
 
         Returns:
-            DBContext: The over-ridden context object that this project uses.
+            NeoContext: The over-ridden context object that this project uses.
         """        
         return await super().get_context(message, cls=cls)
 
@@ -282,7 +316,7 @@ class Neo(commands.Bot):
                 it supports any colour for that matter. Defaults to None.
             title (str, optional): The title. Defaults to None.
             content (str, optional): the description. Defaults to None.
-            NameValuePairs (Iterable[Iterable[str]], optional): 2d iterables with dimension of (2, max(n, 25)). Defaults to None.
+            NameValuePairs (Iterable[Iterable[str]], optional): 2d iterables with dimension of (2, min(n, 25)). Defaults to None.
 
         Returns:
             discord.Embed: [description]
@@ -318,12 +352,20 @@ class Neo(commands.Bot):
         Args:
             member (discord.Member): Discord member object.
         """        
-        if member.guild.id == 583689248117489675 and not self.is_beta:  # NOTE:: [Change this to enable welcoming also change these strings!]
-            logger.info(f"{member.name} intiated welcome process.")
-            await member.send(f"Hi {member.name}, welcome to the Assassination Discord server! Verify yourself, read the rules and get some roles.")
-            channel = self.get_channel(self.config.config["welchannel"])
+        if not self.is_beta:  # NOTE:: [Change this to enable welcoming also change these strings!]
+            if not (Id := self.GuildInfo.get(ctx.guild.id, None)):
+                return
+            if not Id[1]:
+                return
+            channel = self.get_channel()
+            if not channel:
+                return
+            logger.debug(f"{member.name} intiated welcome process.")
+            await member.send(f"Hi {member.name}, welcome to {ctx.guild.name}")
             embed: discord.Embed = discord.Embed(
-                title="Welcome!", description=f"welcome to the server {member.mention}! everyone please make them feel welcomed!")
+                title="Welcome!",
+                description=f"welcome to the server {member.mention}! Everyone please make them feel welcomed!",
+                colour=discord.Colour.blue())
             await channel.send(embed=embed, content=None)
         else:
             return
@@ -337,25 +379,28 @@ class Neo(commands.Bot):
         """Run the bot."""
         logger.info("Logging in...")
         super().run(self.token, reconnect=True)
-        self.conn.close()
     #----------------------------------------#
-
     async def _close_(self) -> None:
-        async def inner(client):
-            Nodes = list(client.nodes.values())
+        async def inner(bot: Neo):
+            Nodes = list(bot.wavelink.nodes.values())
             if Nodes: # Check if there are any.
                 for node in Nodes:
                     await node.destroy()
-            await client.session.close()
+            await bot.wavelink.session.close()
             logging.getLogger("wavelink.client").info(f"Closed session and destroyed Nodes.")
+            # -- Close asyncpg Pool
+            self.conn.close()
+            await bot.DbPool.close()
+            logger.info("Closed Pool")
+            logger.info("Exiting...")
             return True
         try:
             # REASON:: [For discord's run method.]
             self.loop.stop()
             # REASON:: [Let other tasks run.]
-            await inner(self.wavelink)
+            await inner(self)
         except asyncio.CancelledError:
-            await inner(self.wavelink)
+            await inner(self)
     #----------------------------------------#
 
     async def _add_exit_handler(self) -> None:

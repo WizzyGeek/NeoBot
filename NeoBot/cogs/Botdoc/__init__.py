@@ -1,0 +1,1 @@
+from .botdoc import setup

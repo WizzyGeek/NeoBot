@@ -5,7 +5,7 @@ import sys
 from typing import Dict, Union, Optional
 import psycopg2
 
-from .Pool import ConnectionPool
+import asyncpg
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -40,9 +40,9 @@ class Config: # REASON: [Make it accessible on hover in ide.]
                 "log": 709339678863786084
             }
             self.wavepass = str(os.environ["wavepass"])
-        except Exception:
+        except KeyError as key:
             logger.warning(
-                "Enviroment Variables don\'t contain credentials, seeking secret.json")
+                "Enviroment Variables don\'t contain credentials (specifically - %s), seeking secret.json", key.args[0])
             try:
                 # This is the CWD.
                 with open("secret.json", "r") as reader:
@@ -57,24 +57,29 @@ class Config: # REASON: [Make it accessible on hover in ide.]
                 sys.exit()
             else:
                 try:
-                    self.creds: Dict[str, str] = self.data["credentials"]
-                    self.token: str = self.creds["token"]
-                    self.dburl: str = self.creds["DATABASE_URL"]
-                    self.wavepass: str = self.creds["wavepass"]
-                    self.reddit: Dict[str, str] = self.data["reddit"]
-                    self.rid: str = self.reddit["id"]
-                    self.rsecret: str = self.reddit["secret"]
-                    self.config: Dict[str, int] = self.data["config"]  # TODO: REMOVE THIS
-                except KeyError:
+                    _creds: Dict[str, str] = self.data["credentials"]
+                    self.token: str = _creds["token"]
+                    self.dburl: str = _creds["DATABASE_URL"]
+                    self.wavepass: str = _creds["wavepass"]
+                    _reddit: Dict[str, str] = self.data["reddit"]
+                    self.rid: str = _reddit["id"]
+                    self.rsecret: str = _reddit["secret"]
+                    self.config: Dict[str, int] = self.data["config"]  # TODO:: [REMOVE THIS]
+                except KeyError as err:
                     logger.exception(
-                        "secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
+                        f"{err.args[0]} not found, secret.json not structured properly | More Info here https://github.com/TEEN-BOOM/korosensei/blob/master/README.md")
                     sys.exit()
                 except Exception:
                     logger.exception("An unexpected error occured")
                 else:
                     logger.info("Credentials initialised")
+        else:
+            logger.info("Credentials initialised")
         #----------------------------------------#
         logger.info("Config Object initialised")
+
+    async def __ainit__(self, MaxPoolSize: int = 5):
+        self.pool: asyncpg.pool.Pool = await asyncpg.create_pool(dsn=self.dburl,  min_size=1, max_size=MaxPoolSize)
 
     @property
     def linkcreds(self) -> Optional[Union[dict, Exception]]:
@@ -106,7 +111,7 @@ class Config: # REASON: [Make it accessible on hover in ide.]
         try:
             self.conn = psycopg2.connect(self.dburl)
         except NameError:
-            logger.exception("unexpected error occured!")
+            logger.exception("Unexpected error occured!")
             return False
         except Exception:
             logger.exception("Cannot connect to postgre database")
@@ -120,6 +125,12 @@ class Config: # REASON: [Make it accessible on hover in ide.]
         try:
             self.cur.execute(
                 "CREATE TABLE IF NOT EXISTS prefix(gid BIGINT NOT NULL UNIQUE, prefix TEXT NOT NULL)")
+            self.cur.execute("""
+                CREATE TABLE IF NOT EXISTS
+                    server(
+                        gid BIGINT NOT NULL UNIQUE,
+                        modlog BIGINT UNIQUE,
+                        welchannel BIGINT UNIQUE)""")
             self.conn.commit()
         except:
-            logger.exception("Psycopg2 error occured!")
+            logger.exception("Database error occured!")

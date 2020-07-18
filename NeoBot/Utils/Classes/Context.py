@@ -1,9 +1,13 @@
 """Custom context class for discord."""
-from typing import List, Union, Iterable, Optional
+import logging
+from functools import lru_cache
+from typing import Iterable, List, Optional, Union
 
 import aiohttp
 import discord
 from discord.ext import commands
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 def CompareWithIterable(value, expr, iter: Iterable):
     """Compare an iterable with a single object to see if every element of iterable satifies expression."""
@@ -16,7 +20,7 @@ def CompareWithIterable(value, expr, iter: Iterable):
         return True
     
 
-class DBContext(commands.Context):
+class NeoContext(commands.Context):
     """The over-rided context class.
 
     **DO NOT SET THE TARGET BY ATTRIBUTE**
@@ -27,9 +31,7 @@ class DBContext(commands.Context):
         """Salt and peppa."""
         super().__init__(**kwargs)
         self.reddit_client = self.bot.reddit_client
-        self.db = self.bot.conn
-        self.cur = self.bot.cur
-        self.target = set()
+        self.target = None
         self.set_target(self.message.mentions)
 
     def set_target(self, user: Union[Iterable[discord.Member], discord.Member] = None) -> None:
@@ -66,17 +68,16 @@ class DBContext(commands.Context):
         Returns:
             bool: True if author above target
         """
+        if user == self.author:
+            return False # REASON:: [1>1 is False]
         if user is None:
             user = self.target
         if self.author == self.guild.owner:
             return True
         if user is not None:
             x = lambda z, y: z > y.top_role
-            res = CompareWithIterable(self.author.top_role, x, user)
-            if res == True:
-                return res
-            else:
-                return res
+            return CompareWithIterable(self.author.top_role, x, user)
+
 
     async def whisper(self, user: Union[discord.Member, List[discord.Member]] = None, *args, **kwargs) -> None:
         """DM all targets of a command.
@@ -111,3 +112,19 @@ class DBContext(commands.Context):
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as r:
                 return r
+
+    async def send_log(self, **kwargs):
+        log = kwargs.get("log", self.bot.GuildInfo.get(self.guild.id, None))
+        if not log:
+            return
+        log = log[0]
+        if isinstance(log, discord.abc.Messageable): # REASON:: [I dont care what kind of channel it
+            try:                                     #           is as long as i can send messages]
+                await log.send(**kwargs)
+            except Exception:
+                logger.debug("Error occured while sending the logs", exc_info=True)
+        else:
+            try:
+                await self.bot.get_channel(log).send(**kwargs)
+            except Exception:
+                logger.debug("Error occured while sending the logs", exc_info=True)

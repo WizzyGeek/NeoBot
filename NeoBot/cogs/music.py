@@ -819,3 +819,12 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 def setup(bot: commands.Bot) -> None:
     """Cog setup function."""
     bot.add_cog(Music(bot))
+    credit = {
+        "Entity": "[Wavelink](https://github.com/PythonistaGuild/Wavelink)",
+        "Reason": "Base implementation of music cog"
+    }
+    lava_server_credit = {
+        "Entity": "[Frederikam](https://github.com/Frederikam)",
+        "Reason": "Open-source audio streaming server - Lavalink"
+    }
+    bot.credits.extend([credit, lava_server_credit])

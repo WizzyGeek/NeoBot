@@ -84,13 +84,48 @@ class utility(commands.Cog):
     async def about(self, ctx: commands.Context):
         await ctx.send(str(self.bot.description))
 
-    @commands.command(hidden=True)
-    async def credits(self, ctx: commands.Context):
-        await ctx.send(
-            embed=discord.Embed(
-                colour=discord.Colour.blue(),
-                title="Credits",
-                description="Anvit#4806\nvladdd#0001\n & Authors of other bots and dependecies."))
+    # TODO:: [Use self.bot.credits]
+    # @commands.command(hidden=True)
+    # async def credits(self, ctx: commands.Context):
+    #     await ctx.send(
+    #         embed=discord.Embed(
+    #             colour=discord.Colour.blue(),
+    #             title="Credits",
+    #             description="Anvit#4806\nvladdd#0001\n & Authors of other bots and dependecies."))
+
+    @commands.group(name="config")
+    async def config(self, ctx: commands.Context):
+        pass
+
+    @config.command(name="modlog")
+    async def modlog(self, ctx: commands.Context, channel: discord.TextChannel):
+        """Set the channel to log moderation action"""
+        if not channel:
+            return await ctx.send(embed=self.bot.Qembed(colour=3, title="Error", content="Could not ind the specifie channel"))
+        channel_id = channel.id
+        async with self.DbPool.acquire() as conn:
+            conn.execute("""
+                INSERT INTO server(gid, modlog)
+                VALUES($1, $2)
+                ON CONFLICT (gid)
+                DO UPDATE SET modlog = $2;
+                """, ctx.guild.id, chanel_id)
+        await ctx.send(f"Set the Mod Log channel to {channel.name}")
+    
+    @config.command(name="welcome", hidden=False)
+    async def welcome(self, ctx: commands.Context, channel: discord.TextChannel):
+        """Set the channel to welcome users, cannot change message format currently"""
+        if not channel:
+            return await ctx.send(embed=self.bot.Qembed(colour=3, title="Error", content="Could not ind the specifie channel"))
+        channel_id = channel.id
+        async with self.DbPool.acquire() as conn:
+            conn.execute("""
+                INSERT INTO server(gid, welchannel)
+                VALUES($1, $2)
+                ON CONFLICT (gid)
+                DO UPDATE SET welchannel = $2;
+                """, ctx.guild.id, chanel_id)
+        await ctx.send(f"Set the welcome channel to {channel.name}")
 
 def setup(bot: commands.Bot) -> None:
     """Cog setup function."""

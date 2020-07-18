@@ -477,3 +477,8 @@ class Help(commands.Cog):
 def setup(bot: commands.Bot) -> None:
     """Into pan goes the cog."""
     bot.add_cog(Help(bot))
+    credit = {
+        "Entity": "[Danny](https://github.com/Rapptz)",
+        "Reason": "REPL, EVAL & help command implementation"
+    }
+    bot.credits.append(credit)

@@ -6,7 +6,7 @@ from discord.ext import commands
 empty = ""
 space = " "
 
-
+# ABANDONED:: [I have no idea how would I store so much ]
 
 def data(Object):
     return Object.__data__()

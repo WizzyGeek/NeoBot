@@ -165,7 +165,7 @@ timber.json
 ## img ##
 *.png
 
-.mypy-cache/*
+NeoBot/gui
 
 ## prebuilt cache ##
 !mandelbrot-size=500x300-depth=100-zoom=1.2-center=-1.5x0-show=False.png
