@@ -122,9 +122,9 @@ class NeoContext(commands.Context):
             try:                                     #           is as long as i can send messages]
                 await log.send(**kwargs)
             except Exception:
-                logger.debug("Error occured while sending the logs", exc_info=True)
+                logger.info("Error occured while sending the logs", exc_info=True)
         else:
             try:
                 await self.bot.get_channel(log).send(**kwargs)
             except Exception:
-                logger.debug("Error occured while sending the logs", exc_info=True)
+                logger.info("Error occured while sending the logs", exc_info=True)
