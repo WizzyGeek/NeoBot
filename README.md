@@ -124,3 +124,4 @@ You are welcome to contribute to the bot!
 - [ ] Rewrite the bot (60%)
 - [ ] Use asyncpg (70%)
 - [ ] Remove psycopg2 (10%)
+- [ ] Add kivy GUI (5%)
