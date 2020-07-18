@@ -1,6 +1,7 @@
 git+https://github.com/Rapptz/discord-ext-menus.git
 git+https://github.com/TEEN-BOOM/Wavelink.git
 git+https://github.com/TEEN-BOOM/fractal.git
+asyncpg
 discord.py
 pandas
 Pillow
