@@ -104,7 +104,7 @@ class utility(commands.Cog):
             return await ctx.send(embed=self.bot.Qembed(colour=3, title="Error", content="Could not ind the specifie channel"))
         channel_id = channel.id
         async with self.bot.DbPool.acquire() as conn:
-            conn.execute("""
+            await conn.execute("""
                 INSERT INTO server(gid, modlog)
                 VALUES($1, $2)
                 ON CONFLICT (gid)
@@ -119,7 +119,7 @@ class utility(commands.Cog):
             return await ctx.send(embed=self.bot.Qembed(colour=3, title="Error", content="Could not ind the specifie channel"))
         channel_id = channel.id
         async with self.bot.DbPool.acquire() as conn:
-            conn.execute("""
+            await conn.execute("""
                 INSERT INTO server(gid, welchannel)
                 VALUES($1, $2)
                 ON CONFLICT (gid)
