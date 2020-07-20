@@ -32,9 +32,13 @@ class moderation(commands.Cog):
         Keyword Arguments:
             reason {Optional[str]} -- Provide the reason to warn a user (default: {"No reason"})
         """
+        if not user: # REASON:: [First check if user is converted]
+            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
         if ctx.is_target():
             return await ctx.send(f"You were warned by Yourself for {reason}")
-        if user is not None and ctx.is_above(user):
+        if not ctx.is_above(user):
+            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
+        if user is not None and ctx.is_above(user): # REASON:: [No 'else' as I do not know all possible situations]
             await user.send(f"You sere warned in {user.guild.name} for {reason}")
             embed = discord.Embed(title="Member Warned", color=0x3C80E2)
             embed.add_field(
@@ -46,10 +50,6 @@ class moderation(commands.Cog):
             embed.set_thumbnail(url=user.avatar_url)
             await ctx.send_log(embed=embed)
             return await ctx.send(f"Warned {user.name}!", delete_after=self.DeleteTime)
-        elif not ctx.is_above(user):
-            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
-        elif not user:
-            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
 
     async def unbann(self, ctx: NeoContext, user: discord.Member, reason: str) -> None:
         """Refactored Function to unban an user"""
@@ -77,6 +77,8 @@ class moderation(commands.Cog):
         """
         # TODO:: [Convert this to a converter]
         if isinstance(member, int):
+            if member == ctx.author.id:
+                return await ctx.send("I can\'t unban you")
             user = await self.bot.fetch_user(member)
             bans = await ctx.guild.bans()
             if user in map(lambda x: x.user, bans):
@@ -88,7 +90,7 @@ class moderation(commands.Cog):
             banned_ppl = await ctx.guild.bans()
             for bans in banned_ppl:
                 user = bans.user
-                if str(user) == str(member):
+                if member in [str(user), user.name]: # REASON:: [EG#0000 and EG bot are supported]
                     await self.unbann(ctx, user, reason)
                     return None
             else:
@@ -128,8 +130,12 @@ class moderation(commands.Cog):
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx: NeoContext, user: discord.Member, str, int, *, reason: str = "No reason specified") -> None:
         """kicks a user from the guild"""
+        if not user:
+            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
         if ctx.is_target():
             return await ctx.send(embed=self.bot.Qembed(ctx, content="I cannot kick you, please consider leaving instead"))
+        if not ctx.is_above(user):
+            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
         if user is not None and ctx.is_above(user):
             embed = discord.Embed(title="Member Kicked", color=0x3C80E2)
             await self.log_embed(ctx, user, embed, reason)
@@ -138,10 +144,7 @@ class moderation(commands.Cog):
             await ctx.author.send(f"You were kicked from {ctx.guild.name} for {reason}")
             await ctx.guild.kick(user, reason=reason)
             await ctx.message.delete()
-        elif not ctx.is_above(user):
-            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
-        elif not user:
-            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
+
 
     @kick.error
     async def kick_error(self, ctx: NeoContext, error: discord.ext.commands.CommandError) -> None:
@@ -163,8 +166,12 @@ class moderation(commands.Cog):
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, user: discord.Member, *, reason: str = "Not given"):
         """Bans a user"""
+        if not user:
+            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
         if ctx.is_target():
             return await ctx.send(embed=self.bot.Qembed(ctx, content="I cannot ban you, please consider leaving instead"))
+        if not ctx.is_above(user):
+            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
         if not ctx.is_target(user) and ctx.is_above(user):
             embed = discord.Embed(title="Member Banned", color=0x3C80E2)
             await self.log_embed(ctx, user, embed, reason)
@@ -173,10 +180,6 @@ class moderation(commands.Cog):
             await ctx.author.send(f"You were banned from {ctx.guild.name} for {reason}")
             await ctx.guild.ban(user, reason=reason, delete_message_days=2)
             await ctx.message.delete()
-        elif not ctx.is_above(user):
-            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
-        elif not user:
-            return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
 
 
     @ban.error
@@ -207,8 +210,10 @@ class moderation(commands.Cog):
 
     @commands.command(name="userinfo", aliases=["uinfo"], no_pm=True)
     # @commands.has_permissions(ban_members=True)
-    async def userinfo(self, ctx: NeoContext, usrr: discord.Member) -> None:
+    async def userinfo(self, ctx: NeoContext, user: discord.Member = None) -> None:
         """Get info on an user"""
+        if user == None:
+            user = ctx.author
         roles = [role.mention for role in user.roles]
         embed = discord.Embed(
             timestamp=ctx.message.created_at, color=user.colour)

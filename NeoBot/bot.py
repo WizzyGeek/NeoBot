@@ -168,7 +168,7 @@ class Neo(commands.Bot):
     async def _load_config(self):
         guilds = await self.DbPool.fetch("SELECT * FROM server")
         for guild in guilds:
-            print(guild)
+            # print(guild)
             self.GuildInfo[guild[0]] = guild[1:2]
     #----------------------------------------#
     async def _load_internal_cogs(self):
