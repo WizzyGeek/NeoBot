@@ -3,6 +3,7 @@ from itertools import chain
 
 import discord
 from discord.ext import commands
+import numpy as np
 # Acronyms: ttt = Tic Tac Toe, 
 
 class Partial2DList:
@@ -10,13 +11,21 @@ class Partial2DList:
         # Array_Size:: [ 
         #   {[(32*4)*(DiemensionY + 1) + 16*DiemensionX*DiemensionY]} bits 
         # ]
-        self._array = list(map(lambda _: [*map(lambda _: None, range(DiemensionX))], range(DiemensionY)))
+        # NOTE:: [Any Array should be fine]
+        # self._array = list(map(lambda _: [*map(lambda _: None, range(DiemensionX))], range(DiemensionY)))
+        # self._empty = None
+        self._array = np.zeros(shape=(DiemensionY, DiemensionX))
+        self._empty = 0
         self.height = DiemensionY
         self.width = DiemensionX
+        self.__cached_size = DiemensionX * DiemensionY
 
     def __getitem__(self, key: Tuple[int]):
         try:
             x, y = key
+            assert x <= self.width and y <= self.height
+        except AssertionError as err:
+            raise IndexError(f"2DList Index {key} does not exist, as it exceeds list size") from err
         except Exception:
             raise
         return self._array[y][x]
@@ -24,9 +33,13 @@ class Partial2DList:
     def __setitem__(self, key: Tuple[int], value):
         try:
             x, y = key
+            assert x <= self.width and y <= self.height
+        except AssertionError as err:
+            raise IndexError(f"2DList Index {key} exceeds list size") from err
         except Exception:
             raise
-        self._array[y][x] = value
+        else:
+            self._array[y][x] = value
 
     def __iter__(self):
         """Iterate over the array vertically, horizontally"""
@@ -53,49 +66,76 @@ class Partial2DList:
     def __repr__(self):
         return repr(self._array)
 
+    def __len__(self):
+        return self.__cached_size
+
+    def __call__(self, SubArray: Iterable[Any]):
+        """Substitute the internal array with a List of size X * Y"""
+        Array = []
+        for i in range(0, len(SubArray), self.width):
+            Array.append(SubArray[i:i+self.width])
+        self._array = Array
+
+    def copy(self):
+        _copy = Partial2DList(self.width, self.height)
+        _copy(self._array)
+        return _copy
+
 
 class tttBoard:
     def __init__(self, identifiers: List[Any]):
         self._board = Partial2DList()
         self.ids = identifiers
         self.last_player = None
+        self._board([str(digit) + '\N{combining enclosing keycap}' for digit in range(1, 10)])
 
     def get_winner(self) -> Any:
+        """Returns The winners marker (Any) or None"""
         def _check_equal(i: list):
             element = i[0]
-            if i.count(element) == len(i) and element is not None:
+            if i.count(element) == len(i) and element != self._board._empty:
                 return element
             else:
                 return False
-        Check = chain(map(_check_equal, self._board), map(_check_equal, self._board.diagonal_slices()))
+        # DESC:: [Consume once and check twice]
+        Check = list(chain(map(_check_equal, self._board), map(_check_equal, self._board.diagonal_slices())))
         for Id in self.ids:
             if Id in Check:
                 return Id
         else:
             return None
-    
+
     def play(self, identifier, *, x: int, y: int):
+        if identifier == self.last_player:
+            return
         cleanX = x - 1
         cleanY = y - 1
-        self._board[cleanX][cleanY] = identifier
+        self._board[cleanX, cleanY] = identifier
         self.last_player = identifier
 
-    def build_embed(self):
-        board = self._board._array
+    def __str__(self) -> str:
+        board = self._board._array.copy()
         Xmarker = self.ids[0]
         Omarker = self.ids[1]
         # TODO:med: [Complete Cog and deploy]
+        fake_board = ""
         for i in board:
             for mark in i:
-                if i is None:
-                    pass
-                elif i == Xmarker:
-                    pass
-                else:
-                    pass
+                if mark == Xmarker:
+                    mark = "🇽"
+                elif mark == Omarker:
+                    mark = "🇴"
+                fake_board += mark
+            else:
+                fake_board += "\n"
+        return fake_board
+
+    def build_embed(self):
+        board = self.__str__()
+    
 
 class Ttt(commands.Cog):
-    def __init__(bot):
+    def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name="ttt")
@@ -104,3 +144,9 @@ class Ttt(commands.Cog):
 
 def setup(bot):
     pass
+
+# Board = tttBoard([1,2])
+# print(str(Board))
+# while not Board.get_winner():
+#     Board.play(int(input("id: ")), x=int(input("x: ")), y=int(input("y: ")))
+#     print(str(Board))

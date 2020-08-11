@@ -32,7 +32,7 @@ import signal
 import sys
 import traceback
 import typing
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Optional, Tuple, Union, Any
 
 #-----------3rd-party-imports-----------#
 import discord
@@ -57,8 +57,20 @@ if platform.system() == "Windows":
     asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
 logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO)
-logger: logging.Logger = logging.getLogger(__name__)
-logging.getLogger("discord.gateway").setLevel(logging.WARNING)
+root_logger = logging.getLogger()
+
+try:
+    from rich.logging import RichHandler
+except ImportError:
+    pass
+else:
+    root_logger.removeHandler(root_logger.handlers[0])
+    root_logger.addHandler(RichHandler())
+    # Rich is present
+    from rich.traceback import install
+    install()
+    # For tables in Future
+    # rich_logs = True
 
 try:
     import timber
@@ -84,7 +96,10 @@ else:
         raise_exceptions=True,
         drop_extra_events=False
         )
-    logging.getLogger("").addHandler(timber_handler)
+    root_logger.addHandler(timber_handler)
+
+logger: logging.Logger = logging.getLogger(__name__)
+logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
 #----------------------------------------#
 
@@ -216,10 +231,14 @@ class Neo(commands.Bot):
             ctx (commands.Context): The context
             error (discord.ext.commands.CommandError): The discord error
         """
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"{ctx.invoked_with} requires {error.param.name} argument.")
+            # await self.help_command.send_help issues with hardware rn.
+        # -- Internal(ish) Errors
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send("This command cannot be used in private messages.")
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.author.send("Sorry. This command is disabled and cannot be used.")
+            await ctx.send("Sorry. This command is disabled and cannot be used.")
         elif isinstance(error, commands.CommandInvokeError):
             logger.error(f"In {ctx.command.qualified_name}:")
             traceback.print_tb(error.original.__traceback__)

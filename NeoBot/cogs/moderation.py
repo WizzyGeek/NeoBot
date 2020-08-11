@@ -39,7 +39,7 @@ class moderation(commands.Cog):
         if not ctx.is_above(user):
             return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content=f"{ctx.target[0].mention} seems to be above you."))
         if user is not None and ctx.is_above(user): # REASON:: [No 'else' as I do not know all possible situations]
-            await user.send(f"You sere warned in {user.guild.name} for {reason}")
+            await user.send(f"You were warned in {user.guild.name} for {reason}")
             embed = discord.Embed(title="Member Warned", color=0x3C80E2)
             embed.add_field(
                 name="Member", value=f"{user.mention}({user.name}) with id {user.id}", inline=True)
@@ -108,9 +108,9 @@ class moderation(commands.Cog):
         Purges the specified amount of messages 
         """
         try:
-            await ctx.channel.purge(limit=amount+1)
+            await ctx.channel.purge(limit=amount+1) # NOTE:: [Limit is an exclusive value]
         except:
-            await ctx.send("something ")
+            await ctx.send("I couldn't Delete delete the messages!")
         else:
             await ctx.send(content=f"Deleted {amount} messages!", delete_after=self.DeleteTime)
             await ctx.send_log(
@@ -128,7 +128,7 @@ class moderation(commands.Cog):
 
     @commands.command(pass_context=True, name="kick", aliases=["begone"], description="kicks a taged member like \"$kick @example#0000\"")
     @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx: NeoContext, user: discord.Member, str, int, *, reason: str = "No reason specified") -> None:
+    async def kick(self, ctx: NeoContext, user: discord.Member, *, reason: str = "No reason specified") -> None:
         """kicks a user from the guild"""
         if not user:
             return await ctx.send(embed=self.bot.Qembed(ctx, title="Error", content="I could not find that specified user", Colour=3))
@@ -149,10 +149,10 @@ class moderation(commands.Cog):
     @kick.error
     async def kick_error(self, ctx: NeoContext, error: discord.ext.commands.CommandError) -> None:
         """Error Handlerish for kick command"""
-        if isinstance(error, commands.errors.MissingRequiredArgument):
-            await ctx.send("**Sorry, I couldn't find this user**", delete_after=self.DeleteTime)
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"**{error.param.name} is a missing Argument**")
             await ctx.message.delete()
-        elif isinstance(error, commands.errors.MissingPermissions):
+        elif isinstance(error, commands.MissingPermissions):
             await ctx.send("**You don't have permission to kick users!**", delete_after=self.DeleteTime)
             await ctx.message.delete()
         elif isinstance(error, discord.Forbidden):
@@ -185,13 +185,13 @@ class moderation(commands.Cog):
     @ban.error
     async def ban_error(self, ctx:NeoContext, error: discord.ext.commands.CommandError) -> None:
         """Ban Error handler"""
-        if isinstance(error, commands.errors.MissingRequiredArgument):
+        if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("**Sorry, I couldn't find this user**", delete_after=self.DeleteTime)
             await ctx.message.delete()
-        elif isinstance(error, commands.errors.MissingPermissions):
+        elif isinstance(error, commands.MissingPermissions):
             await ctx.send("**You don't have permission to ban users!**", delete_after=self.DeleteTime)
             await ctx.message.delete()
-        elif isinstance(error, discord.Forbidden):
+        elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send("I don't have sufficient permissions", delete_after=self.bot.DeleteTime)
         else:
             raise error
@@ -200,9 +200,9 @@ class moderation(commands.Cog):
     @unban.error
     async def permit_error(self, ctx: NeoContext, error: discord.ext.commands.CommandError) -> None:
         """Purge, unban error"""
-        if isinstance(error, commands.errors.MissingPermissions):
+        if isinstance(error, commands.MissingPermissions):
             await ctx.send(f"Sorry {ctx.message.author}, you do not have the permissions to do that!", delete_after=self.bot.DeleteTime)
-        elif isinstance(error, discord.Forbidden):
+        elif isinstance(error, commands.BotMissingPermissions):
             await ctx.send("I dont seem to have all required permissions.", delete_after=self.bot.DeleteTime)
         else:
             await ctx.send(embed=discord.Embed(description="**Aww Snap! something went wrong**\nI have informed my devlopers", colour=ctx.author.colour))
@@ -261,7 +261,7 @@ class moderation(commands.Cog):
 
     @guildinfo.error
     @userinfo.error
-    async def info_error(self, ctx, error):
+    async def info_error(self, ctx: NeoContext, error):
         """info commands error handler"""
         await ctx.send(embed=discord.Embed(description="**Aww Snap! something went wrong**\nI have informed my devlopers", colour=ctx.author.colour))
         logger.exception("info command failed: %s", error)

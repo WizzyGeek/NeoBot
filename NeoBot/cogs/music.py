@@ -23,7 +23,7 @@ WSlogger.addHandler(logging.StreamHandler())
 
 class NoChannelProvided(commands.CommandError):
     """Error raised when no suitable voice channel was supplied."""
-    
+
     pass
 
 
