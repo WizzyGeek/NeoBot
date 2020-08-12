@@ -78,13 +78,13 @@ Requires `secret.json`
 ### method 2 
 
 Set enviroment variables, this is done during setup for heroku.
-Also you will need to change `config` dict at line 60 in bot.py (Will be moved to database in future)
+Also you will need to ~~change `config` dict at line 60 in bot.py (Will be moved to database in future)~~ configuure the bot for the server using `config` command
 
 ### method 3 (Not reccomended with hardcoding)
 Creating a config object with similar attributes
 example:
 ```py
-from NeoBot import Config, 
+from NeoBot.Utils import Config, 
 
 Class Credentials(Config):
     def __init__(self):
@@ -124,4 +124,3 @@ You are welcome to contribute to the bot!
 - [ ] Rewrite the bot (60%)
 - [ ] Use asyncpg (70%)
 - [ ] Remove psycopg2 (10%)
-- [ ] Add kivy GUI (5%)
