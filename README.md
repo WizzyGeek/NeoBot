@@ -78,7 +78,7 @@ Requires `secret.json`
 ### method 2 
 
 Set enviroment variables, this is done during setup for heroku.
-Also you will need to ~~change `config` dict at line 60 in bot.py (Will be moved to database in future)~~ configuure the bot for the server using `config` command
+Also you will need to ~~change `config` dict at line 60 in bot.py (Will be moved to database in future)~~ configuure the bot for the server using `config` command.
 
 ### method 3 (Not reccomended with hardcoding)
 Creating a config object with similar attributes
