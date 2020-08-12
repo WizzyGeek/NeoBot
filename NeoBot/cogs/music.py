@@ -154,7 +154,7 @@ class Player(wavelink.Player):
             embed.add_field(name='Duration', value=duration)
         except OverflowError:
             embed.add_field(name='Duration', value="[Long]")
-        status = status_dict[self.paused]
+        status = status_dict[self.is_paused and self.is_playing]
         embed.add_field(name='Status', value=status)
         embed.add_field(name='Queue Length', value=str(qsize))
         embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
