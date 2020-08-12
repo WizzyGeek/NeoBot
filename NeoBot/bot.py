@@ -56,7 +56,7 @@ else:
 if platform.system() == "Windows":
     asyncio.set_event_loop(asyncio.ProactorEventLoop())
 
-logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO)
+logging.basicConfig(format="%(name)s:%(levelname)s: %(message)s", level=logging.INFO, datefmt="[%X]")
 root_logger = logging.getLogger()
 
 try:
@@ -64,11 +64,12 @@ try:
 except ImportError:
     pass
 else:
-    root_logger.removeHandler(root_logger.handlers[0])
-    root_logger.addHandler(RichHandler())
-    # Rich is present
-    from rich.traceback import install
-    install()
+    if str(os.environ["RICH"]).lower() in ["yes", "y", "true", "t"]:
+        root_logger.removeHandler(root_logger.handlers[0])
+        root_logger.addHandler(RichHandler())
+        # Rich is present
+        from rich.traceback import install
+        install()
     # For tables in Future
     # rich_logs = True
 
