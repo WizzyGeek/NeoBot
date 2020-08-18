@@ -271,7 +271,7 @@ class Neo(commands.Bot):
         Returns:
             List[str]: [description]
         """        
-        proxy_msg: discord.Object = discord.Object(id=None) # -- WET
+        proxy_msg: discord.Object = discord.Object(id=guild.id)
         proxy_msg.guild = guild
         return local_inject(self, proxy_msg)
     #----------------------------------------#
