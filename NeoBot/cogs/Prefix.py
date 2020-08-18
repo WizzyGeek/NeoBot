@@ -11,7 +11,7 @@ class Prefix(commands.Cog):
     @commands.group(name="prefix")
     async def prefix(self, ctx: commands.Context):
         if not ctx.invoked_subcommand:
-            prefixes = self.bot.get_guild_prefixes(ctx.guild.id)
+            prefixes = self.bot.get_guild_prefixes(ctx.guild)
             await ctx.send_embed(title=f"Prefixes", description="".join([f"{n}.{pre}" for n, pre in enumerate(prefixes, start=1)]))
     
 
