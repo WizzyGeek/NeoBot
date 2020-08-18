@@ -99,7 +99,7 @@ class NeoContext(commands.Context):
     async def send(self, content=None, **kwargs) -> discord.Message:
         """Convert all messages outbound from the bot to Blurple Embed."""
         if content is not None and kwargs.pop("embed", None) is None:
-            embed = embed = discord.Embed(description=content, colour=discord.Colour.blue())
+            embed = discord.Embed(description=content, colour=discord.Colour.blue())
             return await super().send(embed=embed, **kwargs)
         else:
             return await super().send(content=content, **kwargs)
