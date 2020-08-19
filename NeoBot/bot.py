@@ -64,12 +64,15 @@ try:
 except ImportError:
     pass
 else:
-    if str(os.environ["RICH"]).lower() in ["yes", "y", "true", "t"]:
-        root_logger.removeHandler(root_logger.handlers[0])
-        root_logger.addHandler(RichHandler())
-        # Rich is present
-        from rich.traceback import install
-        install()
+    try:
+        if str(os.environ["RICH"]).lower() in ["yes", "y", "true", "t"]:
+            root_logger.removeHandler(root_logger.handlers[0])
+            root_logger.addHandler(RichHandler())
+            # Rich is present
+            from rich.traceback import install
+            install()
+    except KeyError:
+        pass
     # For tables in Future
     # rich_logs = True
 
@@ -373,7 +376,7 @@ class Neo(commands.Bot):
             member (discord.Member): Discord member object.
         """        
         if not self.is_beta:  # NOTE:: [Change this to enable welcoming also change these strings!]
-            if not (Id := self.GuildInfo.get(ctx.guild.id, None)):
+            if not (Id := self.GuildInfo.get(member.guild.id, None)):
                 return
             if not Id[1]:
                 return
@@ -381,7 +384,7 @@ class Neo(commands.Bot):
             if not channel:
                 return
             logger.debug(f"{member.name} intiated welcome process.")
-            await member.send(f"Hi {member.name}, welcome to {ctx.guild.name}")
+            await member.send(f"Hi {member.name}, welcome to {member.guild.name}")
             embed: discord.Embed = discord.Embed(
                 title="Welcome!",
                 description=f"welcome to the server {member.mention}! Everyone please make them feel welcomed!",

@@ -12,8 +12,7 @@ class Prefix(commands.Cog):
     async def prefix(self, ctx: commands.Context):
         if not ctx.invoked_subcommand:
             prefixes = self.bot.get_guild_prefixes(ctx.guild)
-            await ctx.send_embed(title=f"Prefixes", description="".join([f"{n}.{pre}" for n, pre in enumerate(prefixes, start=1)]))
-    
+            await ctx.send_embed(title=f"Prefixes", description="".join([f"{pre}\n" for pre in prefixes][1:]), colour=discord.Colour.blue())
 
 def setup(bot: commands.Bot) -> None:
     """Cog setup function."""

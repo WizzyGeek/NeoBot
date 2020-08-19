@@ -141,7 +141,6 @@ class Player(wavelink.Player):
             return
 
         channel = self.bot.get_channel(int(self.channel_id))
-        qsize = self.queue.qsize()
         status_dict = {True: "Playing", False: "Paused"}
         embed = discord.Embed(
             title=f'Music Controller | {channel.name}', colour=0xebb145)
@@ -154,9 +153,9 @@ class Player(wavelink.Player):
             embed.add_field(name='Duration', value=duration)
         except OverflowError:
             embed.add_field(name='Duration', value="[Long]")
-        status = status_dict[self.is_paused and self.is_playing]
+        status = status_dict[self.is_playing]
         embed.add_field(name='Status', value=status)
-        embed.add_field(name='Queue Length', value=str(qsize))
+        embed.add_field(name='Queue Length', value=self.queue.qsize())
         embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
         embed.add_field(name='Requested By', value=track.requester.mention)
         embed.add_field(name='DJ', value=self.dj.mention)
@@ -534,6 +533,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if not player.is_playing:
             await player.do_next()
+        await player.invoke_controller()
 
     @commands.command()
     async def pause(self, ctx: commands.Context):
@@ -561,6 +561,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.invoke_controller()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to pause the player.', delete_after=15)
+        await player.invoke_controller()
 
     @commands.command()
     async def resume(self, ctx: commands.Context):
@@ -588,6 +589,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.invoke_controller()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to resume the player.', delete_after=15)
+        await player.invoke_controller()
 
     @commands.command()
     async def skip(self, ctx: commands.Context):
@@ -619,6 +621,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.stop()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to skip the song.', delete_after=15)
+        await player.invoke_controller()
 
     @commands.command()
     async def stop(self, ctx: commands.Context):
@@ -641,6 +644,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.teardown()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to stop the player.', delete_after=15)
+        await player.invoke_controller()
 
     @commands.command(aliases=['v', 'vol'])
     async def volume(self, ctx: commands.Context, *, vol: float):
