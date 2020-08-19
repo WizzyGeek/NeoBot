@@ -630,6 +630,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             guild_id=ctx.guild.id, cls=Player, context=ctx)
 
         if not player.is_connected:
+            try:
+                await player.disconnect()
+            except:
+                pass
             return
 
         if self.is_privileged(ctx):
