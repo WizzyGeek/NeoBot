@@ -648,7 +648,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await player.teardown()
         else:
             await ctx.send(f'{ctx.author.mention} has voted to stop the player.', delete_after=15)
-        await player.invoke_controller()
 
     @commands.command(aliases=['v', 'vol'])
     async def volume(self, ctx: commands.Context, *, vol: float):
