@@ -130,6 +130,9 @@ class Player(wavelink.Player):
 
         else:
             embed = self.build_embed()
+            if embed:
+                self.updating = False
+                self.context.send("No Tracks currently playing!", delete_after=7.0)
             await self.controller.message.edit(embed=embed)
 
         self.updating = False
