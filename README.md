@@ -1,4 +1,5 @@
 # ![NeoBot](https://user-images.githubusercontent.com/51919967/86535024-01884d00-befb-11ea-8e27-577e6344413b.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTEEN-BOOM%2FNeoBot.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FTEEN-BOOM%2FNeoBot?ref=badge_shield)
 
 # ⦗![Open Source](https://opensource.org/files/osi_favicon.png)⦘Neo a discord bot
 
@@ -124,3 +125,6 @@ You are welcome to contribute to the bot!
 - [ ] Rewrite the bot (60%)
 - [ ] Use asyncpg (70%)
 - [ ] Remove psycopg2 (10%)
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTEEN-BOOM%2FNeoBot.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FTEEN-BOOM%2FNeoBot?ref=badge_large)
