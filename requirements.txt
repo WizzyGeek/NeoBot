@@ -3,7 +3,7 @@ git+https://github.com/TEEN-BOOM/fractal.git
 asyncpg
 discord.py>=1.4.1
 pandas
-wavelink
+wavelink > 0.9.4
 Pillow
 psycopg2-binary
 praw

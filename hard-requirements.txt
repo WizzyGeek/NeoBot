@@ -1,6 +1,6 @@
 git+https://github.com/Rapptz/discord-ext-menus.git
 git+https://github.com/TEEN-BOOM/fractal.git
-wavelink
+wavelink > 0.9.4
 asyncpg
 discord.py
 pandas
