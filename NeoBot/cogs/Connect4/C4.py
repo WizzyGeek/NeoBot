@@ -76,7 +76,7 @@ class Connect4(commands.Cog):
 
             try:
                 # convert the reaction to a 0-indexed int and move in that column
-                game.move(self.DIGITS.index(str(reaction)))
+                game.move(DIGITS.index(str(reaction)))
             except ValueError:
                 pass # the column may be full
 
