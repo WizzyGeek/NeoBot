@@ -25,7 +25,6 @@ class NoChannelProvided(commands.CommandError):
     """Error raised when no suitable voice channel was supplied."""
     pass
 
-
 class IncorrectChannelError(commands.CommandError):
     """Error raised when commands are issued outside of the players session channel."""
     pass
@@ -363,7 +362,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         nodes = self.bot.config.linkcreds
 
         for n in nodes.values():
-            await self.bot.wavelink.initiate_node(password=self.bot.wavepass, resume_session=True, **n)
+            await self.bot.wavelink.initiate_node(password=self.bot.wavepass, **n)
 
     @wavelink.WavelinkMixin.listener()
     async def on_node_ready(self, node: wavelink.Node) -> None:
