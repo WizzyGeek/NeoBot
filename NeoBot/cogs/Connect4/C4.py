@@ -30,7 +30,7 @@ class Connect4(commands.Cog):
             return await ctx.send("You can't play with yourself,\nThere is no fun in that.")
 
         DIGITS: List[str] = [str(digit) + '\N{combining enclosing keycap}' for digit in range(1, x + 1)]
-        VALID_REACTIONS = DIGITS.append(self.CANCEL_GAME_EMOJI)
+        VALID_REACTIONS = DIGITS + [self.CANCEL_GAME_EMOJI]
 
         player1: discord.Member = ctx.author
 
