@@ -23,26 +23,24 @@ WSlogger.addHandler(logging.StreamHandler())
 
 class NoChannelProvided(commands.CommandError):
     """Error raised when no suitable voice channel was supplied."""
-
     pass
 
 
 class IncorrectChannelError(commands.CommandError):
     """Error raised when commands are issued outside of the players session channel."""
-    
     pass
 
 class key:
     def __init__(self, key: str, show = True):
         self.key = key
         self.show = show
-    
+
     def __repr__(self) -> str:
         if self.show:
             return self.key
         else:
             return super().__repr__()
-        
+
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
@@ -424,13 +422,13 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def cog_before_invoke(self, ctx: commands.Context):
         """Coroutine called before command invocation.
-        
+
         We mainly just want to check whether the user is in the players controller channel.
         """
         player: Player = self.bot.wavelink.get_player(
             ctx.guild.id, cls=Player, context=ctx)
-        
-        
+
+
 
         def check(ctx: commands.Context, channel) -> typing.Union[Exception, bool]:
             """Check if user is a valid listener.
@@ -440,7 +438,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             Returns:
                 typing.Union[Exception, bool]: True when when user is in a valid channel, Error when not.
-            """                      
+            """
             if ctx.author not in channel.members:
                 return IncorrectChannelError(f"User {ctx.author} not in VC")
             else:
@@ -579,7 +577,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             await ctx.send('An admin or DJ has resumed the player.', delete_after=10)
             player.resume_votes.clear()
             await player.set_pause(False)
-            await player.invoke_controller() 
+            await player.invoke_controller()
             return
 
         required = self.required(ctx)
