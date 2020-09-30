@@ -515,7 +515,23 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not URL_REG.match(query):
             query = f'ytsearch:{query}'
 
-        tracks = await self.bot.wavelink.get_tracks(query)
+        try:
+            tracks = await self.bot.wavelink.get_tracks(query)
+        except wavelink.ZeroConnectedNodes:
+            for ws in map(self.bot.wavelink.nodes.values(), lambda n: n._websocket):
+                try:
+                    ws._task.cancel()
+                except Exception:
+                    logger.debug("Error while cancelling task", exc_info=True)
+                finally:
+                    ws._task = None
+                ws._closed = True
+                ws._node.available = False
+                await ws._websocket.close(message=b'Node destroy request.')
+                await ws._connect()
+            else:
+                tracks = await self.bot.wavelink.get_tracks(query) # WET
+
         if not tracks:
             return await ctx.send('No songs were found with that query. Please try again.', delete_after=15)
 

@@ -288,7 +288,7 @@ class Sudo(commands.Cog):
             await self.bot.user.edit(username=name)
         else:
             await self.bot.send_command_help(ctx)
-    
+
     @settings.command(name="game")
     @commands.is_owner()
     @commands.guild_only()
@@ -360,7 +360,7 @@ class Sudo(commands.Cog):
         else:
             await self.bot.change_presence(activity=None, status=current_status)
         await ctx.send("Done | ✅")
- 
+
     @settings.command(name="avatar")
     @commands.is_owner()
     async def set_avatar(self, ctx: commands.Context, url: str):

@@ -1,15 +1,15 @@
-from typing import Tuple, Iterable, Optional, List, Any
+from typing import Mapping, Tuple, Iterable, Optional, List, Any
 from itertools import chain
 
 import discord
 from discord.ext import commands
 import numpy as np
-# Acronyms: ttt = Tic Tac Toe, 
+# Acronyms: ttt = Tic Tac Toe,
 
 class Partial2DList:
     def __init__(self, DiemensionX: Optional[int] = 3, DiemensionY: Optional[int] = 3):
-        # Array_Size:: [ 
-        #   {[(32*4)*(DiemensionY + 1) + 16*DiemensionX*DiemensionY]} bits 
+        # Array_Size:: [
+        #   {[(32*4)*(DiemensionY + 1) + 16*DiemensionX*DiemensionY]} bits
         # ]
         # NOTE:: [Any Array should be fine]
         # self._array = list(map(lambda _: [*map(lambda _: None, range(DiemensionX))], range(DiemensionY)))
@@ -48,12 +48,12 @@ class Partial2DList:
             yield T
         for i in range(self.width):
             yield [array[0][i], array[1][i], array[2][i]]
-        
+
 
     def diagonal_slices(self):
         # !IMP:: [Do not iterate over the slices! Instead implement another generator]
-        if not self.height == self.width:
-            raise NotImplemented("Can not slice diagonally a non-square Array.")
+        if self.height != self.width:
+            raise NotImplementedError
         Diagonals = (
             [], # DESC:: [Top Right to Bottom left;
             []  #         Bottom Right to Top left]
@@ -77,10 +77,7 @@ class Partial2DList:
         self._array = Array
 
     def copy(self):
-        _copy = Partial2DList(self.width, self.height)
-        _copy(self._array)
-        return _copy
-
+        return Partial2DList(self.width, self.height)(self._array)
 
 class tttBoard:
     def __init__(self, identifiers: List[Any]):
@@ -114,25 +111,23 @@ class tttBoard:
         self.last_player = identifier
 
     def __str__(self) -> str:
-        board = self._board._array.copy()
-        Xmarker = self.ids[0]
-        Omarker = self.ids[1]
+        board = self._board._array
+        id_map = {
+            self.ids[0]: "x",
+            self.ids[1]: "o"
+        }
         # TODO:med: [Complete Cog and deploy]
         fake_board = ""
         for i in board:
             for mark in i:
-                if mark == Xmarker:
-                    mark = "🇽"
-                elif mark == Omarker:
-                    mark = "🇴"
-                fake_board += mark
+                fake_board += id_map[mark]
             else:
                 fake_board += "\n"
         return fake_board
 
     def build_embed(self):
         board = self.__str__()
-    
+
 
 class Ttt(commands.Cog):
     def __init__(self, bot):

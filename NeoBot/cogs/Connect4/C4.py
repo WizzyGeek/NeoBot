@@ -22,8 +22,8 @@ class Connect4(commands.Cog):
         """Play connect4 with another player"""
         if x > 9 or y > 9:
             return await ctx.send("Board can\'t be bigger than 9x9")
-        if x <= 0 or y <= 0:
-            return await ctx.send("Board's diemensions cant be zero or less")
+        if x <= 3 or y <= 3:
+            return await ctx.send("Board's diemensions cant be 3 or less")
         if player2.bot:
             return await ctx.send("You can\'t play with Bots!")
         if player2 == ctx.author:
@@ -78,7 +78,7 @@ class Connect4(commands.Cog):
                 # convert the reaction to a 0-indexed int and move in that column
                 game.move(DIGITS.index(str(reaction)))
             except ValueError:
-                pass # the column may be full
+                await ctx.send("You played in a Full column.")
 
             await message.edit(embed=game.build_embed())
 

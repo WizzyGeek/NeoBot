@@ -1,5 +1,5 @@
 """A connect4 game using a board."""
-from typing import List
+from typing import List, Tuple
 from itertools import chain, groupby
 
 import discord

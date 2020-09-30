@@ -9,7 +9,7 @@ class Board(list):
 		self.width: int = width
 		self.height: int = height
 		# 2D array of Zeroes
-		for x in range(width):
+		for _ in range(width):
 			self.append([0] * height)
 
 	def __getitem__(self, pos: Union[int, Tuple[int]]):
