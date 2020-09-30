@@ -518,7 +518,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         try:
             tracks = await self.bot.wavelink.get_tracks(query)
         except wavelink.ZeroConnectedNodes:
-            for ws in map(self.bot.wavelink.nodes.values(), lambda n: n._websocket):
+            for ws in map(lambda n: n._websocket, self.bot.wavelink.nodes.values()):
                 try:
                     ws._task.cancel()
                 except Exception:
