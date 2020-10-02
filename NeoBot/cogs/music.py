@@ -515,24 +515,26 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not URL_REG.match(query):
             query = f'ytsearch:{query}'
 
-        try:
-            tracks = await self.bot.wavelink.get_tracks(query)
-        except wavelink.ZeroConnectedNodes:
-            for ws in map(lambda n: n._websocket, self.bot.wavelink.nodes.values()):
-                try:
-                    ws._task.cancel()
-                except Exception:
-                    logger.debug("Error while cancelling task", exc_info=True)
-                finally:
-                    ws._task = None
-                ws._closed = True
-                ws._node.available = False
-                await ws._websocket.close(message=b'Node destroy request.')
-                await ws._connect()
-            else:
-                player: Player = self.bot.wavelink.get_player(
-                    guild_id=ctx.guild.id, cls=Player, context=ctx)
-                tracks = await self.bot.wavelink.get_tracks(query) # WET
+        async with ctx.typing():
+            # This takes Time
+            try:
+                tracks = await self.bot.wavelink.get_tracks(query)
+            except wavelink.ZeroConnectedNodes:
+                for ws in map(lambda n: n._websocket, self.bot.wavelink.nodes.values()):
+                    try:
+                        ws._task.cancel()
+                    except Exception:
+                        logger.debug("Error while cancelling task", exc_info=True)
+                    finally:
+                        ws._task = None
+                    ws._closed = True
+                    ws._node.available = False
+                    await ws._websocket.close(message=b'Node destroy request.')
+                    await ws._connect()
+                else:
+                    player: Player = self.bot.wavelink.get_player(
+                        guild_id=ctx.guild.id, cls=Player, context=ctx)
+                    tracks = await self.bot.wavelink.get_tracks(query) # WET
 
         if not tracks:
             return await ctx.send('No songs were found with that query. Please try again.', delete_after=15)
