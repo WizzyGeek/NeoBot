@@ -36,7 +36,7 @@ class Meme(commands.Cog):
 
     @commands.command(mame="comic")
     async def comic(self, ctx):
-        
+
         SRs = ["fffffffuuuuuuuuuuuu", "comics"]
         await self.fetch_meme(ctx, SRs)
 
@@ -60,7 +60,7 @@ class Meme(commands.Cog):
     async def joke(self, ctx):
         SRs = ["jokes"]
         await self.fetch_joke(ctx, SRs)
-    
+
     @commands.command(name="dadjoke")
     async def dadjoke(self, ctx):
         SRs = ["dadjokes"]
@@ -74,7 +74,7 @@ class Meme(commands.Cog):
         if getsizeof(self.joke_done) > 20971520: # 20 mb
             x = len(self.joke_done)
             del self.joke_done[x-(x/2):]
-            
+
 def setup(bot):
     bot.add_cog(Meme(bot))
     credit = {

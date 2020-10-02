@@ -130,7 +130,7 @@ class Neo(commands.Bot):
 
     def __init__(self, ConfigObj: Config, *, description: str = None, DeleteTime: float = 10.0, beta_indicator: str = "beta", **options):
         """Intialise the bot.
-        
+
             Require a config object with info and credentials.
 
         Args:
@@ -197,7 +197,7 @@ class Neo(commands.Bot):
             # REASON:: [dump the file in the folder and Voila!]
             if module.name != "__init__.py":
                 try:
-                    name = module.stem 
+                    name = module.stem
                     spec = importlib.util.spec_from_file_location(name, module)
                     self._load_from_module_spec(spec, name)
                 except:
@@ -273,7 +273,7 @@ class Neo(commands.Bot):
 
         Returns:
             List[str]: [description]
-        """        
+        """
         proxy_msg: discord.Object = discord.Object(id=guild.id)
         proxy_msg.guild = guild
         return local_inject(self, proxy_msg)
@@ -287,7 +287,7 @@ class Neo(commands.Bot):
 
         Returns:
             List[str]: List containing guild"s prefixes
-        """                 
+        """
         return self.prefixes.get(guild_id, ["$", "."])
     #----------------------------------------#
 
@@ -300,7 +300,7 @@ class Neo(commands.Bot):
 
         Returns:
             bool: True when succesful, False if not
-        """        
+        """
         if not prefixes:
             self.cur.execute(
                 f"UPDATE prefix SET prefix={None} WHERE id={guild.id}")
@@ -325,7 +325,7 @@ class Neo(commands.Bot):
 
         Returns:
             NeoContext: The over-ridden context object that this project uses.
-        """        
+        """
         return await super().get_context(message, cls=cls)
 
     # Quick embed
@@ -334,7 +334,7 @@ class Neo(commands.Bot):
 
         Args:
             ctx (commands.Context): Context object
-            Colour (Union[int, str, Iterable[Union[str, int]]], optional): 
+            Colour (Union[int, str, Iterable[Union[str, int]]], optional):
                 The colour defualts to author"s supports 1 : green, 2 : yellow, 3 : red,
                 it supports any colour for that matter. Defaults to None.
             title (str, optional): The title. Defaults to None.
@@ -343,7 +343,7 @@ class Neo(commands.Bot):
 
         Returns:
             discord.Embed: [description]
-        """           
+        """
         if title is None:
             title = discord.Embed.Empty
         if content is None:
@@ -374,7 +374,7 @@ class Neo(commands.Bot):
 
         Args:
             member (discord.Member): Discord member object.
-        """        
+        """
         if not self.is_beta:  # NOTE:: [Change this to enable welcoming also change these strings!]
             if not (Id := self.GuildInfo.get(member.guild.id, None)):
                 return

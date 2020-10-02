@@ -127,9 +127,9 @@ class Player(wavelink.Player):
 
         else:
             embed = self.build_embed()
-            if embed:
+            if not embed:
                 self.updating = False
-                self.context.send("No Tracks currently playing!", delete_after=7.0)
+                await self.context.send("No Tracks currently playing!", delete_after=7.0)
             await self.controller.message.edit(embed=embed)
 
         self.updating = False
@@ -530,6 +530,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 await ws._websocket.close(message=b'Node destroy request.')
                 await ws._connect()
             else:
+                player: Player = self.bot.wavelink.get_player(
+                    guild_id=ctx.guild.id, cls=Player, context=ctx)
                 tracks = await self.bot.wavelink.get_tracks(query) # WET
 
         if not tracks:
