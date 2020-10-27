@@ -68,6 +68,7 @@ heartbeat is required if your vps closes idle connections.
 #### music-legacy
 If you wish to not use Lavalink then remane `music.pysc` -> `music.py` & delete `Music.py`, uninstall wavelink `python3 -m pip uninstall wavelink`
 and download FFmpeg binary for your platform and install opuslib if you do not use discord.py on windows
+
 ##### music-legacy for heroku
 Add the build packs, after following above steps.
 - https://github.com/xrisk/heroku-opus.git
@@ -79,7 +80,7 @@ Requires `secret.json`
 ### method 2 
 
 Set enviroment variables, this is done during setup for heroku.
-Also you will need to ~~change `config` dict at line 60 in bot.py (Will be moved to database in future)~~ configuure the bot for the server using `config` command.
+Also you will need to configuure the bot for the server using `config` command.
 
 ### method 3 (Not reccomended with hardcoding)
 Creating a config object with similar attributes
@@ -93,11 +94,6 @@ Class Credentials(Config):
         self.dburl = "url"
         self.rid = "redditid"
         self.rsecret = "reddit_secret"
-        # self.config to be removed in future to set it from commands
-        self.config = {
-            "welchannel": 23456789,
-            "log": 23876556789
-        }
         # to move to asyncpg for leveling system
         self.cur = psycopg2.connect(self.dburl)
         self.conn = self.conn.cursor()
@@ -106,9 +102,6 @@ if __name__ == '__main__':
     ConfigObj = Credentials()
     Neo = Neo(ConfigObj)
     Neo.run()
-    ConfigObj2 = Config()
-    SomeOtherBot = Neo(ConfigObj2) # You can run multiple bots using different bot and config objects
-    SomeotherBot.run()
 ```
 ### method 4
 Directly set attributes in Bot Class.
