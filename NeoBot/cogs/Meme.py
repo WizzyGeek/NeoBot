@@ -72,7 +72,7 @@ class Meme(commands.Cog):
         SRs = ["dadjokes"]
         await self.fetch_joke(ctx, SRs)
   
-    @commands.command(name="showerthought", aliases=["st", "showert", "showerthought"])
+    @commands.command(name="showerthought", aliases=["st", "showert", "showerthoughts"])
     async def st(self, ctx):
         await self.fetch_joke(ctx, ["showerthoughts"])
 
