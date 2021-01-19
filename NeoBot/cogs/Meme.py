@@ -35,7 +35,7 @@ class Meme(commands.Cog):
         await self.fetch_meme(ctx, SRs)
         
     @commands.command(name="memeeconomy", aliases=["memeec", "mec"])
-    async def meme(self, ctx):
+    async def memeeconomy(self, ctx):
         """posts a meme from  memeeconomy"""
         SRs = ["memeeconomy"]
         await self.fetch_meme(ctx, SRs)
