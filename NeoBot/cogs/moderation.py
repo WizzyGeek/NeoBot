@@ -110,7 +110,7 @@ class moderation(commands.Cog):
         try:
             await ctx.channel.purge(limit=amount+1) # NOTE:: [Limit is an exclusive value]
         except:
-            await ctx.send("I couldn't Delete delete the messages!")
+            await ctx.send("I couldn't delete the messages!")
         else:
             await ctx.send(content=f"Deleted {amount} messages!", delete_after=self.DeleteTime)
             await ctx.send_log(
