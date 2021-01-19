@@ -51,7 +51,7 @@ class Fractal(commands.Cog):
         if Model["output"].is_file():
             pass
         else:
-            fractal = self.loop.run_in_executor(self.executor, lambda: exec_command(Model))
+            fractal = self.loop.run_in_executor(self.executor, exec_command, Model)
             await asyncio.gather(fractal)
 
         embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join([str(stat) for stat in Model.items() if stat[0] != "output"]))
