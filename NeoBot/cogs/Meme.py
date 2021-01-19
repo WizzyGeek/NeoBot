@@ -71,6 +71,10 @@ class Meme(commands.Cog):
     async def dadjoke(self, ctx):
         SRs = ["dadjokes"]
         await self.fetch_joke(ctx, SRs)
+  
+    @commands.command(name="showerthought", aliases=["st", "showert", "showerthought"])
+    async def st(self, ctx):
+        await self.fetch_joke(ctx, ["showerthoughts"])
 
     @tasks.loop(minutes=60.0)
     async def memory_optimizer(self):
