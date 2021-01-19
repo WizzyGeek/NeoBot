@@ -31,7 +31,13 @@ class Meme(commands.Cog):
     @commands.command(name="meme")
     async def meme(self, ctx):
         """posts a meme"""
-        SRs = ["memes", "dankmemes", "terriblefacebookmemes", "memeeconomy"]
+        SRs = ["memes", "dankmemes", "terriblefacebookmemes"]
+        await self.fetch_meme(ctx, SRs)
+        
+    @commands.command(name="memeeconomy", aliases=["memeec", "mec"])
+    async def meme(self, ctx):
+        """posts a meme from  memeeconomy"""
+        SRs = ["memeeconomy"]
         await self.fetch_meme(ctx, SRs)
 
     @commands.command(mame="comic")
