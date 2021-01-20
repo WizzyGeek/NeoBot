@@ -52,10 +52,12 @@ class Fractal(commands.Cog):
             pass
         else:
             fractal = self.loop.run_in_executor(self.executor, exec_command, Model)
-            await asyncio.gather(fractal)
-
-        embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join([str(stat) for stat in Model.items() if stat[0] != "output"]))
-        return await ctx.send(embed=embed, file=discord.File(Model["output"]))
+            async def inner():
+                await fractal
+                embed = self.bot.Qembed(ctx, title="Stats for nerds", content="\n".join([str(stat) for stat in Model.items() if stat[0] != "output"]))
+                await ctx.send(embed=embed, file=discord.File(Model["output"]))
+            self.loop.create_task(inner())
+        return None
 
     @commands.group(name="fractal", no_pm=True)
     @commands.cooldown(1, 30, commands.BucketType.guild)
