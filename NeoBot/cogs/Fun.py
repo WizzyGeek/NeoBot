@@ -292,12 +292,6 @@ class Fun(commands.Cog):
         await ctx.message.delete()
         spaced_message = spaces.join(list(msg))
         await ctx.send(spaced_message)
-
-    @space.error
-    async def space_error(self, ctx, err):
-        if isinstance(self, err, commands.MissingRequiredArgument):
-            ctx.send("Please give me a string (text) to space out.",
-                     delete_after=10.0)
     #----------------------------------------#
 
 def setup(bot: commands.Bot) -> None:
