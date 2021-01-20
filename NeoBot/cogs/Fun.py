@@ -290,8 +290,7 @@ class Fun(commands.Cog):
     async def space(self, ctx, spaces=1, *, msg : commands.clean_content):
         """Add n spaces between each letter. Ex: space 2 thicc"""
         await ctx.message.delete()
-        spaced_message = (" " * spaces).join(list(msg))
-        await ctx.send(spaced_message)
+        await ctx.send((" " * spaces).join(msg))
     #----------------------------------------#
 
 def setup(bot: commands.Bot) -> None:
