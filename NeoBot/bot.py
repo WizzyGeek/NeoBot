@@ -76,32 +76,6 @@ else:
     # For tables in Future
     # rich_logs = True
 
-try:
-    import timber
-except ImportError:
-    pass
-else:
-    try:
-        with open("timber.json", "r") as reader:
-            data: Dict[str, str] = json.load(reader)
-    except FileNotFoundError:
-        try:
-            key: str = str(os.environ["KEY"])
-            source_id: str = str(os.environ["ID"])
-        except KeyError:
-            logging.info("Timber package installed but credentials not provided. Uninstall package if not needed.")
-    else:
-        key: str = data["key"]
-        source_id: str = data["source"]
-
-    timber_handler = timber.TimberHandler(
-        source_id=source_id,
-        api_key=key,
-        raise_exceptions=True,
-        drop_extra_events=False
-        )
-    root_logger.addHandler(timber_handler)
-
 logger: logging.Logger = logging.getLogger(__name__)
 logging.getLogger("discord.gateway").setLevel(logging.WARNING)
 
