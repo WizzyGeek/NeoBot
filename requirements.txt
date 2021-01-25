@@ -25,5 +25,4 @@ websockets
 requests
 # ![OPTIONAL: DEPENDENCIES]
 uvloop
-timber
 rich
