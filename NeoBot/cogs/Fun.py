@@ -220,7 +220,7 @@ class Fun(commands.Cog):
     #----------------------------------------#
 
     @commands.command(pass_context=True)
-    async def dice(self, ctx, dice=1, faces=6):
+    async def dice(self, ctx, faces=6, dice=1):
         """Roll dice. Optionally input # of dice and # of sides. Ex: dice 5 12"""
         embed = discord.Embed(title="**Dice  rolled..**")
         dice += 1
