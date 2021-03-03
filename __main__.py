@@ -3,6 +3,7 @@ from NeoBot import Neo, Config
 
 def get_intents() -> Intents:
     intents = Intents.all()
+    intents.presences = False
     intents.typing = False
     return intents
 
